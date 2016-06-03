@@ -1,0 +1,8 @@
+---
+flags:
+ - github-token:
+     help: "github token"
+ - github-server:
+ - github-api_url: 
+ - infra:
+ - github-login:
