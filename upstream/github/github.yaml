@@ -1,8 +1,20 @@
 ---
 flags:
- - github-token:
-     help: "github token"
- - github-server:
- - github-api_url: 
- - infra:
- - github-login:
+ common:
+   - forjj-infra:
+ create:
+   - github-token:
+       help: "github token to access. This token must authorize organization level access."
+       required: true
+   - github-server:
+       help: "Github Entreprise Server name. By default, public 'github.com' API is used."
+   - forjj-organization:
+   - github-organization:
+       help: "Github Organization name. By default, it uses the FORJJ organization name"
+ update:
+ maintain:
+   - github-token:
+       help: "github token to access. This token must authorize organization level access."
+       required: true
+   - github-server:
+       help: "Github Entreprise Server name. By default, public 'github.com' API is used."

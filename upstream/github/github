@@ -18,8 +18,10 @@ function parse_options
  while [ $# -ne 0 ]
  do
    case "$1" in
-     --infra)
-       INFRA=true; shift;;
+     --forj-infra)
+       INFRA=$2; shift;shift;;
+     --forj-organization)
+       ORGA=$2; shift;shift;;
      *)
        if [ "${1:0:9}" != "--github-" ]
        then
@@ -218,8 +220,8 @@ else
   GITHUB[repo_name]="$(json-get "$RES" '.name')"
 fi
 
-if [ $INFRA = true ]
-then
+# if [ $INFRA = true ]
+# then
    FORK_SSH_LIKE="ssh://git@${GITHUB[SERVER]}/$LOGIN/$REPO"
    FORK_SCP_LIKE="git@${GITHUB[SERVER]}:$LOGIN/$REPO"
    FORK_HTTP_LIKE="https://${GITHUB[SERVER]}/$LOGIN/$REPO"
@@ -297,4 +299,4 @@ set -x
    esac    
    echo "Existing local $REPO directory/clone may be in conflict with the existing remote repository. Please check it to be a git clone from $FORK_SCP_LIKE"
    exit 1
-fi   
+#fi   

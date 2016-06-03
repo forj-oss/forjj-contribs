@@ -1,3 +1,8 @@
 ---
 flags:
- - features: 
+ common:
+ create:
+   - features:
+     help: "List of features to add to jenkins."
+ update:
+ maintain:
