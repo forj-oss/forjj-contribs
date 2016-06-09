@@ -55,7 +55,13 @@ The output is conform to the plugin json data format described below.
 
 ### Role
 The main role of `check` is to ensure that the application can be used properly for the complete DevOps solution.
-The upstream check task check if the service up and running and if repository given already exist on the upstream server.
+
+The upstream check task check if :
+* the service up and running, 
+* repository given already exist on the upstream server \[jq syntax '.repos | map(.name)' \]
+* the configuration file exists. \[jq syntax => '.repos | map(.config)' \] This test is done if --infra is added.
+If this test is success, `state_code` is 200.
+
 The others plugin type check task check the service up and running. If it needs to add some configuration test, it should do it here as well.
 
 ### output
@@ -152,7 +158,7 @@ A create is possible and succeed if the upstream driver as created a repository.
     a --infra is passed to properly create those 2 infra repositories.
 
     ```json
-{ "repos": { 
+{ "repos": [{ 
      "name": "<organization>-infra", 
      "upstream": "git@...", 
      "config": "<organization>-infra/github.yaml" 
@@ -160,18 +166,18 @@ A create is possible and succeed if the upstream driver as created a repository.
      "name": "<organization>-infra-state",
      "upstream": "git@...", 
      "config": "<organization>-infra-state/github.yaml" 
-     },
-  "services": {
+     }],
+  "services": [{
       "upstream": "https://github.hpe.com"
-     }
-  "state_code": "200", 
+     }],
+  "state_code": 200, 
   "status": "2 repositories, 1 organization created." }
     ```
 
     If an issue occurs, the standard out is used formatted in json:
 
     ```json
-{ "state_code": "404", "error_message": "An error occured..." }
+{ "state_code": 404, "error_message": "An error occured..." }
     ```
 
 
