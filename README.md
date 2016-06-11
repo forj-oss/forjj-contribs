@@ -46,20 +46,25 @@ It has the following format:
 
 ```yaml
 ---
-flags:                           # common regroups options for all tasks
-  common:                        # list of options for all tasks.
-  - <optionName>:                # This named the option (without --).
-    help : "option help"         # Describe the optionName help.
-    required: <true/false>       # false by default.
-    default : "my default value" # Define the default value.
-  create: # create options list
-  - ...:
+plugin: <PluginName>                 # Required by the GO `goforjj` package. It must be the name of your yaml file.
+version: <PluginVersion>             # Version of your plugin.
+description: "<Desc>"                # Small sentence about what your FORJJ plugin do
+flags:                               # common regroups options for all tasks
+  common:                            # list of options for all tasks.
+    help: "<Plugin cmd description>" # Sentence describing the plugin command tasks.
+    flags:                           # Describe the collection of common flags.
+    - <optionName>:                  # This named the option (without --).
+        help : "option help"         # Describe the optionName help.
+        required: <true/false>       # false by default.
+        default : "my default value" # Define the default value.
+  create:                            # create options list
+    help: "<Plugin cmd description>" # Sentence describing the plugin command tasks.
+    flags:                           
+    - ...:
+      [...]
+  update:                            # Same data as common/create/... commands
     [...]
-  update:
-  - ...:
-    [...]
-  maintain:
-  - ...:
+  maintain:                          # Same data as common/create/... commands
     [...]
     
 ```
