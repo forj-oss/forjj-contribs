@@ -2,6 +2,9 @@
 plugin: "github"
 version: "0.1"
 description: "Upstream github plugin for FORJJ. It properly configure github.com or entreprise with organisation/repos"
+runtime:
+  docker:
+    image: docker.hos.hpecorp.net/forjj-us/github
 flags:
  common:
    flags:
