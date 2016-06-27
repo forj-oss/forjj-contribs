@@ -37,10 +37,12 @@ The drivers should implement following tasks:
   - `maintain`: It update the infra with the data from the infra repository.
 
 **Plugin json data format:** 
-  - `repos/[]/name`     : repository configured.
-  - `repos/[]/upstream` : upstream data updated/created
-  - `repos/[]/config`   : driver configuration filename updated
-  - `services/[]url`    : web service url. ex: https://github.hpe.com
+  - `data/`             : Plugin data structure
+  -   `[]repos/`        : Repos data
+  -      `name`         : repository configured.
+  -      `upstream`     : upstream data updated/created
+  -      `[]files`      : driver files managed
+  -   `services/[]url`  : web service url. ex: https://github.hpe.com
   - `status`            : Driver task status message
   - `state_code`        : driver task status code. 200 OK
   - `error_message`     : driver error message
