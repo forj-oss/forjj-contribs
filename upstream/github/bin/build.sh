@@ -2,7 +2,20 @@
 #
 #
 
-TAG="-t docker.hos.hpecorp.net/forjj-us/github"
+TAG="-t $(awk '$1 ~ /docker_image/ { print $0 }' github.yaml | sed 's/^docker_image: "*\(.*\)"/\1/g')"
+
+DOCKERFILE=""
+
+if [ "$1" = "--local" ]
+then
+    echo "Local go build, then create a docker image..."
+    CGO_ENABLED=0 go build
+    if [ $? -ne 0 ]
+    then
+        exit 1
+    fi
+    DOCKERFILE="-f Dockerfile.local"
+fi
 
 if [ "$http_proxy" != "" ]
 then
@@ -15,4 +28,4 @@ then
    fi
 fi
 
-sudo docker build $PROXY $TAG .
+sudo docker build $PROXY $DOCKERFILE $TAG .

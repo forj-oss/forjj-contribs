@@ -1,0 +1,7 @@
+FROM fedora:latest
+
+COPY github /bin/github
+
+WORKDIR /src
+
+ENTRYPOINT /bin/github
