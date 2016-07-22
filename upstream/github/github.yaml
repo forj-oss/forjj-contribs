@@ -2,15 +2,13 @@
 plugin: "github"
 version: "0.1"
 description: "Upstream github plugin for FORJJ. It properly configure github.com or entreprise with organisation/repos"
-runtime:
-  docker:
-    image: docker.hos.hpecorp.net/forjj-us/github
+docker_image: "docker.hos.hpecorp.net/forjj-us/github"
 flags:
  common:
    flags:
    - forjj-infra:
        help: "Name of the Infra repository to use"
-   - github-debug: 
+   - github-debug:
        help: "To activate github debug information"
  create:
    help: "Create the github environment to manage source and infra code."
