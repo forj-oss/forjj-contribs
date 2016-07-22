@@ -1,7 +1,9 @@
-FROM fedora:latest
+FROM alpine:latest
 
 COPY github /bin/github
 
 WORKDIR /src
 
-ENTRYPOINT /bin/github
+ENTRYPOINT ["/bin/github"]
+
+CMD ["--help"]
