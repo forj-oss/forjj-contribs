@@ -10,41 +10,74 @@ package main
 // Like Index which currently return a basic code.
 
 import (
-    "fmt"
-    "os"
+//    "fmt"
+//    "os"
     "net/http"
     "github.hpe.com/christophe-larsonneur/goforjj"
+//    "github.com/parnurzeal/gorequest"
 )
 
 // Do creating plugin task
 // req_data contains the request data posted by forjj. Structure generated from 'github.yaml'.
 // ret_data contains the response structure to return back to forjj.
 //
-func DoCreate(w http.ResponseWriter, r *http.Request, req_data *CreateReq, ret_data *goforjj.PluginData) {
+func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *goforjj.PluginData) {
 
-    // This is where you shoud write your Update code. Following line is for Demo only.
-    fmt.Fprintf(os.Stdout,"%#v\n", req_data)
+    gws := GitHubStruct{
+        source: req.ForjjSourceMount,
+        token: req.GithubToken,
+    }
+    check := make(map[string]bool)
+    check["token"] = true
 
+    //ensure source path is writeable
+    if gws.verify_req_fails(ret, check) {
+        return
+    }
+
+    if gws.github_connect(ret) == nil {
+        return
+    }
+
+    // Write the github.yaml source file.
 }
 
 // Do updating plugin task
 // req_data contains the request data posted by forjj. Structure generated from 'github.yaml'.
 // ret_data contains the response structure to return back to forjj.
 //
-func DoUpdate(w http.ResponseWriter, r *http.Request, req_data *UpdateReq, ret_data *goforjj.PluginData) {
+func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *goforjj.PluginData) {
 
-    // This is where you shoud write your create code. Following line is for Demo only.
-    fmt.Fprintf(os.Stdout,"%#v\n", req_data)
+    gws := GitHubStruct{
+        source: req.ForjjSourceMount,
+    }
+    check := make(map[string]bool)
 
+    if gws.verify_req_fails(ret, check) {
+        return
+    }
 }
 
 // Do maintaining plugin task
 // req_data contains the request data posted by forjj. Structure generated from 'github.yaml'.
 // ret_data contains the response structure to return back to forjj.
 //
-func DoMaintain(w http.ResponseWriter, r *http.Request, req_data *MaintainReq, ret_data *goforjj.PluginData) {
+func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *goforjj.PluginData) {
 
-    // This is where you shoud write your Update code. Following line is for Demo only.
-    fmt.Fprintf(os.Stdout,"%#v\n", req_data)
+    gws := GitHubStruct{
+        source: req.ForjjSourceMount,
+        workspace: req.ForjjWorkspaceMount,
+        token: req.GithubToken,
+    }
+    check := make(map[string]bool)
+    check["token"] = true
+    check["workspace"] = true
 
+    if gws.verify_req_fails(ret, check) { // true => include workspace testing.
+        return
+    }
+
+    if gws.github_connect(ret) == nil {
+        return
+    }
 }
