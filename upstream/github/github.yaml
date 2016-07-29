@@ -15,6 +15,8 @@ actions:
        help: "Name of the Infra repository to use"
      github-debug:
        help: "To activate github debug information"
+     forjj-source-mount:
+       help: "Where the source dir is located for github plugin."
  create:
    help: "Create the github environment to manage source and infra code."
    flags:
@@ -37,3 +39,5 @@ actions:
        required: true
      github-server:
        help: "Github Entreprise Server name. By default, public 'github.com' API is used."
+     forjj-workspace-mount:
+       help: "Where the workspace dir is located for github plugin."

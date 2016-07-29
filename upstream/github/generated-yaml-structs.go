@@ -11,6 +11,7 @@ type CreateReq struct {
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
+    ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for github plugin.
     GithubDebug string `json:"github-debug"` // To activate github debug information
 }
 
@@ -18,15 +19,18 @@ type UpdateReq struct {
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
+    ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for github plugin.
     GithubDebug string `json:"github-debug"` // To activate github debug information
 }
 
 type MaintainReq struct {
+    ForjjWorkspaceMount string `json:"forjj-workspace-mount"` // Where the workspace dir is located for github plugin.
     GithubServer string `json:"github-server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
     GithubToken string `json:"github-token"` // github token to access. This token must authorize organization level access.
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
+    ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for github plugin.
     GithubDebug string `json:"github-debug"` // To activate github debug information
 }
 
@@ -48,6 +52,8 @@ const YamlDesc="---\n" +
    "       help: \"Name of the Infra repository to use\"\n" +
    "     github-debug:\n" +
    "       help: \"To activate github debug information\"\n" +
+   "     forjj-source-mount:\n" +
+   "       help: \"Where the source dir is located for github plugin.\"\n" +
    " create:\n" +
    "   help: \"Create the github environment to manage source and infra code.\"\n" +
    "   flags:\n" +
@@ -70,5 +76,7 @@ const YamlDesc="---\n" +
    "       required: true\n" +
    "     github-server:\n" +
    "       help: \"Github Entreprise Server name. By default, public 'github.com' API is used.\"\n" +
+   "     forjj-workspace-mount:\n" +
+   "       help: \"Where the workspace dir is located for github plugin.\"\n" +
    ""
 
