@@ -2,7 +2,7 @@
 #
 #
 
-TAG="-t $(awk '$1 ~ /docker_image/ { print $0 }' github.yaml | sed 's/^docker_image: "*\(.*\)"/\1/g')"
+TAG="-t $(awk '$1 ~ /docker_image/ { print $0 }' github.yaml | sed 's/^ *docker_image: "*\(.*\)"/\1/g')"
 
 DOCKERFILE=""
 

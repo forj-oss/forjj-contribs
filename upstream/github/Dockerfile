@@ -3,7 +3,7 @@ FROM golang:1.6.2-alpine
 RUN apk update && apk add --no-cache git && mkdir /go/src/github
 
 ENV TERM vt100
-    
+
 COPY * /go/src/github/
 COPY entrypoint.sh /tmp
 
@@ -15,5 +15,9 @@ RUN go get -insecure && \
     cd - && \
     go generate && \
     go install
+
+RUN adduser devops devops -D
+
+USER devops
 
 ENTRYPOINT [ "/tmp/entrypoint.sh" ]
