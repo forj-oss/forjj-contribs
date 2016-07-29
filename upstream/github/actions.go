@@ -15,6 +15,7 @@ import (
     "net/http"
     "github.hpe.com/christophe-larsonneur/goforjj"
 //    "github.com/parnurzeal/gorequest"
+    "log"
 )
 
 // Do creating plugin task
@@ -29,11 +30,13 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     }
     check := make(map[string]bool)
     check["token"] = true
+    log.Printf("Checking parameters : %#v", gws)
 
     //ensure source path is writeable
     if gws.verify_req_fails(ret, check) {
         return
     }
+    log.Printf("Checking github connection : %#v", gws)
 
     if gws.github_connect(ret) == nil {
         return

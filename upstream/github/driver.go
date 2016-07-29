@@ -13,6 +13,7 @@ type GitHubStruct struct {
     source string
     workspace string
     token string
+    debug bool
     Client *github.Client
 }
 
