@@ -4,30 +4,30 @@
 package main
 
 type CreateReq struct {
-    ForjjOrganization string `yaml:"forjj-organization"` // Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
-    GithubOrganization string `yaml:"github-organization"` // Github Organization name. By default, it uses the FORJJ organization name
-    GithubServer string `yaml:"github-server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
-    GithubToken string `yaml:"github-token"` // github token to access. This token must authorize organization level access.
+    ForjjOrganization string `json:"forjj-organization"` // Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
+    GithubOrganization string `json:"github-organization"` // Github Organization name. By default, it uses the FORJJ organization name
+    GithubServer string `json:"github-server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
+    GithubToken string `json:"github-token"` // github token to access. This token must authorize organization level access.
 
     // common flags
-    ForjjInfra string `yaml:"forjj-infra"` // Name of the Infra repository to use
-    GithubDebug string `yaml:"github-debug"` // To activate github debug information
+    ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
+    GithubDebug string `json:"github-debug"` // To activate github debug information
 }
 
 type UpdateReq struct {
 
     // common flags
-    ForjjInfra string `yaml:"forjj-infra"` // Name of the Infra repository to use
-    GithubDebug string `yaml:"github-debug"` // To activate github debug information
+    ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
+    GithubDebug string `json:"github-debug"` // To activate github debug information
 }
 
 type MaintainReq struct {
-    GithubServer string `yaml:"github-server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
-    GithubToken string `yaml:"github-token"` // github token to access. This token must authorize organization level access.
+    GithubServer string `json:"github-server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
+    GithubToken string `json:"github-token"` // github token to access. This token must authorize organization level access.
 
     // common flags
-    ForjjInfra string `yaml:"forjj-infra"` // Name of the Infra repository to use
-    GithubDebug string `yaml:"github-debug"` // To activate github debug information
+    ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
+    GithubDebug string `json:"github-debug"` // To activate github debug information
 }
 
 // YamlDesc has been created from your 'github.yaml' file.

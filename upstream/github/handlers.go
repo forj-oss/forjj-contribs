@@ -32,6 +32,20 @@ func content_type_match(header http.Header, match string) bool {
     return false
 }
 
+func panicIfError(w http.ResponseWriter, err error, message string, pars ...interface{}) {
+    if err != nil {
+        w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+        w.WriteHeader(422) // unprocessable entity
+        if message != "" {
+            err = fmt.Errorf("%s %s", fmt.Errorf(message, pars...), err)
+        }
+        if err := json.NewEncoder(w).Encode(err); err != nil {
+            panic(err)
+        }
+    }
+}
+
+
 // Create handler
 func Create(w http.ResponseWriter, r *http.Request) {
     var data *goforjj.PluginData = newPluginData()
@@ -42,10 +56,12 @@ func Create(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         panic(err)
     }
-    if content_type_match(r.Header, "text/json") {
-        if err := json.Unmarshal(body, &req_data); err != nil {
-            panic(err)
-        }
+
+    if content_type_match(r.Header, "application/json") {
+        err := json.Unmarshal(body, &req_data)
+        panicIfError(w, err, "Unable to decode '%#v' as json.", string(body))
+    } else {
+        panicIfError(w, *new(error), "Invalid payload format. Must be 'application/json'. Got %#v", r.Header["Content-Type"])
     }
 
     // Create the github.yaml source file.
@@ -68,10 +84,12 @@ func Update(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         panic(err)
     }
-    if content_type_match(r.Header, "text/json") {
-        if err := json.Unmarshal(body, &req_data); err != nil {
-            panic(err)
-        }
+
+    if content_type_match(r.Header, "application/json") {
+        err := json.Unmarshal(body, &req_data)
+        panicIfError(w, err, "Unable to decode '%#v' as json.", string(body))
+    } else {
+        panicIfError(w, *new(error), "Invalid payload format. Must be 'application/json'. Got %#v", r.Header["Content-Type"])
     }
 
     // Update the github.yaml source file.
@@ -94,10 +112,12 @@ func Maintain(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         panic(err)
     }
-    if content_type_match(r.Header, "text/json") {
-        if err := json.Unmarshal(body, &req_data); err != nil {
-            panic(err)
-        }
+
+    if content_type_match(r.Header, "application/json") {
+        err := json.Unmarshal(body, &req_data)
+        panicIfError(w, err, "Unable to decode '%#v' as json.", string(body))
+    } else {
+        panicIfError(w, *new(error), "Invalid payload format. Must be 'application/json'. Got %#v", r.Header["Content-Type"])
     }
 
     DoMaintain(w, r, &req_data, data)
