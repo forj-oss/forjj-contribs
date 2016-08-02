@@ -38,7 +38,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     }
     log.Printf("Checking github connection : %#v", gws)
 
-    if gws.github_connect(ret) == nil {
+    if gws.github_connect(req.GithubServer, ret) == nil {
         return
     }
 
@@ -80,7 +80,9 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
         return
     }
 
-    if gws.github_connect(ret) == nil {
+    // Read the github.yaml file.
+
+    if gws.github_connect("", ret) == nil {
         return
     }
 }
