@@ -2,31 +2,28 @@
 
 This plugin implements github/github entreprise configuration to build an SCM environment for GIT repositories upstream.
 
-It provides a json data to the standard output.
-Errors are reported to the standard output as well as json
+It has been implemented as REST API. See ...(TBD) for FORJJ REST API description.
 
 Depending on tasks, the driver will concretely do several things described below:
-
-## Check task
-
-`check` do a check if the organization and infra repo with the github.yaml file exists.
 
 ## Create task
 
 `Create` properly configure the server side to have at least the `infra` repository created.
 
-It won't execute the `Maintain task`. If a `maintain` have to be executed just after, forjj itself will ask it by calling the driver to `maintain`.
+It will create a `<infra>/apps/upstream/github.yaml` which describes how github must be configured properly.
 
-On github server file, through his API, the driver will ensure element requested will exist. So it can:
+On github server, through Github API, the driver will ensure element requested will exist. So it can:
 - Create/Configure the organization (with members)
 - Create/Configure the `infra` repository (with members)
 
-Locally, the driver puts some information about the infra and other repos in the `infra` repository by :
-- It stores a 'github.yaml file in each `<organization>-infra/repos/<repo>/`
+The creation of the initial repositories/organization/... are done automatically at create time by the maintain task described below.
+
+As soon as `<infra>/apps/upstream/github.yaml` exists, create will fails and ask to use update instead.
+**Warning!!!** If the server side has already been configured, create will create the file and start the maintain task, as usual. And then Maintain will change anything to comply the newly created `github.yaml`
 
 ## Update task
 
-Update mainly do update in the local `infra` repo and create commits and push them. (The flow must be configured to push to the right place.)
+Update mainly do update in the local `infra` repo and reports file updated to forjj. (The flow must be configured to push to the right place.)
 It may (TBD) do the following:
 - Update the list of repositories and rights
 - Update github configuration data about each repositories in `<organization>-infra/repos/<repo>/`

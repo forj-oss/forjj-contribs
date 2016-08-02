@@ -1,23 +1,19 @@
-FROM golang:1.6.2-alpine
+FROM alpine:latest
 
-RUN apk update && apk add --no-cache git && mkdir /go/src/github
+COPY github /bin/github
 
-ENV TERM vt100
+WORKDIR /src
 
-COPY * /go/src/github/
-COPY entrypoint.sh /tmp
+COPY ca_certificates/* /usr/local/share/ca-certificates/
 
-WORKDIR /go/src/github
-
-RUN go get -insecure && \
-    cd $GOPATH/src/github.hpe.com/christophe-larsonneur/go-forjj/cmd/genflags/ && \
-    go get && \
-    cd - && \
-    go generate && \
-    go install
-
-RUN adduser devops devops -D
+RUN apk update && \
+    apk add --no-cache ca-certificates && \
+    update-ca-certificates --fresh && \
+    rm -f /var/cache/apk/*tar.gz && \
+    adduser devops devops -D
 
 USER devops
 
-ENTRYPOINT [ "/tmp/entrypoint.sh" ]
+ENTRYPOINT ["/bin/github"]
+
+CMD ["--help"]
