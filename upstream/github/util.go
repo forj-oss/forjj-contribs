@@ -58,3 +58,10 @@ func (g *GitHubStruct)verify_req_fails(ret *goforjj.PluginData, check map[string
 
     return false // Everything is fine
 }
+
+func StatusAdd(o *goforjj.PluginData, n string) {
+    if o.Status != "" {
+        o.Status =  o.Status + "\n"
+    }
+    o.Status =  o.Status + n
+}

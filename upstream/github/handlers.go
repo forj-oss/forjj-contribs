@@ -17,7 +17,7 @@ import (
 func newPluginData() (* goforjj.PluginData) {
     var r goforjj.PluginData = goforjj.PluginData{
         Repos: make(map[string]goforjj.PluginRepo),
-        Services: make([]goforjj.PluginService, 0),
+        Services: goforjj.PluginService{ make(map[string]string) },
     }
     return &r
 }

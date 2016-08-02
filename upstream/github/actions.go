@@ -16,6 +16,7 @@ import (
     "github.hpe.com/christophe-larsonneur/goforjj"
 //    "github.com/parnurzeal/gorequest"
     "log"
+    "fmt"
 )
 
 // Do creating plugin task
@@ -36,13 +37,24 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     if gws.verify_req_fails(ret, check) {
         return
     }
+    StatusAdd(ret, "environment checked.")
     log.Printf("Checking github connection : %#v", gws)
 
     if gws.github_connect(req.GithubServer, ret) == nil {
         return
     }
 
-    // Write the github.yaml source file.
+    file := "github.yaml"
+    if err := gws.create_yaml(file, req) ; err != nil {
+        ret.ErrorMessage = fmt.Sprintf("%s", err)
+        return
+    }
+    StatusAdd(ret, fmt.Sprintf("Configuration saved in '%s'.", file))
+
+    // We assume ssh is used and forjj can push with appropriate credential.
+    ret.Repos["infra"] = goforjj.PluginRepo{req.ForjjInfra, "git@" + gws.Client.BaseURL.Host + ":" + gws.orga + "/" + req.ForjjInfra + ".git"}
+    ret.CommitMessage = fmt.Sprintf("Create github configuration")
+    ret.Files = append(ret.Files, file)
 }
 
 // Do updating plugin task

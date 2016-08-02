@@ -26,7 +26,8 @@ func (g *GitHubStruct)github_connect(server string, ret *goforjj.PluginData) (* 
         ret.ErrorMessage = fmt.Sprintf("Unable to get the owner of the token given. %s", err)
         return nil
     } else {
-        log.Printf("Connection successful. Token given to user '%s'", *user.Login)
+        log.Printf("Connection successful. Token given by user '%s'", *user.Login)
+        StatusAdd(ret, "Connection successful.")
     }
 
     return  g.Client

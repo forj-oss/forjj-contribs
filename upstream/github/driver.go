@@ -15,10 +15,11 @@ type GitHubStruct struct {
     token string
     debug bool
     Client *github.Client
+    source GitHubSourceStruct
 }
 
 type GitHubSourceStruct struct {
-    Urls goforjj.PluginService           // github base Url
+    goforjj.PluginService                // github base Url
     Repos map[string]RepositoryStruct    // Collection of repositories managed in github
     Organization string                  // Organization name
     UserGroups []UserGroupStruct         // Collection of groups to add to the organization
