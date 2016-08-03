@@ -17,7 +17,11 @@ import (
 //    "github.com/parnurzeal/gorequest"
     "log"
     "fmt"
+    "path"
+    "os"
 )
+
+const github_file = "github.yaml"
 
 // Do creating plugin task
 // req_data contains the request data posted by forjj. Structure generated from 'github.yaml'.
@@ -26,7 +30,7 @@ import (
 func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *goforjj.PluginData) {
 
     gws := GitHubStruct{
-        source: req.ForjjSourceMount,
+        source_mount: req.ForjjSourceMount,
         token: req.GithubToken,
     }
     check := make(map[string]bool)
@@ -37,24 +41,35 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     if gws.verify_req_fails(ret, check) {
         return
     }
-    StatusAdd(ret, "environment checked.")
+    log.Printf("Checking Infrastructure code existence.")
+    if _, err := os.Stat(path.Join(req.ForjjSourceMount, github_file)) ; err == nil {
+        ret.Errorf("Unable to create the github configuration which already exist.\nUse update to update it (or update %s), and maintain to update github according to his configuration.", github_file)
+        return
+    }
+    ret.StatusAdd("environment checked.")
     log.Printf("Checking github connection : %#v", gws)
 
     if gws.github_connect(req.GithubServer, ret) == nil {
         return
     }
 
-    file := "github.yaml"
-    if err := gws.create_yaml(file, req) ; err != nil {
-        ret.ErrorMessage = fmt.Sprintf("%s", err)
+    // Build gws.github_source and save it.
+    if err := gws.create_yaml(path.Join(req.ForjjSourceMount, github_file), req) ; err != nil {
+        ret.Errorf("%s", err)
         return
     }
-    StatusAdd(ret, fmt.Sprintf("Configuration saved in '%s'.", file))
+    log.Printf(ret.StatusAdd("Configuration saved in '%s'.", github_file))
 
+    // Building final Post answer
     // We assume ssh is used and forjj can push with appropriate credential.
-    ret.Repos["infra"] = goforjj.PluginRepo{req.ForjjInfra, "git@" + gws.Client.BaseURL.Host + ":" + gws.orga + "/" + req.ForjjInfra + ".git"}
+    infra_repo := gws.github_source.Repos[req.ForjjInfra]
+    ret.Repos[req.ForjjInfra] = goforjj.PluginRepo{ infra_repo.Name, infra_repo.Upstream }
+    for k, v := range gws.github_source.Urls {
+        ret.Services.Urls[k] = v
+    }
+
     ret.CommitMessage = fmt.Sprintf("Create github configuration")
-    ret.Files = append(ret.Files, file)
+    ret.Files = append(ret.Files, github_file)
 }
 
 // Do updating plugin task
@@ -64,7 +79,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *goforjj.PluginData) {
 
     gws := GitHubStruct{
-        source: req.ForjjSourceMount,
+        source_mount: req.ForjjSourceMount,
     }
     check := make(map[string]bool)
 
@@ -80,8 +95,8 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *goforjj.PluginData) {
 
     gws := GitHubStruct{
-        source: req.ForjjSourceMount,
-        workspace: req.ForjjWorkspaceMount,
+        source_mount: req.ForjjSourceMount,
+        workspace_mount: req.ForjjWorkspaceMount,
         token: req.GithubToken,
     }
     check := make(map[string]bool)
@@ -93,8 +108,14 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
     }
 
     // Read the github.yaml file.
+    gws.load_yaml(path.Join(req.ForjjSourceMount, github_file))
 
-    if gws.github_connect("", ret) == nil {
+    if gws.github_connect(gws.github_source.Urls["github-base-url"], ret) == nil {
+        return
+    }
+
+    // ensure organization exist
+    if ! gws.ensure_organization_exists(ret) {
         return
     }
 }

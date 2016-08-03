@@ -10,18 +10,20 @@ import (
 )
 
 type GitHubStruct struct {
-    source string
-    workspace string
+    source_mount string              // mount point
+    workspace_mount string           // mount point
     token string
     debug bool
+    user string                      // github user name
     Client *github.Client
-    source GitHubSourceStruct
+    github_source GitHubSourceStruct // github source structure (yaml)
 }
 
 type GitHubSourceStruct struct {
-    goforjj.PluginService                // github base Url
+    goforjj.PluginService `,inline`      // github base Url
     Repos map[string]RepositoryStruct    // Collection of repositories managed in github
     Organization string                  // Organization name
+    OrgDisplayName string                // Organization's display name.
     UserGroups []UserGroupStruct         // Collection of groups to add to the organization
 }
 
@@ -31,9 +33,9 @@ type UserGroupStruct struct {
 }
 
 type RepositoryStruct  struct {
-    goforjj.PluginRepo           // Name/Upstream
-    Description string           // Title in github repository
-    UserGroups []UserGroupStruct // Collection of groups to add to the organization
+    goforjj.PluginRepo `,inline`      // Name/Upstream
+    Description string                // Title in github repository
+    UserGroups []UserGroupStruct      // Collection of groups to add to the organization
 }
 
 const github_source_file = "github.yaml"

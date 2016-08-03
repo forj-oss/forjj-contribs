@@ -37,7 +37,5 @@ actions:
      github-token:
        help: "github token to access. This token must authorize organization level access."
        required: true
-     github-server:
-       help: "Github Entreprise Server name. By default, public 'github.com' API is used."
      forjj-workspace-mount:
        help: "Where the workspace dir is located for github plugin."

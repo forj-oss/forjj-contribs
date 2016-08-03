@@ -8,39 +8,53 @@ import (
 
 func (g *GitHubStruct)create_yaml(file string, req *CreateReq) error {
     // Write the github.yaml source file.
-    var g.source GitHubSourceStruct
-    g.source.Url = make(map[string]string)
-    g.source.Url["github-base-url"] = g.Client.BaseURL.String()
+    g.github_source.Urls = make(map[string]string)
+    g.github_source.Urls["github-base-url"] = g.Client.BaseURL.String()
 
     if orga := req.GithubOrganization; orga == "" {
-        g.source.Organization = req.ForjjOrganization
+        g.github_source.Organization = req.ForjjOrganization
     } else {
-        g.source.Organization = req.GithubOrganization
+        g.github_source.Organization = req.GithubOrganization
     }
 
     // Ensure Infra is already in the list of repo managed.
-    if g.source.Repos == nil {
-        g.source.Repos = make(map[string]RepositoryStruct)
+    if g.github_source.Repos == nil {
+        g.github_source.Repos = make(map[string]RepositoryStruct)
     }
 
-    infra, found := g.source.Repos[req.ForjjInfra]
+    upstream := "git@" + g.Client.BaseURL.Host + ":" + g.github_source.Organization + "/" + req.ForjjInfra + ".git"
+    infra, found := g.github_source.Repos[req.ForjjInfra]
     if ! found {
         infra = RepositoryStruct{
-            Name: req.ForjjInfra,
-            Upstream: "git@" + g.Client.BaseURL.Host + ":" + g.source.orga + "/" + req.ForjjInfra + ".git",
-            Description: fmt.Sprintf("Infrastructure repository for Organization '%s' maintained by Forjj", g.source.orga),
+            Description: fmt.Sprintf("Infrastructure repository for Organization '%s' maintained by Forjj", g.github_source.Organization),
             UserGroups: make([]UserGroupStruct, 0),
         }
+        infra.Name = req.ForjjInfra
     }
+    infra.Upstream = upstream
+    g.github_source.Repos[req.ForjjInfra] = infra
 
 
-    d, err := yaml.Marshal(&g.source)
+    d, err := yaml.Marshal(&g.github_source)
     if  err != nil {
         return fmt.Errorf("Unable to encode github data in yaml. %s", err)
     }
 
     if err := ioutil.WriteFile(file, d, 0644) ; err != nil {
-        return fmt.Errorf("Unable to save 'github.yaml'. %s", err)
+        return fmt.Errorf("Unable to save '%s'. %s", file, err)
+    }
+    return nil
+}
+
+func (g *GitHubStruct)load_yaml(file string) error {
+    d, err := ioutil.ReadFile(file)
+    if err != nil {
+        return fmt.Errorf("Unable to load '%s'. %s", file, err)
+    }
+
+    err = yaml.Unmarshal(d, &g.github_source)
+    if  err != nil {
+        return fmt.Errorf("Unable to decode github data in yaml. %s", err)
     }
     return nil
 }

@@ -25,7 +25,6 @@ type UpdateReq struct {
 
 type MaintainReq struct {
     ForjjWorkspaceMount string `json:"forjj-workspace-mount"` // Where the workspace dir is located for github plugin.
-    GithubServer string `json:"github-server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
     GithubToken string `json:"github-token"` // github token to access. This token must authorize organization level access.
 
     // common flags
@@ -74,8 +73,6 @@ const YamlDesc="---\n" +
    "     github-token:\n" +
    "       help: \"github token to access. This token must authorize organization level access.\"\n" +
    "       required: true\n" +
-   "     github-server:\n" +
-   "       help: \"Github Entreprise Server name. By default, public 'github.com' API is used.\"\n" +
    "     forjj-workspace-mount:\n" +
    "       help: \"Where the workspace dir is located for github plugin.\"\n" +
    ""

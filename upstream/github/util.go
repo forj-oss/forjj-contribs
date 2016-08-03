@@ -38,12 +38,12 @@ func reqCheckPath(name, path string, ret *goforjj.PluginData) bool {
 // return true if something is wrong.
 func (g *GitHubStruct)verify_req_fails(ret *goforjj.PluginData, check map[string]bool) bool {
 
-    if reqCheckPath("source (forjj-source-mount)", g.source, ret) {
+    if reqCheckPath("source (forjj-source-mount)", g.source_mount, ret) {
         return true
     }
 
     if v, ok := check["workspace"] ; ok && v {
-        if reqCheckPath("workspace (forjj-workspace-mount)", g.workspace, ret) {
+        if reqCheckPath("workspace (forjj-workspace-mount)", g.workspace_mount, ret) {
             return true
         }
     }
@@ -57,11 +57,4 @@ func (g *GitHubStruct)verify_req_fails(ret *goforjj.PluginData, check map[string
 
 
     return false // Everything is fine
-}
-
-func StatusAdd(o *goforjj.PluginData, n string) {
-    if o.Status != "" {
-        o.Status =  o.Status + "\n"
-    }
-    o.Status =  o.Status + n
 }
