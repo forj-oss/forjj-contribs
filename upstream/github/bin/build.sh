@@ -23,5 +23,3 @@ then
 fi
 
 sudo docker build $PROXY $DOCKERFILE $TAG .
-
-rm -f github
