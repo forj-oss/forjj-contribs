@@ -10,11 +10,8 @@ package main
 // Like Index which currently return a basic code.
 
 import (
-//    "fmt"
-//    "os"
     "net/http"
     "github.hpe.com/christophe-larsonneur/goforjj"
-//    "github.com/parnurzeal/gorequest"
     "log"
     "fmt"
     "path"
@@ -70,6 +67,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 
     ret.CommitMessage = fmt.Sprintf("Create github configuration")
     ret.Files = append(ret.Files, github_file)
+
 }
 
 // Do updating plugin task

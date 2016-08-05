@@ -72,6 +72,8 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
     DoCreate(w, r, &req_data, data)
 
+    req_data.SaveMaintainOptions(data)
+
     if data.ErrorMessage != "" {
         log.Print("HTTP ERROR: 422 - ", data.ErrorMessage)
         w.WriteHeader(422) // unprocessable entity
@@ -103,6 +105,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
     // See goforjj/plugin-json-struct.go for json data structure recognized by forjj.
 
     DoUpdate(w, r, &req_data, data)
+
+    req_data.SaveMaintainOptions(data)
 
     if data.ErrorMessage != "" {
         log.Print("HTTP ERROR: 422 - ", data.ErrorMessage)

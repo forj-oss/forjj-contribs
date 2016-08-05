@@ -3,6 +3,8 @@
 // To update those structure, update the 'github.yaml' and run 'go generate'
 package main
 
+import "github.hpe.com/christophe-larsonneur/goforjj"
+
 type CreateReq struct {
     ForjjOrganization string `json:"forjj-organization"` // Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
     GithubOrganization string `json:"github-organization"` // Github Organization name. By default, it uses the FORJJ organization name
@@ -31,6 +33,41 @@ type MaintainReq struct {
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
     ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for github plugin.
     GithubDebug string `json:"github-debug"` // To activate github debug information
+}
+
+// Function which adds maintain options as part of the plugin answer in create/update phase.
+// forjj won't add any driver name because 'maintain' phase read the list of drivers to use from forjj-maintain.yml
+// So --git-us is not available for forjj maintain.
+func (r *CreateReq)SaveMaintainOptions(ret *goforjj.PluginData) {
+    if ret.Options == nil {
+        ret.Options = make(map[string]goforjj.PluginOption)
+    }
+
+    ret.Options["github-token"] = addMaintainOptionValue(ret.Options, "github-token", r.GithubToken, "",
+                                                         "github token to access. This token must authorize organization level access.")
+}
+
+func (r *UpdateReq)SaveMaintainOptions(ret *goforjj.PluginData) {
+    if ret.Options == nil {
+        ret.Options = make(map[string]goforjj.PluginOption)
+    }
+}
+
+func addMaintainOptionValue(options map[string]goforjj.PluginOption, option, value, defaultv, help string) (goforjj.PluginOption){
+    opt, ok := options[option]
+    if ok && value != "" {
+        opt.Value = value
+        return opt
+    }
+    if ! ok {
+        opt = goforjj.PluginOption { Help: help }
+        if value == "" {
+            opt.Value = defaultv
+        } else {
+            opt.Value = value
+        }
+    }
+    return opt
 }
 
 // YamlDesc has been created from your 'github.yaml' file.
