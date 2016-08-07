@@ -114,3 +114,72 @@ func (g *GitHubStruct)ensure_organization_exists(ret *goforjj.PluginData) (s boo
     }
     return true
 }
+
+// FUTURE: Add users/groups
+func (r *RepositoryStruct)ensure_exists(gws *GitHubStruct, ret *goforjj.PluginData) error{
+     // test existence
+    c := gws.Client.Repositories
+    found_repo, _, err := c.Get(gws.github_source.Organization, r.Name)
+    if err != nil {
+        // Creating repository
+        github_repo := github.Repository{
+            Description: &r.Description,
+            Name: &r.Name,
+        }
+        found_repo, _, err = c.Create(gws.github_source.Organization, &github_repo)
+        if err != nil {
+            ret.Errorf("Unable to create '%s' in organization '%s'. %s.", r.Name, gws.github_source.Organization, err)
+            return err
+        }
+        log.Printf(ret.StatusAdd("Repo '%s': created", r.Name))
+
+    } else {
+        // Updating repository if needed
+        repo_updated := r.maintain(found_repo)
+        if repo_updated == nil {
+            log.Printf(ret.StatusAdd("Repo '%s': No change", r.Name))
+        } else {
+            found_repo, _, err = c.Edit(gws.github_source.Organization, r.Name, repo_updated)
+            if err != nil {
+                ret.Errorf("Unable to update '%s' in organization '%s'. %s.", r.Name, gws.github_source.Organization, err)
+                return err
+            }
+            log.Printf(ret.StatusAdd("Repo '%s': updated", r.Name))
+        }
+    }
+
+    // TODO: Use a goforjj function to manage this return.
+
+    // Prepare return status information to github API caller.
+    if ret.Repos == nil {
+        ret.Repos = make(map[string]goforjj.PluginRepo)
+    }
+
+    if repo, found := ret.Repos[r.Name]; found {
+        repo.Upstream = *found_repo.SSHURL
+        ret.Repos[r.Name] = repo
+    } else {
+        repo = goforjj.PluginRepo {
+            Name: r.Name,
+            Upstream: *found_repo.SSHURL,
+        }
+        ret.Repos[r.Name] = repo
+    }
+    return nil
+}
+
+func (r *RepositoryStruct)maintain(e_repo *github.Repository) *github.Repository {
+    update := false
+    ret := github.Repository{}
+    ret.Name = e_repo.Name
+    if e_repo.Description != &r.Description {
+        update = true
+        ret.Description = &r.Description
+    }
+
+    if update {
+        return &ret
+    }
+    return nil
+
+}

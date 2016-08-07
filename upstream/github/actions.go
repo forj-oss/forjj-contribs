@@ -116,4 +116,13 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
     if ! gws.ensure_organization_exists(ret) {
         return
     }
+    log.Printf(ret.StatusAdd("Organization maintained."))
+
+    // loop on list of repos, and ensure they exist with minimal config and rights
+    for name, repo_data := range  gws.github_source.Repos {
+        if err := repo_data.ensure_exists(&gws, ret) ; err != nil {
+           return
+        }
+        log.Printf(ret.StatusAdd("Repo maintained: %s", name))
+    }
 }

@@ -43,8 +43,7 @@ func (r *CreateReq)SaveMaintainOptions(ret *goforjj.PluginData) {
         ret.Options = make(map[string]goforjj.PluginOption)
     }
 
-    ret.Options["github-token"] = addMaintainOptionValue(ret.Options, "github-token", r.GithubToken, "",
-                                                         "github token to access. This token must authorize organization level access.")
+    ret.Options["github-token"] = addMaintainOptionValue(ret.Options, "github-token", r.GithubToken, "", "github token to access. This token must authorize organization level access.")
 }
 
 func (r *UpdateReq)SaveMaintainOptions(ret *goforjj.PluginData) {
