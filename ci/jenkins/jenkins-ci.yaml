@@ -1,0 +1,52 @@
+---
+plugin: "jenkins"
+version: "0.1"
+description: "CI jenkins plugin for FORJJ."
+runtime:
+  docker_image: "docker.hos.hpecorp.net/forjj-ci/jenkins"
+  service_type: "REST API"
+  service:
+    #socket: "jenkins.sock"
+    parameters: [ "service", "start" ]
+actions:
+  common:
+    flags:
+      forjj-infra:
+        help: "Name of the Infra repository to use"
+      jenkins-debug:
+        help: "To activate jenkins debug information"
+      forjj-source-mount:
+        help: "Where the source dir is located for github plugin."
+  create:
+    help: "Create a jenkins instance source code."
+    flags:
+
+# Options related to source code
+      name:
+        help: "Name of the jenkins instance"
+        required: true
+      docker-image:
+        help: "Base docker image name to use in Dockerfile"
+      features:
+        help: "List of features to add to jenkins features.lst."
+
+# Options related to deployment
+      deploy-to:
+        default: "docker"
+        help: "Where this jenkins source code will be deployed. Supports 'docker'. Future would be 'marathon', 'dcos' and 'host'"
+      service-addr:
+        required: true
+        help: "CNAME or IP address of the expected jenkins instance"
+      service-port:
+        default: "8080"
+        help: "Expected jenkins instance port number."
+  update:
+    help: "update a jenkins instance source code"
+    flags:
+      name:
+        help: "Name of the jenkins instance"
+        required: true
+      features-add:
+        help: "List of features to add to jenkins."
+  maintain:
+    help: "Instantiate jenkins thanks to source code."
