@@ -23,6 +23,7 @@ import (
 func DoCreate(w http.ResponseWriter, r *http.Request, req_data *CreateReq, ret_data *goforjj.PluginData) {
 
     // This is where you shoud write your Update code. Following line is for Demo only.
+    req_data.create_jenkins_sources()
     fmt.Fprintf(os.Stdout,"%#v\n", req_data)
 
 }
