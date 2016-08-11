@@ -1,0 +1,11 @@
+#DOCKER_OPTS="-v $PWD/sonar.groovy:/usr/share/jenkins/ref/init.groovy.d/sonar.groovy \
+#-v $PWD/sonar-runner.groovy:/usr/share/jenkins/ref/init.groovy.d/sonar-runner.groovy"
+
+# To run an image from a different repository. Default is $LOGNAME
+# REPO=MyRepo
+
+# To run a different image. Default is 'jenkins-master'
+# IMAGE_NAME=MyImage
+
+# To run a different image version. Default is 'test'
+# IMAGE_VERSION=MyVersion

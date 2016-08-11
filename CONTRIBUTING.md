@@ -31,12 +31,12 @@ FORJJ do his task by starting a FORJJ container, with a simple task name and fla
 When FORJJ container is started, it will interpret task and flags and call the driver.
 
 The drivers should implement following tasks:
-  - `check`   : It provide a status information in json format.
+  - `info`    : It provide a status information in json format. (currently not used in forjj)
   - `create`  : It create requested resource. Create is used once. Return a json data.
   - `update`  : It update the infra repository. Returns a json data
   - `maintain`: It update the infra with the data from the infra repository.
 
-**Plugin json data format:** 
+**Plugin json data format:**
   - `data/`             : Plugin data structure
   -   `[]repos/`        : Repos data
   -      `name`         : repository configured.
@@ -59,7 +59,7 @@ The output is conform to the plugin json data format described below.
 The main role of `check` is to ensure that the application can be used properly for the complete DevOps solution.
 
 The upstream check task check if :
-* the service up and running, 
+* the service up and running,
 * repository given already exist on the upstream server \[jq syntax '.repos | map(.name)' \]
 * the configuration file exists. \[jq syntax => '.repos | map(.config)' \] This test is done if --infra is added.
 If this test is success, `state_code` is 200.
@@ -118,7 +118,7 @@ The plugin maintain task get input data from the command line flags. Usually, th
 
 ### role
 
-The main role in maintain context is to instantiate and configure the application like jenkins for the jenkins-ci plugin. 
+The main role in maintain context is to instantiate and configure the application like jenkins for the jenkins-ci plugin.
 This activity is typically made by any kind of orchestration tools, like ansible/puppet or any other kind of tools you like to use.
 
 Ansible or puppet are currently not installed in the FORJJ container. But this could be done, if FORJJ can support different containers.
@@ -145,7 +145,7 @@ A create is possible and succeed if the upstream driver as created a repository.
   Locally, FORJJ can :
   - TODO: Clone from a URL
   - Create a new one, empty with 2 directories : `repos/<organization>-infra`
-  - TODO: Keep an existing directory to migrate to git. 
+  - TODO: Keep an existing directory to migrate to git.
     TODO: We can imagine to introduce a migration step here to get source code migrated to git.
   - TODO: Keep an unknown existing cloned repository to migrate from an external GIT upstream environment to the one FORJJ will manage.
     TODO: We can imagine to introduce a migratioin step here to cleanup GIT commits.
@@ -159,28 +159,28 @@ A create is possible and succeed if the upstream driver as created a repository.
 
     a --infra is passed to properly create those 2 infra repositories.
 
-    ```json
-{ "repos": [{ 
-     "name": "<organization>-infra", 
-     "upstream": "git@...", 
-     "config": "<organization>-infra/github.yaml" 
+```json
+{ "repos": [{
+     "name": "<organization>-infra",
+     "upstream": "git@...",
+     "config": "<organization>-infra/github.yaml"
      }, {
      "name": "<organization>-infra-state",
-     "upstream": "git@...", 
-     "config": "<organization>-infra-state/github.yaml" 
+     "upstream": "git@...",
+     "config": "<organization>-infra-state/github.yaml"
      }],
   "services": [{
       "upstream": "https://github.hpe.com"
      }],
-  "state_code": 200, 
+  "state_code": 200,
   "status": "2 repositories, 1 organization created." }
-    ```
+```
 
     If an issue occurs, the standard out is used formatted in json:
 
-    ```json
+```json
 { "state_code": 404, "error_message": "An error occured..." }
-    ```
+```
 
 
 - update/create the origin remote then pull it.
@@ -199,7 +199,7 @@ If any additionnal repositories are requested. (--repos), the 'create' task will
 when the container is started the *update* task, the driver is called to update the upstream configuration file ONLY.
 It should return the json output.
 
-*maintain* 
+*maintain*
 
 When the container is started the *maintain* task, the driver is called to update the upstream service configuration to reflect the configuration data.
 The container will do:

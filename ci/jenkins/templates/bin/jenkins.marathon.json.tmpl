@@ -1,0 +1,94 @@
+{
+  "id": "/{{ .Settings.Name }}",
+  "cmd": null,
+  "cpus": 1,
+  "mem": 1024,
+  "disk": 0,
+  "instances": 1,
+  "acceptedResourceRoles": [
+    "slave_public"
+  ],
+  "container": {
+    "type": "DOCKER",
+    "volumes": [
+      {
+        "containerPath": "/var/run/docker.sock",
+        "hostPath": "/var/run/docker.sock",
+        "mode": "RW"
+      },
+      {
+        "containerPath": "/opt/mesosphere",
+        "hostPath": "/opt/mesosphere",
+        "mode": "RO"
+      },
+      {
+        "containerPath": "/tmp/jenkins_credentials.sh",
+        "hostPath": "/etc/vnfm-credentials.sh",
+        "mode": "RO"
+      }
+    ],
+    "docker": {
+      "image": "docker.hos.hpecorp.net/{{ .Settings.Organization }}/{{ .Settings.Name }}:{{ .Settings.Version }}",
+      "network": "HOST",
+      "privileged": false,
+      "parameters": [
+        {
+          "key": "env",
+          "value": "JAVA_OPTS=-Xmx256m"
+        },
+        {
+          "key": "env",
+          "value": "SEED_JOBS_REPO=https://github.hpe.com/{{ .Settings.Organization }}/{{ .Forjj.InfraRepo }}"
+        }{{ set_marathon_docker_env .Settings }}
+      ],
+      "forcePullImage": true
+    }
+  },
+  "env": {
+    "DIRECT_PUBLIC_JENKINS_URL": "http://$HOST:$PORT0",
+    "LD_LIBRARY_PATH": "/opt/mesosphere/lib",
+    "JENKINS_MESOS_SLAVE_USER": "root",
+    "JENKINS_MESOS_LABEL": "",
+    "JENKINS_SLAVE_AGENT_PORT": "$PORT1",
+    "JENKINS_PORT": "$PORT0",
+    "JENKINS_MESOS_ROLE": "slave_public",
+    "MESOS_MASTER": "{{ .Settings.Mesos.Master }}",
+    "JENKINS_MASTER_LABEL": "master",
+    "JENKINS_MASTER_EXECUTORS": "0",
+    "JENKINS_FRAMEWORK_NAME": "{{ .Settings.Organization }}-{{ .Settings.Name }}",
+    "JENKINS_MASTER_LABEL": "master"
+  },
+  "healthChecks": [
+    {
+      "path": "/login",
+      "protocol": "HTTP",
+      "portIndex": 0,
+      "gracePeriodSeconds": 30,
+      "intervalSeconds": 60,
+      "timeoutSeconds": 20,
+      "maxConsecutiveFailures": 3,
+      "ignoreHttp1xx": false
+    }
+  ],
+  "labels": {
+{{ if .Settings.Mesos.Cname }}\
+    "HAPROXY_0_VHOST": "{{ .Settings.Mesos.Cname }}",
+{{ end }}
+    "HAPROXY_GROUP": "external"
+  },
+  "portDefinitions": [
+    {
+      "port": {{ .Settings.Marathon.ServicePort1 }},
+      "protocol": "tcp",
+      "labels": {}
+    },
+    {
+      "port": {{ .Settings.Marathon.ServicePort2 }},
+      "protocol": "tcp",
+      "labels": {}
+    }
+  ],
+  "uris": [
+    "file:///etc/docker.tar.gz"
+  ]
+}

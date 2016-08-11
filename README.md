@@ -75,14 +75,14 @@ actions:                             # Collection of actions to describe. common
   common:                            # list of options for all tasks.
     help: "<Plugin cmd description>" # Sentence describing the plugin command tasks.
     flags:                           # Describe the collection of common flags.
-    - <optionName>:                  # This named the option (without --).
+      <optionName>:                  # This named the option (without --).
         help : "option help"         # Describe the optionName help.
         required: <true/false>       # false by default.
         default : "my default value" # Define the default value.
   create:                            # create options list
     help: "<Plugin cmd description>" # Sentence describing the plugin command tasks.
     flags:
-    - ...:
+      ...:
       [...]
   update:                            # Same data as common/create/... commands
     [...]

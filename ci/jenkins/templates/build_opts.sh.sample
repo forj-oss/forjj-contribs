@@ -1,0 +1,22 @@
+# BUILD_OPTS - Global additional setting for docker build
+# BUILD_OPTS=""
+
+# Following parameters helps to develop your own jenkins-install-inits feature
+#
+# By default, jenkins-install-inits script (jenkins_install.sh) uses
+# https://github.hpe.com/RnDLabIT/jenkins-install-inits/raw/master to get features definition.
+# where :
+# MYFORK - Where is the FORK for JENKINS_INSTALL_INITS repo. Default is RnDLabIT/jenkins-install-inits
+# MYFORK=christophe-larsonneur/jenkins-install-inits
+#
+# BRANCH - and which branch. default is master
+# BRANCH=sonar
+
+# If you need to automatically push your image to the default registry
+# AUTO_PUSH=true
+
+# To use a different image name: Default is 'jenkins-master'
+# IMAGE_NAME=vnfm-jenkins-master
+
+# To use a different version. Default is 'test'
+# IMAGE_VERSION=myversion
