@@ -13,15 +13,13 @@ type jenkinsApp struct {
     App *kingpin.Application
     params Params
     socket string
-    src_path string
     Yaml goforjj.YamlPlugin
 }
 
 type Params struct {
     socket_file *string
     socket_path *string
-    src_path *string
-    daemon *bool // Currently not used - Lot of concerns with daemonize in go... Stay in foreground
+    template_dir *string
 }
 
 func (a *jenkinsApp)init() {
@@ -35,8 +33,8 @@ func (a *jenkinsApp)init() {
     daemon.Command("start", "start jenkins REST API service")
     a.params.socket_file = daemon.Flag("socket-file", "Socket file to use").Default(a.Yaml.Runtime.Service.Socket).String()
     a.params.socket_path = daemon.Flag("socket-path", "Socket file path to use").Default("/tmp/forjj-socks").String()
-    a.params.src_path = daemon.Flag("source-path", "Path to jenkins plugin source file").Default("/src").String()
-    a.params.daemon = daemon.Flag("daemon", "Start process in background like a daemon").Short('d').Bool()
+    a.params.template_dir = daemon.Flag("templates", "Path to templates files.").Default("templates").String()
+
 }
 
 func (a *jenkinsApp)load_plugin_def() {

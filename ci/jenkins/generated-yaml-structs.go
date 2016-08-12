@@ -5,27 +5,41 @@ package main
 
 import "github.hpe.com/christophe-larsonneur/goforjj"
 
+// Common group of data between create/update actions
+type DeployStruct struct {
+    DeployTo string `json:"deploy-to"`
+    ServiceAddr string `json:"service-addr"`
+    ServicePort string `json:"service-port"`
+}
+
+type SourceStruct struct {
+    DockerImage string `json:"docker-image"`
+    Features string `json:"features"`
+    Name string `json:"name"`
+}
+
+
+type GroupReq struct {
+    Deploy DeployStruct `json:",inline"`
+    Source SourceStruct `json:",inline"`
+}
+
 type CreateReq struct {
-    DeployTo string `json:"deploy-to"` // Where this jenkins source code will be deployed. Supports 'docker'. Future would be 'marathon', 'dcos' and 'host'
-    DockerImage string `json:"docker-image"` // Base docker image name to use in Dockerfile
-    Features string `json:"features"` // List of features to add to jenkins features.lst.
-    Name string `json:"name"` // Name of the jenkins instance
-    ServiceAddr string `json:"service-addr"` // CNAME or IP address of the expected jenkins instance
-    ServicePort string `json:"service-port"` // Expected jenkins instance port number.
+    Groups GroupReq `json:",inline"`
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
-    ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for github plugin.
+    ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for jenkins plugin.
     JenkinsDebug string `json:"jenkins-debug"` // To activate jenkins debug information
 }
 
 type UpdateReq struct {
+    Groups GroupReq `json:",inline"`
     FeaturesAdd string `json:"features-add"` // List of features to add to jenkins.
-    Name string `json:"name"` // Name of the jenkins instance
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
-    ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for github plugin.
+    ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for jenkins plugin.
     JenkinsDebug string `json:"jenkins-debug"` // To activate jenkins debug information
 }
 
@@ -33,7 +47,7 @@ type MaintainReq struct {
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
-    ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for github plugin.
+    ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for jenkins plugin.
     JenkinsDebug string `json:"jenkins-debug"` // To activate jenkins debug information
 }
 
@@ -79,7 +93,7 @@ const YamlDesc="---\n" +
    "  service_type: \"REST API\"\n" +
    "  service:\n" +
    "    #socket: \"jenkins.sock\"\n" +
-   "    parameters: [ \"service\", \"start\" ]\n" +
+   "    parameters: [ \"service\", \"start\", \"--templates\", \"/templates\"]\n" +
    "actions:\n" +
    "  common:\n" +
    "    flags:\n" +
@@ -88,36 +102,41 @@ const YamlDesc="---\n" +
    "      jenkins-debug:\n" +
    "        help: \"To activate jenkins debug information\"\n" +
    "      forjj-source-mount:\n" +
-   "        help: \"Where the source dir is located for github plugin.\"\n" +
+   "        help: \"Where the source dir is located for jenkins plugin.\"\n" +
    "  create:\n" +
    "    help: \"Create a jenkins instance source code.\"\n" +
    "    flags:\n" +
-   "\n" +
-   "# Options related to source code\n" +
+   "      # Options related to source code\n" +
    "      name:\n" +
    "        help: \"Name of the jenkins instance\"\n" +
    "        required: true\n" +
+   "        group: \"source\"\n" +
    "      docker-image:\n" +
    "        help: \"Base docker image name to use in Dockerfile\"\n" +
+   "        group: \"source\"\n" +
    "      features:\n" +
    "        help: \"List of features to add to jenkins features.lst.\"\n" +
-   "\n" +
-   "# Options related to deployment\n" +
+   "        group: \"source\"\n" +
+   "      # Options related to deployment\n" +
    "      deploy-to:\n" +
    "        default: \"docker\"\n" +
    "        help: \"Where this jenkins source code will be deployed. Supports 'docker'. Future would be 'marathon', 'dcos' and 'host'\"\n" +
+   "        group: \"deploy\"\n" +
    "      service-addr:\n" +
    "        required: true\n" +
    "        help: \"CNAME or IP address of the expected jenkins instance\"\n" +
+   "        group: \"deploy\"\n" +
    "      service-port:\n" +
    "        default: \"8080\"\n" +
    "        help: \"Expected jenkins instance port number.\"\n" +
+   "        group: \"deploy\"\n" +
    "  update:\n" +
    "    help: \"update a jenkins instance source code\"\n" +
    "    flags:\n" +
    "      name:\n" +
    "        help: \"Name of the jenkins instance\"\n" +
    "        required: true\n" +
+   "        group: \"source\"\n" +
    "      features-add:\n" +
    "        help: \"List of features to add to jenkins.\"\n" +
    "  maintain:\n" +

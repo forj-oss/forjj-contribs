@@ -1,17 +1,7 @@
 // This file has been created by "go generate" as initial code. go generate will never update it, EXCEPT if you remove it.
-
-// So, update it for your need.
 package main
 
-// You can remove following comments.
-// It has been designed fo you, to implement the core of your plugin task.
-//
-// You can use use it to write your own plugin handler for additional functionnality
-// Like Index which currently return a basic code.
-
 import (
-    "fmt"
-    "os"
     "net/http"
     "github.hpe.com/christophe-larsonneur/goforjj"
 )
@@ -20,22 +10,56 @@ import (
 // req_data contains the request data posted by forjj. Structure generated from 'jenkins.yaml'.
 // ret_data contains the response structure to return back to forjj.
 //
-func DoCreate(w http.ResponseWriter, r *http.Request, req_data *CreateReq, ret_data *goforjj.PluginData) {
+func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *goforjj.PluginData) {
+    var p *JenkinsPlugin
 
-    // This is where you shoud write your Update code. Following line is for Demo only.
-    req_data.create_jenkins_sources()
-    fmt.Fprintf(os.Stdout,"%#v\n", req_data)
+    if pr, ok := req.check_source_existence(ret) ; !ok {
+        return
+    } else {
+        p = pr
+    }
 
+    if ! p.initialize_from(req, ret) {
+        return
+    }
+
+    if ! p.create_jenkins_sources(ret) {
+        return
+    }
+
+    if ! p.save_yaml(ret) {
+        return
+    }
 }
 
 // Do updating plugin task
 // req_data contains the request data posted by forjj. Structure generated from 'jenkins.yaml'.
 // ret_data contains the response structure to return back to forjj.
 //
-func DoUpdate(w http.ResponseWriter, r *http.Request, req_data *UpdateReq, ret_data *goforjj.PluginData) {
+func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *goforjj.PluginData) {
+    var p *JenkinsPlugin
 
-    // This is where you shoud write your create code. Following line is for Demo only.
-    fmt.Fprintf(os.Stdout,"%#v\n", req_data)
+    if pr, ok := req.check_source_existence(ret) ; !ok {
+        return
+    } else {
+        p = pr
+    }
+
+    if ! p.load_yaml(ret) {
+        return
+    }
+
+    if ! p.update_from(req, ret) {
+        return
+    }
+
+    if ! p.update_jenkins_sources(ret) {
+        return
+    }
+
+    if ! p.save_yaml(ret) {
+        return
+    }
 
 }
 
@@ -43,9 +67,16 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req_data *UpdateReq, ret_d
 // req_data contains the request data posted by forjj. Structure generated from 'jenkins.yaml'.
 // ret_data contains the response structure to return back to forjj.
 //
-func DoMaintain(w http.ResponseWriter, r *http.Request, req_data *MaintainReq, ret_data *goforjj.PluginData) {
+func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *goforjj.PluginData) {
 
-    // This is where you shoud write your Update code. Following line is for Demo only.
-    fmt.Fprintf(os.Stdout,"%#v\n", req_data)
+    if ! req.check_source_existence(ret) {
+        return
+    }
+
+    // loop on list of jenkins instances defined by a collection of */jenkins.yaml
+    if ! req.instantiate(ret) {
+        return
+    }
+
 
 }

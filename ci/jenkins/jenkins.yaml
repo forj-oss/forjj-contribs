@@ -7,7 +7,7 @@ runtime:
   service_type: "REST API"
   service:
     #socket: "jenkins.sock"
-    parameters: [ "service", "start" ]
+    parameters: [ "service", "start", "--templates", "/templates"]
 actions:
   common:
     flags:
@@ -16,36 +16,41 @@ actions:
       jenkins-debug:
         help: "To activate jenkins debug information"
       forjj-source-mount:
-        help: "Where the source dir is located for github plugin."
+        help: "Where the source dir is located for jenkins plugin."
   create:
     help: "Create a jenkins instance source code."
     flags:
-
-# Options related to source code
+      # Options related to source code
       name:
         help: "Name of the jenkins instance"
         required: true
+        group: "source"
       docker-image:
         help: "Base docker image name to use in Dockerfile"
+        group: "source"
       features:
         help: "List of features to add to jenkins features.lst."
-
-# Options related to deployment
+        group: "source"
+      # Options related to deployment
       deploy-to:
         default: "docker"
         help: "Where this jenkins source code will be deployed. Supports 'docker'. Future would be 'marathon', 'dcos' and 'host'"
+        group: "deploy"
       service-addr:
         required: true
         help: "CNAME or IP address of the expected jenkins instance"
+        group: "deploy"
       service-port:
         default: "8080"
         help: "Expected jenkins instance port number."
+        group: "deploy"
   update:
     help: "update a jenkins instance source code"
     flags:
       name:
         help: "Name of the jenkins instance"
         required: true
+        group: "source"
       features-add:
         help: "List of features to add to jenkins."
   maintain:

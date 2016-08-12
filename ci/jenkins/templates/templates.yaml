@@ -1,0 +1,43 @@
+# This file describes collections of jenkins features and a list of files to generate.
+---
+features:
+  common:
+  - "feature:proxy"
+  - "feature:seed-job"
+  - "basic-security"
+  - "feature:tcp-slave-agent-port"
+  deploy:
+    mesos:
+    - "feature:mesos-plugin"
+    - "feature:executor"
+    dcos:
+    - "feature:mesos-plugin"
+    - "feature:executor"
+sources:
+  common:
+    docker file:
+      template: "Dockerfile"
+    build script:
+      template: "bin/build.sh"
+      chmod   : 0755
+    git ignore:
+      template: ".gitignore"
+    build options sample:
+      source  : "build_opts.sh.sample"
+    jenkins features:
+      template: "features.lst"
+    jenkins credentials:
+      source  : "jenkins_credentials.sh.sample"
+  deploy:
+    docker:
+      start up script:
+        template: "bin/start.sh"
+        chmod   : 0755
+      start up options sample:
+        template : "run_opts.sh.sample"
+    mesos:
+      marathon json payload:
+        template: "bin/marathon.json"
+    dcos:
+      marathon json payload:
+        template: "bin/marathon.json"
