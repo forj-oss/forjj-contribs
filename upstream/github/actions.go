@@ -76,7 +76,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     // Building final Post answer
     // We assume ssh is used and forjj can push with appropriate credential.
     infra_repo := gws.github_source.Repos[req.ForjjInfra]
-    ret.Repos[req.ForjjInfra] = goforjj.PluginRepo{ infra_repo.Name, infra_repo.Upstream }
+    ret.Repos[req.ForjjInfra] = goforjj.PluginRepo{ infra_repo.Name, infra_repo.Upstream, infra_repo.Exist }
     for k, v := range gws.github_source.Urls {
         ret.Services.Urls[k] = v
     }
@@ -100,6 +100,8 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
     if gws.verify_req_fails(ret, check) {
         return
     }
+
+    // TODO: Add code to update github service source files
 }
 
 // Do maintaining plugin task
