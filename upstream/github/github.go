@@ -7,6 +7,7 @@ import (
     "log"
     "net/url"
     "regexp"
+    "fmt"
 )
 
 func (g *GitHubStruct)github_connect(server string, ret *goforjj.PluginData) (* github.Client) {
@@ -115,7 +116,29 @@ func (g *GitHubStruct)ensure_organization_exists(ret *goforjj.PluginData) (s boo
     return true
 }
 
+// Return an error if at least one repo exist.
+func (r *GitHubStruct)repos_exists() error {
+    // loop on list of repos, and ensure they exist with minimal config and rights
+    for name, repo_data := range  r.github_source.Repos {
+        if repo_data.exists(r) {
+            return fmt.Errorf("%s already exist in github server.", name)
+        }
+    }
+    return nil
+}
+
+func (r *RepositoryStruct)exists(gws *GitHubStruct) bool{
+    c := gws.Client.Repositories
+    _, _, err := c.Get(gws.github_source.Organization, r.Name)
+
+    if err == nil { // repos exist
+        return true
+    }
+    return false
+}
+
 // FUTURE: Add users/groups
+
 func (r *RepositoryStruct)ensure_exists(gws *GitHubStruct, ret *goforjj.PluginData) error{
      // test existence
     c := gws.Client.Repositories

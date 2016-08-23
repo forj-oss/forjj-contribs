@@ -38,20 +38,36 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     if gws.verify_req_fails(ret, check) {
         return
     }
+
+    // A create won't be possible if source files already exist. The Update is the only possible option.
     log.Printf("Checking Infrastructure code existence.")
     if _, err := os.Stat(path.Join(req.ForjjSourceMount, github_file)) ; err == nil {
         ret.Errorf("Unable to create the github configuration which already exist.\nUse update to update it (or update %s), and maintain to update github according to his configuration.", github_file)
         return
     }
-    ret.StatusAdd("environment checked.")
+
     log.Printf("Checking github connection : %#v", gws)
 
     if gws.github_connect(req.GithubServer, ret) == nil {
         return
     }
 
-    // Build gws.github_source and save it.
-    if err := gws.create_yaml(path.Join(req.ForjjSourceMount, github_file), req) ; err != nil {
+    // Build gws.github_source yaml structure.
+    if err := gws.create_yaml_data(req) ; err != nil {
+        ret.Errorf("%s", err)
+        return
+    }
+
+    // A create won't be possible if repo requested already exist. The Update is the only possible option.
+    if err := gws.repos_exists() ; err != nil {
+        ret.Errorf("%s\nUnable to create the github configuration when github already has repositories created. Use 'update' instead.", err)
+        return
+    }
+
+    ret.StatusAdd("Environment checked. Ready to be created.")
+
+    // Save gws.github_source.
+    if err := gws.save_yaml(path.Join(req.ForjjSourceMount, github_file)) ; err != nil {
         ret.Errorf("%s", err)
         return
     }

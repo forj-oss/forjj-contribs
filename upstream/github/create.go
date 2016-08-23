@@ -6,7 +6,7 @@ import (
     "io/ioutil"
 )
 
-func (g *GitHubStruct)create_yaml(file string, req *CreateReq) error {
+func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
     // Write the github.yaml source file.
     g.github_source.Urls = make(map[string]string)
     g.github_source.Urls["github-base-url"] = g.Client.BaseURL.String()
@@ -34,6 +34,11 @@ func (g *GitHubStruct)create_yaml(file string, req *CreateReq) error {
     infra.Upstream = upstream
     g.github_source.Repos[req.ForjjInfra] = infra
 
+    // TODO: Be able to add several repos thanks to the request structure.
+    return nil
+}
+
+func (g *GitHubStruct)save_yaml(file string) error {
 
     d, err := yaml.Marshal(&g.github_source)
     if  err != nil {
