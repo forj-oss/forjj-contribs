@@ -31,6 +31,16 @@ actions:
        help: "Github Organization name. By default, it uses the FORJJ organization name"
  update:
    help: "Update the github infrastructure in the infra repository."
+   flags:
+     github-token:
+       help: "github token to access. This token must authorize organization level access."
+       required: true
+     github-server:
+       help: "Github Entreprise Server name. By default, public 'github.com' API is used."
+     forjj-organization:
+       help: "Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization"
+     github-organization:
+       help: "Github Organization name. By default, it uses the FORJJ organization name"
  maintain:
    help: "Maintain github infrastructure from the infra repository"
    flags:

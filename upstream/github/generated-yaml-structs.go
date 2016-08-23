@@ -18,6 +18,10 @@ type CreateReq struct {
 }
 
 type UpdateReq struct {
+    ForjjOrganization string `json:"forjj-organization"` // Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
+    GithubOrganization string `json:"github-organization"` // Github Organization name. By default, it uses the FORJJ organization name
+    GithubServer string `json:"github-server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
+    GithubToken string `json:"github-token"` // github token to access. This token must authorize organization level access.
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
@@ -50,6 +54,8 @@ func (r *UpdateReq)SaveMaintainOptions(ret *goforjj.PluginData) {
     if ret.Options == nil {
         ret.Options = make(map[string]goforjj.PluginOption)
     }
+
+    ret.Options["github-token"] = addMaintainOptionValue(ret.Options, "github-token", r.GithubToken, "", "github token to access. This token must authorize organization level access.")
 }
 
 func addMaintainOptionValue(options map[string]goforjj.PluginOption, option, value, defaultv, help string) (goforjj.PluginOption){
@@ -103,6 +109,16 @@ const YamlDesc="---\n" +
    "       help: \"Github Organization name. By default, it uses the FORJJ organization name\"\n" +
    " update:\n" +
    "   help: \"Update the github infrastructure in the infra repository.\"\n" +
+   "   flags:\n" +
+   "     github-token:\n" +
+   "       help: \"github token to access. This token must authorize organization level access.\"\n" +
+   "       required: true\n" +
+   "     github-server:\n" +
+   "       help: \"Github Entreprise Server name. By default, public 'github.com' API is used.\"\n" +
+   "     forjj-organization:\n" +
+   "       help: \"Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization\"\n" +
+   "     github-organization:\n" +
+   "       help: \"Github Organization name. By default, it uses the FORJJ organization name\"\n" +
    " maintain:\n" +
    "   help: \"Maintain github infrastructure from the infra repository\"\n" +
    "   flags:\n" +

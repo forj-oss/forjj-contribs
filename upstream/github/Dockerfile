@@ -1,7 +1,5 @@
 FROM alpine:latest
 
-COPY github /bin/github
-
 WORKDIR /src
 
 COPY ca_certificates/* /usr/local/share/ca-certificates/
@@ -11,6 +9,8 @@ RUN apk update && \
     update-ca-certificates --fresh && \
     rm -f /var/cache/apk/*tar.gz && \
     adduser devops devops -D
+
+COPY github /bin/github
 
 USER devops
 
