@@ -29,16 +29,16 @@ type YamlJenkins struct {
     Features []string
 }
 
-func (r *GroupReq)new_plugin(src string) (p *JenkinsPlugin) {
-    p = &JenkinsPlugin{}
+func new_plugin(src string) (p *JenkinsPlugin) {
+    p = new(JenkinsPlugin)
 
     p.source_path = src
     return
 }
 
 func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (status bool) {
-    p.yaml.Source = r.Groups.Source
-    p.yaml.Deploy = r.Groups.Deploy
+    p.yaml.Source = r.SourceStruct
+    p.yaml.Deploy = r.DeployStruct
     return true
 }
 

@@ -7,25 +7,20 @@ import "github.hpe.com/christophe-larsonneur/goforjj"
 
 // Common group of data between create/update actions
 type DeployStruct struct {
-    DeployTo string `json:"deploy-to"`
-    ServiceAddr string `json:"service-addr"`
-    ServicePort string `json:"service-port"`
+    DeployTo string `json:"deploy-to"` // Where this jenkins source code will be deployed. Supports 'docker'. Future would be 'marathon', 'dcos' and 'host'
+    ServiceAddr string `json:"service-addr"` // CNAME or IP address of the expected jenkins instance
+    ServicePort string `json:"service-port"` // Expected jenkins instance port number.
 }
 
 type SourceStruct struct {
-    DockerImage string `json:"docker-image"`
-    Features string `json:"features"`
-    Name string `json:"name"`
-}
-
-
-type GroupReq struct {
-    Deploy DeployStruct `json:",inline"`
-    Source SourceStruct `json:",inline"`
+    DockerImage string `json:"docker-image"` // Base docker image name to use in Dockerfile
+    Features string `json:"features"` // List of features to add to jenkins features.lst.
+    Name string `json:"name"` // Name of the jenkins instance
 }
 
 type CreateReq struct {
-    Groups GroupReq `json:",inline"`
+    DeployStruct
+    SourceStruct
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
@@ -34,7 +29,9 @@ type CreateReq struct {
 }
 
 type UpdateReq struct {
-    Groups GroupReq `json:",inline"`
+    DeployStruct
+    SourceStruct
+
     FeaturesAdd string `json:"features-add"` // List of features to add to jenkins.
 
     // common flags
