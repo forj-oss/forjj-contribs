@@ -17,7 +17,7 @@ import (
 func newPluginData() (* goforjj.PluginData) {
     var r goforjj.PluginData = goforjj.PluginData{
         Repos: make(map[string]goforjj.PluginRepo),
-        Services: goforjj.PluginService{ make(map[string]string) },
+        Services: goforjj.PluginService{make(map[string]string)},
     }
     return &r
 }
@@ -53,8 +53,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
     var req_data CreateReq
 
     body, err := ioutil.ReadAll(io.LimitReader(r.Body, 10240))
-    log.Print("Body: %s", string(body))
-
 
     if err != nil {
         panic(err)
@@ -70,14 +68,20 @@ func Create(w http.ResponseWriter, r *http.Request) {
     // Create the github.yaml source file.
     // See goforjj/plugin-json-struct.go for json data structure recognized by forjj.
 
-    DoCreate(w, r, &req_data, data)
+    err_code := DoCreate(w, r, &req_data, data)
 
     req_data.SaveMaintainOptions(data)
 
     if data.ErrorMessage != "" {
-        log.Print("HTTP ERROR: 422 - ", data.ErrorMessage)
-        w.WriteHeader(422) // unprocessable entity
+        if err_code == 0 {
+            err_code = 422 // unprocessable entity
+        }
+        log.Print("HTTP ERROR: ", err_code, " - ", data.ErrorMessage)
+    } else {
+        err_code = 200
     }
+    w.WriteHeader(err_code)
+
     if err := json.NewEncoder(w).Encode(data); err != nil {
         panic(err)
     }
@@ -104,14 +108,19 @@ func Update(w http.ResponseWriter, r *http.Request) {
     // Update the github.yaml source file.
     // See goforjj/plugin-json-struct.go for json data structure recognized by forjj.
 
-    DoUpdate(w, r, &req_data, data)
+    err_code := DoUpdate(w, r, &req_data, data)
 
     req_data.SaveMaintainOptions(data)
 
     if data.ErrorMessage != "" {
-        log.Print("HTTP ERROR: 422 - ", data.ErrorMessage)
-        w.WriteHeader(422) // unprocessable entity
+        if err_code == 0 {
+            err_code = 422 // unprocessable entity
+        }
+        log.Print("HTTP ERROR: ", err_code, " - ", data.ErrorMessage)
+    } else {
+        err_code = 200
     }
+    w.WriteHeader(err_code)
 
     if err := json.NewEncoder(w).Encode(data); err != nil {
         panic(err)
@@ -136,12 +145,17 @@ func Maintain(w http.ResponseWriter, r *http.Request) {
         panicIfError(w, *new(error), "Invalid payload format. Must be 'application/json'. Got %#v", r.Header["Content-Type"])
     }
 
-    DoMaintain(w, r, &req_data, data)
+    err_code := DoMaintain(w, r, &req_data, data)
 
     if data.ErrorMessage != "" {
-        log.Print("HTTP ERROR: 422 - ", data.ErrorMessage)
-        w.WriteHeader(422) // unprocessable entity
+        if err_code == 0 {
+            err_code = 422 // unprocessable entity
+        }
+        log.Print("HTTP ERROR: ", err_code, " - ", data.ErrorMessage)
+    } else {
+        err_code = 200
     }
+    w.WriteHeader(err_code)
 
     if err := json.NewEncoder(w).Encode(data); err != nil {
         panic(err)

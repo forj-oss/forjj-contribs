@@ -10,7 +10,6 @@ type CreateReq struct {
     GithubOrganization string `json:"github-organization"` // Github Organization name. By default, it uses the FORJJ organization name
     GithubServer string `json:"github-server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
     GithubToken string `json:"github-token"` // github token to access. This token must authorize organization level access.
-
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
     ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for github plugin.

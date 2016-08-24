@@ -24,7 +24,8 @@ const github_file = "github.yaml"
 // req_data contains the request data posted by forjj. Structure generated from 'github.yaml'.
 // ret_data contains the response structure to return back to forjj.
 //
-func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *goforjj.PluginData) {
+// By default, if httpCode is not set (ie equal to 0), the function caller will set it to 422 in case of errors (error_message != "") or 200
+func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *goforjj.PluginData) (httpCode int){
 
     gws := GitHubStruct{
         source_mount: req.ForjjSourceMount,
@@ -36,13 +37,6 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 
     //ensure source path is writeable
     if gws.verify_req_fails(ret, check) {
-        return
-    }
-
-    // A create won't be possible if source files already exist. The Update is the only possible option.
-    log.Printf("Checking Infrastructure code existence.")
-    if _, err := os.Stat(path.Join(req.ForjjSourceMount, github_file)) ; err == nil {
-        ret.Errorf("Unable to create the github configuration which already exist.\nUse update to update it (or update %s), and maintain to update github according to his configuration.", github_file)
         return
     }
 
@@ -59,9 +53,17 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     }
 
     // A create won't be possible if repo requested already exist. The Update is the only possible option.
-    if err := gws.repos_exists() ; err != nil {
+    // The list of repository found are listed and returned in the answer.
+    if err := gws.repos_exists(ret) ; err != nil {
         ret.Errorf("%s\nUnable to create the github configuration when github already has repositories created. Use 'update' instead.", err)
-        return
+        return 419
+    }
+
+    // A create won't be possible if source files already exist. The Update is the only possible option.
+    log.Printf("Checking Infrastructure code existence.")
+    if _, err := os.Stat(path.Join(req.ForjjSourceMount, github_file)) ; err == nil {
+        ret.Errorf("Unable to create the github configuration which already exist.\nUse 'update' to update it (or update %s), and 'maintain' to update your github service according to his configuration.", github_file)
+        return 419
     }
 
     ret.StatusAdd("Environment checked. Ready to be created.")
@@ -84,13 +86,15 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     ret.CommitMessage = fmt.Sprintf("Create github configuration")
     ret.Files = append(ret.Files, github_file)
 
+    return 200
 }
 
 // Do updating plugin task
 // req_data contains the request data posted by forjj. Structure generated from 'github.yaml'.
 // ret_data contains the response structure to return back to forjj.
 //
-func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *goforjj.PluginData) {
+// By default, if httpCode is not set (ie equal to 0), the function caller will set it to 422 in case of errors (error_message != "") or 200
+func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *goforjj.PluginData) (httpCode int) {
 
     gws := GitHubStruct{
         source_mount: req.ForjjSourceMount,
@@ -98,17 +102,19 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
     check := make(map[string]bool)
 
     if gws.verify_req_fails(ret, check) {
-        return
+        return 422
     }
 
     // TODO: Add code to update github service source files
+    return
 }
 
 // Do maintaining plugin task
 // req_data contains the request data posted by forjj. Structure generated from 'github.yaml'.
 // ret_data contains the response structure to return back to forjj.
 //
-func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *goforjj.PluginData) {
+// By default, if httpCode is not set (ie equal to 0), the function caller will set it to 422 in case of errors (error_message != "") or 200
+func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *goforjj.PluginData) (httpCode int) {
 
     gws := GitHubStruct{
         source_mount: req.ForjjSourceMount,
@@ -143,4 +149,5 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
         }
         log.Printf(ret.StatusAdd("Repo maintained: %s", name))
     }
+    return
 }
