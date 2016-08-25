@@ -85,6 +85,7 @@ const YamlDesc="---\n" +
    "  service:\n" +
    "    #socket: \"github.sock\"\n" +
    "    parameters: [ \"service\", \"start\" ]\n" +
+   "created_flag_file: \"{{ .InstanceName }}/{{.Name}}.yaml\"\n" +
    "actions:\n" +
    " common:\n" +
    "   flags:\n" +

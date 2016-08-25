@@ -8,6 +8,7 @@ runtime:
   service:
     #socket: "github.sock"
     parameters: [ "service", "start" ]
+created_flag_file: "{{ .InstanceName }}/{{.Name}}.yaml"
 actions:
  common:
    flags:
