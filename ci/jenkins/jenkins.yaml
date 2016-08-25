@@ -8,6 +8,7 @@ runtime:
   service:
     #socket: "jenkins.sock"
     parameters: [ "service", "start", "--templates", "/templates"]
+created_flag_file: "{{ .InstanceName }}/forjj-{{ .Name }}.yaml"
 actions:
   common:
     flags:
@@ -21,9 +22,8 @@ actions:
     help: "Create a jenkins instance source code."
     flags:
       # Options related to source code
-      name:
-        help: "Name of the jenkins instance"
-        required: true
+      forjj-instance-name:
+        help: "Name of the jenkins instance given by forjj."
         group: "source"
       docker-image:
         help: "Base docker image name to use in Dockerfile"
@@ -47,9 +47,8 @@ actions:
   update:
     help: "update a jenkins instance source code"
     flags:
-      name:
-        help: "Name of the jenkins instance"
-        required: true
+      forjj-instance-name:
+        help: "Name of the jenkins instance given by forjj."
         group: "source"
       features-add:
         help: "List of features to add to jenkins."

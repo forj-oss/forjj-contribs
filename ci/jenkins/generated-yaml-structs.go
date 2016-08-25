@@ -15,7 +15,7 @@ type DeployStruct struct {
 type SourceStruct struct {
     DockerImage string `json:"docker-image"` // Base docker image name to use in Dockerfile
     Features string `json:"features"` // List of features to add to jenkins features.lst.
-    Name string `json:"name"` // Name of the jenkins instance
+    ForjjInstanceName string `json:"forjj-instance-name"` // Name of the jenkins instance given by forjj.
 }
 
 type CreateReq struct {
@@ -91,6 +91,7 @@ const YamlDesc="---\n" +
    "  service:\n" +
    "    #socket: \"jenkins.sock\"\n" +
    "    parameters: [ \"service\", \"start\", \"--templates\", \"/templates\"]\n" +
+   "created_flag_file: \"{{ .InstanceName }}/forjj-{{ .Name }}.yaml\"\n" +
    "actions:\n" +
    "  common:\n" +
    "    flags:\n" +
@@ -104,9 +105,8 @@ const YamlDesc="---\n" +
    "    help: \"Create a jenkins instance source code.\"\n" +
    "    flags:\n" +
    "      # Options related to source code\n" +
-   "      name:\n" +
-   "        help: \"Name of the jenkins instance\"\n" +
-   "        required: true\n" +
+   "      forjj-instance-name:\n" +
+   "        help: \"Name of the jenkins instance given by forjj.\"\n" +
    "        group: \"source\"\n" +
    "      docker-image:\n" +
    "        help: \"Base docker image name to use in Dockerfile\"\n" +
@@ -130,9 +130,8 @@ const YamlDesc="---\n" +
    "  update:\n" +
    "    help: \"update a jenkins instance source code\"\n" +
    "    flags:\n" +
-   "      name:\n" +
-   "        help: \"Name of the jenkins instance\"\n" +
-   "        required: true\n" +
+   "      forjj-instance-name:\n" +
+   "        help: \"Name of the jenkins instance given by forjj.\"\n" +
    "        group: \"source\"\n" +
    "      features-add:\n" +
    "        help: \"List of features to add to jenkins.\"\n" +
