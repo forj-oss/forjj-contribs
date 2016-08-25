@@ -9,7 +9,6 @@ import (
     "net"
     "os"
     "log"
-    "fmt"
     "net/http"
     "gopkg.in/alecthomas/kingpin.v2"
     "path"
@@ -28,11 +27,11 @@ func (a *jenkinsApp)start_server() {
     }
     go func () {
         <-int_sig
-        fmt.Printf("\nExiting and closing socket...\n")
+        log.Printf("\nExiting and closing socket...\n")
         ln.Close()
         os.Exit(0)
     }()
-    fmt.Printf("Starting http service on socket : %s\n", a.socket)
+    log.Printf("Starting http service on socket : %s\n", a.socket)
 
     router := NewRouter()
 
