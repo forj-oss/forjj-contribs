@@ -19,7 +19,9 @@ type JenkinsPlugin struct {
 }
 
 type TemplateData struct {
-     Features []string
+    Features []string
+    Image string
+    Maintainer string
 }
 
 type YamlJenkins struct {

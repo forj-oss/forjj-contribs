@@ -86,7 +86,9 @@ const YamlDesc="---\n" +
    "version: \"0.1\"\n" +
    "description: \"CI jenkins plugin for FORJJ.\"\n" +
    "runtime:\n" +
-   "  docker_image: \"docker.hos.hpecorp.net/forjj-ci/jenkins\"\n" +
+   "  docker:\n" +
+   "    image: \"docker.hos.hpecorp.net/forjj-ci/jenkins\"\n" +
+   "    dood: true\n" +
    "  service_type: \"REST API\"\n" +
    "  service:\n" +
    "    #socket: \"jenkins.sock\"\n" +

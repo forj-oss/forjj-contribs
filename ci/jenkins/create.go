@@ -6,6 +6,7 @@ import (
     "path"
     "os"
     "text/template"
+    "io/ioutil"
 )
 
 // return true if instance doesn't exist.
@@ -96,9 +97,16 @@ func (p *JenkinsPlugin)generate_source_files(instance_name string, ret *goforjj.
             }
         }
 
-        t, err := template.New("jenkins").Funcs(template.FuncMap{}).Parse(src)
+        var data string
+        if b, err := ioutil.ReadFile(src) ; err != nil {
+            log.Printf(ret.Errorf("Load issue. %s", err))
+        } else {
+            data = string(b)
+        }
+
+        t, err := template.New(src).Funcs(template.FuncMap{}).Parse(data)
         if err != nil {
-            log.Printf(ret.Errorf("Template issue: %s", err))
+            log.Printf(ret.Errorf("Template issue. %s", err))
             return
         }
 
@@ -106,7 +114,7 @@ func (p *JenkinsPlugin)generate_source_files(instance_name string, ret *goforjj.
             log.Printf(ret.Errorf("Unable to create %s. %s.", dest, err))
             return
         } else {
-            t.ExecuteTemplate(out, desc.Template, p.data)
+            t.Execute(out, p.data)
             out.Close()
         }
         ret.AddFile(path.Join(instance_name, desc.Template))

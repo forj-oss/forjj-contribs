@@ -7,7 +7,7 @@ WORKDIR /src
 
 COPY ca_certificates/* /usr/local/share/ca-certificates/
 
-COPY templates/* /templates/
+COPY templates/ /templates/
 
 RUN apk update &&     apk add --no-cache ca-certificates &&     update-ca-certificates --fresh &&     rm -f /var/cache/apk/*tar.gz &&     adduser devops devops -D
 
