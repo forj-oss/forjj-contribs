@@ -2,7 +2,7 @@
 #
 #
 
-TAG="-t $(awk '$1 ~ /docker_image/ { print $0 }' jenkins.yaml | sed 's/^ *docker_image: "*\(.*\)"/\1/g')"
+TAG="-t $(awk '$0 ~ /^ *image: ".*"$/ { print $0 }' jenkins.yaml | sed 's/^ *image: "*\(.*\)".*$/\1/g')"
 
 echo "Local go build, then create a docker image..."
 CGO_ENABLED=0 go build
