@@ -127,7 +127,12 @@ func (r *GitHubStruct)repos_exists(ret *goforjj.PluginData) (err error) {
             repo_data.Exist = true
         }
         if ret != nil {
-            ret.Repos[name] = goforjj.PluginRepo{ repo_data.Name, repo_data.Upstream, repo_data.Exist }
+            ret.Repos[name] = goforjj.PluginRepo{
+                Name: repo_data.Name,
+                Exist: repo_data.Exist,
+                Remotes: map[string]string { "origin": repo_data.Upstream},
+                BranchConnect: map[string]string { "master": "origin/master"},
+            }
         }
     }
     return

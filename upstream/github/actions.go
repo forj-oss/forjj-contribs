@@ -78,7 +78,12 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     // Building final Post answer
     // We assume ssh is used and forjj can push with appropriate credential.
     infra_repo := gws.github_source.Repos[req.ForjjInfra]
-    ret.Repos[req.ForjjInfra] = goforjj.PluginRepo{ infra_repo.Name, infra_repo.Upstream, infra_repo.Exist }
+    ret.Repos[req.ForjjInfra] = goforjj.PluginRepo{
+        Name: infra_repo.Name,
+        Exist: infra_repo.Exist,
+        Remotes: map[string]string {"origin": infra_repo.Upstream},
+        BranchConnect: map[string]string {"master": "origin/master"},
+    }
     for k, v := range gws.github_source.Urls {
         ret.Services.Urls[k] = v
     }
