@@ -30,17 +30,18 @@ sources:
       source  : "jenkins_credentials.sh.sample"
   deploy:
     docker:
-      maintain_execute: "bin/build.sh && bin/start.sh"
       start up script:
         template: "bin/start.sh"
         chmod   : 0755
       start up options sample:
         source  : "run_opts.sh.sample"
     mesos:
-      maintain_execute: "curl -X POST -d @bin/marathon.json {{ .Mesos.MarathonUrl}}/..."
       marathon json payload:
         template: "bin/marathon.json"
     dcos:
-      maintain_execute: "curl -X POST -d @bin/marathon.json {{ .Mesos.MarathonUrl}}/... -H 'token: {{ .Mesos.Token }}"
       marathon json payload:
         template: "bin/marathon.json"
+run_deploy:
+  docker: "bin/build.sh && bin/start.sh"
+  mesos: "curl -X POST -d @bin/marathon.json {{ .Mesos.MarathonUrl }}/..." # Not tested
+  dcos: "curl -X POST -d @bin/marathon.json {{ .Mesos.MarathonUrl }}/... -H 'token: {{ .Mesos.Token }}" # Not tested
