@@ -28,6 +28,8 @@ func (r *UpdateReq) check_source_existence(ret *goforjj.PluginData) (p *JenkinsP
     p.template_file = templatef
 
     ret.StatusAdd("environment checked.")
+
+
     return p, true
 }
 

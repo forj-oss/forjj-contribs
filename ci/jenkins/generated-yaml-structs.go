@@ -14,8 +14,12 @@ type DeployStruct struct {
 
 type SourceStruct struct {
     DockerImage string `json:"docker-image"` // Base docker image name to use in Dockerfile
+    DockerImageVersion string `json:"docker-image-version"` // Base docker image version to use in Dockerfile
+    DockerRepoimage string `json:"docker-repoimage"` // Repository name containing your base docker image name to use in Dockerfile
     Features string `json:"features"` // List of features to add to jenkins features.lst.
     ForjjInstanceName string `json:"forjj-instance-name"` // Name of the jenkins instance given by forjj.
+    ForjjOrganization string `json:"forjj-organization"` // Organization name used in the docker repo name if --docker-repoimage not set.
+    Maintainer string `json:"maintainer"` // Jenkins image maintainer
 }
 
 type CreateReq struct {
@@ -110,8 +114,21 @@ const YamlDesc="---\n" +
    "      forjj-instance-name:\n" +
    "        help: \"Name of the jenkins instance given by forjj.\"\n" +
    "        group: \"source\"\n" +
+   "      forjj-organization:\n" +
+   "        help: \"Organization name used in the docker repo name if --docker-repoimage not set.\"\n" +
+   "        group: \"source\"\n" +
    "      docker-image:\n" +
    "        help: \"Base docker image name to use in Dockerfile\"\n" +
+   "        default: \"jenkins\"\n" +
+   "        group: \"source\"\n" +
+   "      docker-image-version:\n" +
+   "        help: \"Base docker image version to use in Dockerfile\"\n" +
+   "        group: \"source\"\n" +
+   "      docker-repoimage:\n" +
+   "        help: \"Repository name containing your base docker image name to use in Dockerfile\"\n" +
+   "        group: \"source\"\n" +
+   "      maintainer:\n" +
+   "        help: \"Jenkins image maintainer\"\n" +
    "        group: \"source\"\n" +
    "      features:\n" +
    "        help: \"List of features to add to jenkins features.lst.\"\n" +
@@ -134,6 +151,22 @@ const YamlDesc="---\n" +
    "    flags:\n" +
    "      forjj-instance-name:\n" +
    "        help: \"Name of the jenkins instance given by forjj.\"\n" +
+   "        group: \"source\"\n" +
+   "      forjj-organization:\n" +
+   "        help: \"Organization name used in the docker repo name if --docker-repoimage not set.\"\n" +
+   "        group: \"source\"\n" +
+   "      docker-image-version:\n" +
+   "        help: \"Base docker image version to use in Dockerfile\"\n" +
+   "        group: \"source\"\n" +
+   "      docker-image:\n" +
+   "        help: \"Base docker image name to use in Dockerfile\"\n" +
+   "        default: \"jenkins\"\n" +
+   "        group: \"source\"\n" +
+   "      docker-repoimage:\n" +
+   "        help: \"Repository name containing your base docker image name to use in Dockerfile\"\n" +
+   "        group: \"source\"\n" +
+   "      maintainer:\n" +
+   "        help: \"Jenkins image maintainer\"\n" +
    "        group: \"source\"\n" +
    "      features-add:\n" +
    "        help: \"List of features to add to jenkins.\"\n" +

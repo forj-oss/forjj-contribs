@@ -51,16 +51,17 @@ func (p *JenkinsPlugin)LoadTemplatesDef() error {
     return nil
 }
 
+// Load list of files to copy and files to generate
 func (p *JenkinsPlugin)DefineSources() error {
     // load all features
-    p.data.Features = make([]string, 0, 5)
+    p.yaml.Features = make([]string, 0, 5)
     for _, f := range p.templates_def.Features.Common {
-        p.data.Features = append(p.data.Features, f)
+        p.yaml.Features = append(p.yaml.Features, f)
     }
 
     if deploy_features, ok:= p.templates_def.Features.Deploy[p.yaml.Deploy.DeployTo] ; ok {
         for _, f := range deploy_features {
-            p.data.Features = append(p.data.Features, f)
+            p.yaml.Features = append(p.yaml.Features, f)
         }
     }
 

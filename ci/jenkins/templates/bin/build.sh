@@ -2,12 +2,12 @@
 #
 #
 
-IMAGE_NAME={{ .Settings.Name }}
+IMAGE_NAME={{ .Docker.Name }}
 
 if [ "$LOGNAME" = jenkins ]
 then
-   REPO={{ .Settings.Organization }}
-   IMAGE_VERSION={{ .Settings.Version }}
+   REPO={{ .Docker.Repository }}
+   IMAGE_VERSION={{ .Docker.Version }}
 else
    REPO=$LOGNAME
    IMAGE_VERSION=test

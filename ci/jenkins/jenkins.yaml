@@ -27,8 +27,21 @@ actions:
       forjj-instance-name:
         help: "Name of the jenkins instance given by forjj."
         group: "source"
+      forjj-organization:
+        help: "Organization name used in the docker repo name if --docker-repoimage not set."
+        group: "source"
       docker-image:
         help: "Base docker image name to use in Dockerfile"
+        default: "jenkins"
+        group: "source"
+      docker-image-version:
+        help: "Base docker image version to use in Dockerfile"
+        group: "source"
+      docker-repoimage:
+        help: "Repository name containing your base docker image name to use in Dockerfile"
+        group: "source"
+      maintainer:
+        help: "Jenkins image maintainer"
         group: "source"
       features:
         help: "List of features to add to jenkins features.lst."
@@ -51,6 +64,22 @@ actions:
     flags:
       forjj-instance-name:
         help: "Name of the jenkins instance given by forjj."
+        group: "source"
+      forjj-organization:
+        help: "Organization name used in the docker repo name if --docker-repoimage not set."
+        group: "source"
+      docker-image-version:
+        help: "Base docker image version to use in Dockerfile"
+        group: "source"
+      docker-image:
+        help: "Base docker image name to use in Dockerfile"
+        default: "jenkins"
+        group: "source"
+      docker-repoimage:
+        help: "Repository name containing your base docker image name to use in Dockerfile"
+        group: "source"
+      maintainer:
+        help: "Jenkins image maintainer"
         group: "source"
       features-add:
         help: "List of features to add to jenkins."

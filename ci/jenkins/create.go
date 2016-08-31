@@ -85,7 +85,6 @@ func (p *JenkinsPlugin)copy_source_files(instance_name string, ret *goforjj.Plug
 
 // loop on templates to use to generate source files
 func (p *JenkinsPlugin)generate_source_files(instance_name string, ret *goforjj.PluginData) (status bool) {
-
     for file, desc := range p.templates {
         src := path.Join(p.template_dir, desc.Template)
         dest := path.Join(p.source_path, desc.Template)
@@ -114,7 +113,9 @@ func (p *JenkinsPlugin)generate_source_files(instance_name string, ret *goforjj.
             log.Printf(ret.Errorf("Unable to create %s. %s.", dest, err))
             return
         } else {
-            t.Execute(out, p.data)
+            if err := t.Execute(out, p.yaml) ; err != nil {
+                log.Printf(ret.Errorf("Unable to interpret %s. %s.", dest, err))
+            }
             out.Close()
         }
         ret.AddFile(path.Join(instance_name, desc.Template))
