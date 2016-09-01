@@ -4,6 +4,7 @@ import (
     "gopkg.in/yaml.v2"
     "fmt"
     "io/ioutil"
+    "github.hpe.com/christophe-larsonneur/goforjj"
 )
 
 func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
@@ -28,10 +29,14 @@ func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
         infra = RepositoryStruct{
             Description: fmt.Sprintf("Infrastructure repository for Organization '%s' maintained by Forjj", g.github_source.Organization),
             UserGroups: make([]UserGroupStruct, 0),
+            PluginRepo: goforjj.PluginRepo{
+                Name: req.ForjjInfra,
+                Remotes: map[string]string {"origin":upstream},
+                BranchConnect: map[string]string {"master":"origin/master"},
+            },
         }
         infra.Name = req.ForjjInfra
     }
-    infra.Upstream = upstream
     g.github_source.Repos[req.ForjjInfra] = infra
 
     // TODO: Be able to add several repos thanks to the request structure.

@@ -130,8 +130,8 @@ func (r *GitHubStruct)repos_exists(ret *goforjj.PluginData) (err error) {
             ret.Repos[name] = goforjj.PluginRepo{
                 Name: repo_data.Name,
                 Exist: repo_data.Exist,
-                Remotes: map[string]string { "origin": repo_data.Upstream},
-                BranchConnect: map[string]string { "master": "origin/master"},
+                Remotes: repo_data.Remotes,
+                BranchConnect: repo_data.BranchConnect,
             }
         }
     }
@@ -189,14 +189,15 @@ func (r *RepositoryStruct)ensure_exists(gws *GitHubStruct, ret *goforjj.PluginDa
         ret.Repos = make(map[string]goforjj.PluginRepo)
     }
 
+    // TODO: Add github flow driver for repos management
     if repo, found := ret.Repos[r.Name]; found {
-        repo.Upstream = *found_repo.SSHURL
+        repo.Remotes["origin"] = *found_repo.SSHURL
         ret.Repos[r.Name] = repo
     } else {
         repo = goforjj.PluginRepo {
             Name: r.Name,
-            Upstream: *found_repo.SSHURL,
         }
+        repo.Remotes["origin"] = *found_repo.SSHURL
         ret.Repos[r.Name] = repo
     }
     return nil

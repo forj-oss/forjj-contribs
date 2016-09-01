@@ -81,8 +81,8 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     ret.Repos[req.ForjjInfra] = goforjj.PluginRepo{
         Name: infra_repo.Name,
         Exist: infra_repo.Exist,
-        Remotes: map[string]string {"origin": infra_repo.Upstream},
-        BranchConnect: map[string]string {"master": "origin/master"},
+        Remotes: infra_repo.Remotes,
+        BranchConnect: infra_repo.BranchConnect,
     }
     for k, v := range gws.github_source.Urls {
         ret.Services.Urls[k] = v
