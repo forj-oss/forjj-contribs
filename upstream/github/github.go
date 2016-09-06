@@ -198,8 +198,12 @@ func (r *RepositoryStruct)ensure_exists(gws *GitHubStruct, ret *goforjj.PluginDa
             Name: r.Name,
             Remotes: make(map[string]string),
             Exist: true,
+            BranchConnect: make(map[string]string),
         }
+
+        // TODO: See how to integrate the flow change here to respond the proper branch connect.
         repo.Remotes["origin"] = *found_repo.SSHURL
+        repo.BranchConnect["master"] = "origin/master"
         if found_repo.Parent != nil {
             repo.Remotes["upstream"] = *found_repo.Parent.HTMLURL
         }
