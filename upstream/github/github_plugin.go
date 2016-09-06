@@ -20,18 +20,20 @@ type GitHubSourceStruct struct {
     Repos map[string]RepositoryStruct    // Collection of repositories managed in github
     Organization string                  // Organization name
     OrgDisplayName string                // Organization's display name.
-    UserGroups []UserGroupStruct         // Collection of groups to add to the organization
+    Users map[string]string              // Collection of users role at organization level
+    Groups map[string]string             // Collection of groups role at organization level
 }
 
-type UserGroupStruct struct {
-    Name string // Name of the group
-    Role string // Role to apply in the context
-}
-
-type RepositoryStruct  struct {
-    goforjj.PluginRepo `,inline`      // Name/Upstream
-    Description string                // Title in github repository
-    UserGroups []UserGroupStruct      // Collection of groups to add to the organization
+type RepositoryStruct  struct { // Used to stored the yaml source file. Not used to respond to the API requester.
+    Name string                 // Name of the Repo
+    Flow string                 // Flow applied on the repo.
+    Description string          // Title in github repository
+    Users map[string]string     // Collection of users role
+    Groups map[string]string     // Collection of groups role
+    // Following data are used at runtime but not saved. Used to respond to the API.
+    exist bool                      // True if the repo exist.
+    remotes map[string]string       // k: remote name, v: remote url
+    branchConnect map[string]string // k: local branch name, v: remote/branch
 }
 
 const github_source_file = "github.yaml"

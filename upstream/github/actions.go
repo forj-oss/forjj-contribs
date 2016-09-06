@@ -86,9 +86,9 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     infra_repo := gws.github_source.Repos[req.ForjjInfra]
     ret.Repos[req.ForjjInfra] = goforjj.PluginRepo{
         Name: infra_repo.Name,
-        Exist: infra_repo.Exist,
-        Remotes: infra_repo.Remotes,
-        BranchConnect: infra_repo.BranchConnect,
+        Exist: infra_repo.exist,
+        Remotes: infra_repo.remotes,
+        BranchConnect: infra_repo.branchConnect,
     }
     for k, v := range gws.github_source.Urls {
         ret.Services.Urls[k] = v
@@ -97,7 +97,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     ret.CommitMessage = fmt.Sprintf("Create github configuration")
     ret.Files = append(ret.Files, path.Join(req.ForjjInstanceName, github_file))
 
-    return 200
+    return
 }
 
 // Do updating plugin task
@@ -116,7 +116,39 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
         return 422
     }
 
-    // TODO: Add code to update github service source files
+    // Read the github.yaml file.
+    if err := gws.load_yaml(path.Join(req.ForjjSourceMount, github_file)) ; err != nil {
+        ret.Errorf("Unable to update github instance '%s' source files. %s. Use 'create' to create it first.", req.ForjjInstanceName, err)
+        return
+    }
+
+    // TODO: Update github source code
+    /* if err := gws.update_yaml_data(req) ; err != nil {
+        ret.Errorf("%s", err)
+        return
+    }
+
+    // Save gws.github_source.
+    if err := gws.save_yaml(path.Join(source_path, github_file)) ; err != nil {
+        ret.Errorf("%s", err)
+        return
+    }
+    log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(req.ForjjInstanceName, github_file)))
+
+    // Building final Post answer
+    // We assume ssh is used and forjj can push with appropriate credential.
+    infra_repo := gws.github_source.Repos[req.ForjjInfra]
+    ret.Repos[req.ForjjInfra] = goforjj.PluginRepo{
+        Name: infra_repo.Name,
+        Exist: infra_repo.Exist,
+        Remotes: infra_repo.Remotes,
+        BranchConnect: infra_repo.BranchConnect,
+    }
+    for k, v := range gws.github_source.Urls {
+        ret.Services.Urls[k] = v
+    }
+
+    ret.CommitMessage = fmt.Sprintf("Create github configuration")*/
     return
 }
 
@@ -141,7 +173,10 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
     }
 
     // Read the github.yaml file.
-    gws.load_yaml(path.Join(req.ForjjSourceMount, github_file))
+    if err := gws.load_yaml(path.Join(req.ForjjSourceMount, req.ForjjInstanceName, github_file)) ; err != nil {
+        ret.Errorf("%s", err)
+        return
+    }
 
     if gws.github_connect(gws.github_source.Urls["github-base-url"], ret) == nil {
         return

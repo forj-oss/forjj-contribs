@@ -116,7 +116,7 @@ func (g *GitHubStruct)ensure_organization_exists(ret *goforjj.PluginData) (s boo
     return true
 }
 
-// Return an error if at least one repo exist.
+// Return an error if at least one repo exist. Used at create time.
 func (r *GitHubStruct)repos_exists(ret *goforjj.PluginData) (err error) {
     // loop on list of repos, and ensure they exist with minimal config and rights
     for name, repo_data := range  r.github_source.Repos {
@@ -124,14 +124,14 @@ func (r *GitHubStruct)repos_exists(ret *goforjj.PluginData) (err error) {
             if err == nil {
                 err = fmt.Errorf("At least '%s' already exist in github server.", name)
             }
-            repo_data.Exist = true
+            repo_data.exist = true
         }
         if ret != nil {
             ret.Repos[name] = goforjj.PluginRepo{
                 Name: repo_data.Name,
-                Exist: repo_data.Exist,
-                Remotes: repo_data.Remotes,
-                BranchConnect: repo_data.BranchConnect,
+                Exist: repo_data.exist,
+                Remotes: repo_data.remotes,
+                BranchConnect: repo_data.branchConnect,
             }
         }
     }
@@ -197,8 +197,12 @@ func (r *RepositoryStruct)ensure_exists(gws *GitHubStruct, ret *goforjj.PluginDa
         repo = goforjj.PluginRepo {
             Name: r.Name,
             Remotes: make(map[string]string),
+            Exist: true,
         }
         repo.Remotes["origin"] = *found_repo.SSHURL
+        if found_repo.Parent != nil {
+            repo.Remotes["upstream"] = *found_repo.Parent.HTMLURL
+        }
         ret.Repos[r.Name] = repo
     }
     return nil
