@@ -13,8 +13,8 @@ import (
 func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *goforjj.PluginData) (httpCode int) {
     var p *JenkinsPlugin
 
-    if pr, ok := req.check_source_existence(ret) ; !ok {
-        return
+    if pr, code := req.check_source_existence(ret) ; pr == nil {
+        return code
     } else {
         p = pr
     }

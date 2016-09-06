@@ -12,7 +12,7 @@ func (r *UpdateReq) check_source_existence(ret *goforjj.PluginData) (p *JenkinsP
     log.Printf("Checking Jenkins source code existence.")
     src := path.Join(r.ForjjSourceMount, r.ForjjInstanceName)
     if _, err := os.Stat(path.Join(src, jenkins_file)) ; err == nil {
-        ret.Errorf("Unable to create the jenkins source code for instance name '%s' which already exist.\nUse update to update it (or update %s), and maintain to update github according to his configuration.", src)
+        ret.Errorf("Unable to create the jenkins source code for instance name '%s' which already exist.\nUse update to update it (or update %s), and maintain to update github according to his configuration.", r.ForjjInstanceName, src)
         return
     }
 

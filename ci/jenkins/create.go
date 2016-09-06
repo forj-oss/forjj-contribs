@@ -10,12 +10,12 @@ import (
 )
 
 // return true if instance doesn't exist.
-func (r *CreateReq) check_source_existence(ret *goforjj.PluginData) (p *JenkinsPlugin, status bool) {
+func (r *CreateReq) check_source_existence(ret *goforjj.PluginData) (p *JenkinsPlugin, httpCode int) {
     log.Printf("Checking Jenkins source code existence.")
     src := path.Join(r.ForjjSourceMount, r.ForjjInstanceName)
     if _, err := os.Stat(path.Join(src, jenkins_file)) ; err == nil {
-        log.Printf(ret.Errorf("Unable to create the jenkins source code for instance name '%s' which already exist.\nUse 'update' to update it (or update %s), and 'maintain' to update jenkins according to his configuration. %s.", src, src, err))
-        return
+        log.Printf(ret.Errorf("Unable to create the jenkins source code for instance name '%s' which already exist.\nUse 'update' to update it (or update %s), and 'maintain' to update jenkins according to his configuration.", r.ForjjInstanceName, src))
+        return nil, 419 // Abort message returned to forjj.
     }
 
     p = new_plugin(src)
@@ -30,7 +30,7 @@ func (r *CreateReq) check_source_existence(ret *goforjj.PluginData) (p *JenkinsP
     p.template_file = templatef
 
     log.Printf(ret.StatusAdd("environment checked."))
-    return p, true
+    return
 }
 
 func (r *JenkinsPlugin)create_jenkins_sources(instance_name string, ret *goforjj.PluginData) (status bool) {
