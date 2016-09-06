@@ -12,6 +12,7 @@ type CreateReq struct {
     GithubToken string `json:"github-token"` // github token to access. This token must authorize organization level access.
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
+    ForjjInstanceName string `json:"forjj-instance-name"` // Name of the jenkins instance given by forjj.
     ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for github plugin.
     GithubDebug string `json:"github-debug"` // To activate github debug information
 }
@@ -24,6 +25,7 @@ type UpdateReq struct {
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
+    ForjjInstanceName string `json:"forjj-instance-name"` // Name of the jenkins instance given by forjj.
     ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for github plugin.
     GithubDebug string `json:"github-debug"` // To activate github debug information
 }
@@ -34,6 +36,7 @@ type MaintainReq struct {
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
+    ForjjInstanceName string `json:"forjj-instance-name"` // Name of the jenkins instance given by forjj.
     ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for github plugin.
     GithubDebug string `json:"github-debug"` // To activate github debug information
 }
@@ -96,6 +99,8 @@ const YamlDesc="---\n" +
    "       help: \"To activate github debug information\"\n" +
    "     forjj-source-mount:\n" +
    "       help: \"Where the source dir is located for github plugin.\"\n" +
+   "     forjj-instance-name:\n" +
+   "        help: \"Name of the jenkins instance given by forjj.\"\n" +
    " create:\n" +
    "   help: \"Create the github environment to manage source and infra code.\"\n" +
    "   flags:\n" +

@@ -196,6 +196,7 @@ func (r *RepositoryStruct)ensure_exists(gws *GitHubStruct, ret *goforjj.PluginDa
     } else {
         repo = goforjj.PluginRepo {
             Name: r.Name,
+            Remotes: make(map[string]string),
         }
         repo.Remotes["origin"] = *found_repo.SSHURL
         ret.Repos[r.Name] = repo

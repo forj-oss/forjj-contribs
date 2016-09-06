@@ -19,6 +19,8 @@ actions:
        help: "To activate github debug information"
      forjj-source-mount:
        help: "Where the source dir is located for github plugin."
+     forjj-instance-name:
+        help: "Name of the jenkins instance given by forjj."
  create:
    help: "Create the github environment to manage source and infra code."
    flags:
