@@ -23,6 +23,11 @@ type SourceStruct struct {
 }
 
 type CreateReq struct {
+    Args CreateArgReq `json:"args"`
+    ReposData map[string]goforjj.PluginRepoData
+}
+
+type CreateArgReq struct {
     DeployStruct
     SourceStruct
 
@@ -33,6 +38,11 @@ type CreateReq struct {
 }
 
 type UpdateReq struct {
+    Args UpdateArgReq `json:"args"`
+    ReposData map[string]goforjj.PluginRepoData
+}
+
+type UpdateArgReq struct {
     DeployStruct
     SourceStruct
 
@@ -45,6 +55,11 @@ type UpdateReq struct {
 }
 
 type MaintainReq struct {
+    Args MaintainArgReq `json:"args"`
+    ReposData map[string]goforjj.PluginRepoData
+}
+
+type MaintainArgReq struct {
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
@@ -55,13 +70,13 @@ type MaintainReq struct {
 // Function which adds maintain options as part of the plugin answer in create/update phase.
 // forjj won't add any driver name because 'maintain' phase read the list of drivers to use from forjj-maintain.yml
 // So --git-us is not available for forjj maintain.
-func (r *CreateReq)SaveMaintainOptions(ret *goforjj.PluginData) {
+func (r *CreateArgReq)SaveMaintainOptions(ret *goforjj.PluginData) {
     if ret.Options == nil {
         ret.Options = make(map[string]goforjj.PluginOption)
     }
 }
 
-func (r *UpdateReq)SaveMaintainOptions(ret *goforjj.PluginData) {
+func (r *UpdateArgReq)SaveMaintainOptions(ret *goforjj.PluginData) {
     if ret.Options == nil {
         ret.Options = make(map[string]goforjj.PluginOption)
     }

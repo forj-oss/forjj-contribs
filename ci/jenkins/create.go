@@ -12,9 +12,9 @@ import (
 // return true if instance doesn't exist.
 func (r *CreateReq) check_source_existence(ret *goforjj.PluginData) (p *JenkinsPlugin, httpCode int) {
     log.Printf("Checking Jenkins source code existence.")
-    src := path.Join(r.ForjjSourceMount, r.ForjjInstanceName)
+    src := path.Join(r.Args.ForjjSourceMount, r.Args.ForjjInstanceName)
     if _, err := os.Stat(path.Join(src, jenkins_file)) ; err == nil {
-        log.Printf(ret.Errorf("Unable to create the jenkins source code for instance name '%s' which already exist.\nUse 'update' to update it (or update %s), and 'maintain' to update jenkins according to his configuration.", r.ForjjInstanceName, src))
+        log.Printf(ret.Errorf("Unable to create the jenkins source code for instance name '%s' which already exist.\nUse 'update' to update it (or update %s), and 'maintain' to update jenkins according to his configuration.", r.Args.ForjjInstanceName, src))
         return nil, 419 // Abort message returned to forjj.
     }
 

@@ -11,10 +11,10 @@ func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
     g.github_source.Urls = make(map[string]string)
     g.github_source.Urls["github-base-url"] = g.Client.BaseURL.String()
 
-    if orga := req.GithubOrganization; orga == "" {
-        g.github_source.Organization = req.ForjjOrganization
+    if orga := req.Args.GithubOrganization; orga == "" {
+        g.github_source.Organization = req.Args.ForjjOrganization
     } else {
-        g.github_source.Organization = req.GithubOrganization
+        g.github_source.Organization = req.Args.GithubOrganization
     }
 
     // Ensure Infra is already in the list of repo managed.
@@ -22,20 +22,20 @@ func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
         g.github_source.Repos = make(map[string]RepositoryStruct)
     }
 
-    upstream := "git@" + g.Client.BaseURL.Host + ":" + g.github_source.Organization + "/" + req.ForjjInfra + ".git"
-    infra, found := g.github_source.Repos[req.ForjjInfra]
+    upstream := "git@" + g.Client.BaseURL.Host + ":" + g.github_source.Organization + "/" + req.Args.ForjjInfra + ".git"
+    infra, found := g.github_source.Repos[req.Args.ForjjInfra]
     if ! found {
         infra = RepositoryStruct{
             Description: fmt.Sprintf("Infrastructure repository for Organization '%s' maintained by Forjj", g.github_source.Organization),
             Users: make(map[string]string),
             Groups: make(map[string]string),
-            Name: req.ForjjInfra,
+            Name: req.Args.ForjjInfra,
             remotes: map[string]string {"origin":upstream},
             branchConnect: map[string]string {"master":"origin/master"},
         }
-        infra.Name = req.ForjjInfra
+        infra.Name = req.Args.ForjjInfra
     }
-    g.github_source.Repos[req.ForjjInfra] = infra
+    g.github_source.Repos[req.Args.ForjjInfra] = infra
 
     // TODO: Be able to add several repos thanks to the request structure.
     return nil

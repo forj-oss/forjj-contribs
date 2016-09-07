@@ -10,8 +10,8 @@ import (
 func (r *MaintainReq) check_source_existence(ret *goforjj.PluginData) (status bool) {
     log.Printf("Checking Jenkins source code path existence.")
 
-    if _, err := os.Stat(r.ForjjSourceMount) ; err != nil {
-        ret.Errorf("Unable to maintain jenkins instances. '%s' is inexistent or innacessible. %s", r.ForjjSourceMount, err)
+    if _, err := os.Stat(r.Args.ForjjSourceMount) ; err != nil {
+        ret.Errorf("Unable to maintain jenkins instances. '%s' is inexistent or innacessible. %s", r.Args.ForjjSourceMount, err)
         return
     }
     ret.StatusAdd("environment checked.")

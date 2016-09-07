@@ -17,6 +17,8 @@ import (
 func newPluginData() (* goforjj.PluginData) {
     var r goforjj.PluginData = goforjj.PluginData{
         Repos: make(map[string]goforjj.PluginRepo),
+        ReposData: make(map[string]goforjj.PluginRepoData),
+        Options: make(map[string]goforjj.PluginOption),
         Services: goforjj.PluginService{make(map[string]string)},
     }
     return &r
@@ -70,7 +72,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
     err_code := DoCreate(w, r, &req_data, data)
 
-    req_data.SaveMaintainOptions(data)
+    req_data.Args.SaveMaintainOptions(data)
 
     if data.ErrorMessage != "" {
         if err_code == 0 {
@@ -110,7 +112,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
     err_code := DoUpdate(w, r, &req_data, data)
 
-    req_data.SaveMaintainOptions(data)
+    req_data.Args.SaveMaintainOptions(data)
 
     if data.ErrorMessage != "" {
         if err_code == 0 {

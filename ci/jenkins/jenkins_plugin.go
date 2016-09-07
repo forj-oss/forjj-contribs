@@ -48,9 +48,9 @@ func new_plugin(src string) (p *JenkinsPlugin) {
 
 // Update jenkins source from input sources
 func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (status bool) {
-    p.yaml.Docker.SetFrom(&r.SourceStruct)
-    p.yaml.Deploy = r.DeployStruct
-    p.yaml.Settings.SetFrom(&r.SourceStruct)
+    p.yaml.Docker.SetFrom(&r.Args.SourceStruct)
+    p.yaml.Deploy = r.Args.DeployStruct
+    p.yaml.Settings.SetFrom(&r.Args.SourceStruct)
     return true
 }
 
@@ -59,8 +59,8 @@ func (p *JenkinsPlugin) load_from(ret *goforjj.PluginData) (status bool) {
 }
 
 func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData)  (status bool) {
-    p.yaml.Deploy.SetFrom(&r.DeployStruct)
-    p.yaml.Docker.SetFrom(&r.SourceStruct)
+    p.yaml.Deploy.SetFrom(&r.Args.DeployStruct)
+    p.yaml.Docker.SetFrom(&r.Args.SourceStruct)
     return true
 }
 

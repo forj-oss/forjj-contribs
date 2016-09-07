@@ -23,7 +23,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
         return
     }
 
-    if ! p.create_jenkins_sources(req.ForjjInstanceName, ret) {
+    if ! p.create_jenkins_sources(req.Args.ForjjInstanceName, ret) {
         return
     }
 

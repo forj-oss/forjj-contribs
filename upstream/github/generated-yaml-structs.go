@@ -6,6 +6,11 @@ package main
 import "github.hpe.com/christophe-larsonneur/goforjj"
 
 type CreateReq struct {
+    Args CreateArgReq `json:"args"`
+    ReposData map[string]goforjj.PluginRepoData
+}
+
+type CreateArgReq struct {
     ForjjOrganization string `json:"forjj-organization"` // Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
     GithubOrganization string `json:"github-organization"` // Github Organization name. By default, it uses the FORJJ organization name
     GithubServer string `json:"github-server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
@@ -18,6 +23,11 @@ type CreateReq struct {
 }
 
 type UpdateReq struct {
+    Args UpdateArgReq `json:"args"`
+    ReposData map[string]goforjj.PluginRepoData
+}
+
+type UpdateArgReq struct {
     ForjjOrganization string `json:"forjj-organization"` // Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
     GithubOrganization string `json:"github-organization"` // Github Organization name. By default, it uses the FORJJ organization name
     GithubServer string `json:"github-server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
@@ -31,6 +41,11 @@ type UpdateReq struct {
 }
 
 type MaintainReq struct {
+    Args MaintainArgReq `json:"args"`
+    ReposData map[string]goforjj.PluginRepoData
+}
+
+type MaintainArgReq struct {
     ForjjWorkspaceMount string `json:"forjj-workspace-mount"` // Where the workspace dir is located for github plugin.
     GithubToken string `json:"github-token"` // github token to access. This token must authorize organization level access.
 
@@ -44,7 +59,7 @@ type MaintainReq struct {
 // Function which adds maintain options as part of the plugin answer in create/update phase.
 // forjj won't add any driver name because 'maintain' phase read the list of drivers to use from forjj-maintain.yml
 // So --git-us is not available for forjj maintain.
-func (r *CreateReq)SaveMaintainOptions(ret *goforjj.PluginData) {
+func (r *CreateArgReq)SaveMaintainOptions(ret *goforjj.PluginData) {
     if ret.Options == nil {
         ret.Options = make(map[string]goforjj.PluginOption)
     }
@@ -52,7 +67,7 @@ func (r *CreateReq)SaveMaintainOptions(ret *goforjj.PluginData) {
     ret.Options["github-token"] = addMaintainOptionValue(ret.Options, "github-token", r.GithubToken, "", "github token to access. This token must authorize organization level access.")
 }
 
-func (r *UpdateReq)SaveMaintainOptions(ret *goforjj.PluginData) {
+func (r *UpdateArgReq)SaveMaintainOptions(ret *goforjj.PluginData) {
     if ret.Options == nil {
         ret.Options = make(map[string]goforjj.PluginOption)
     }

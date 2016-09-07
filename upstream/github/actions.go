@@ -28,8 +28,8 @@ const github_file = "github.yaml"
 func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *goforjj.PluginData) (httpCode int){
 
     gws := GitHubStruct{
-        source_mount: req.ForjjSourceMount,
-        token: req.GithubToken,
+        source_mount: req.Args.ForjjSourceMount,
+        token: req.Args.GithubToken,
     }
     check := make(map[string]bool)
     check["token"] = true
@@ -42,7 +42,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 
     log.Printf("Checking github connection : %#v", gws)
 
-    if gws.github_connect(req.GithubServer, ret) == nil {
+    if gws.github_connect(req.Args.GithubServer, ret) == nil {
         return
     }
 
@@ -61,14 +61,14 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 
     // A create won't be possible if source files already exist. The Update is the only possible option.
     log.Printf("Checking Infrastructure code existence.")
-    source_path := path.Join(req.ForjjSourceMount, req.ForjjInstanceName)
+    source_path := path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName)
     if _, err := os.Stat(source_path) ; err != nil {
         if err = os.MkdirAll(source_path, 0755) ; err != nil {
             ret.Errorf("Unable to create '%s'. %s", source_path, err)
         }
     }
-    if _, err := os.Stat(path.Join(req.ForjjSourceMount, req.ForjjInstanceName, github_file)) ; err == nil {
-        ret.Errorf("Unable to create the github configuration which already exist.\nUse 'update' to update it (or update %s), and 'maintain' to update your github service according to his configuration.", path.Join(req.ForjjInstanceName, github_file))
+    if _, err := os.Stat(path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName, github_file)) ; err == nil {
+        ret.Errorf("Unable to create the github configuration which already exist.\nUse 'update' to update it (or update %s), and 'maintain' to update your github service according to his configuration.", path.Join(req.Args.ForjjInstanceName, github_file))
         return 419
     }
 
@@ -79,12 +79,12 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
         ret.Errorf("%s", err)
         return
     }
-    log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(req.ForjjInstanceName, github_file)))
+    log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(req.Args.ForjjInstanceName, github_file)))
 
     // Building final Post answer
     // We assume ssh is used and forjj can push with appropriate credential.
-    infra_repo := gws.github_source.Repos[req.ForjjInfra]
-    ret.Repos[req.ForjjInfra] = goforjj.PluginRepo{
+    infra_repo := gws.github_source.Repos[req.Args.ForjjInfra]
+    ret.Repos[req.Args.ForjjInfra] = goforjj.PluginRepo{
         Name: infra_repo.Name,
         Exist: infra_repo.exist,
         Remotes: infra_repo.remotes,
@@ -95,7 +95,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     }
 
     ret.CommitMessage = fmt.Sprintf("Create github configuration")
-    ret.Files = append(ret.Files, path.Join(req.ForjjInstanceName, github_file))
+    ret.Files = append(ret.Files, path.Join(req.Args.ForjjInstanceName, github_file))
 
     return
 }
@@ -108,7 +108,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *goforjj.PluginData) (httpCode int) {
 
     gws := GitHubStruct{
-        source_mount: req.ForjjSourceMount,
+        source_mount: req.Args.ForjjSourceMount,
     }
     check := make(map[string]bool)
 
@@ -117,8 +117,8 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
     }
 
     // Read the github.yaml file.
-    if err := gws.load_yaml(path.Join(req.ForjjSourceMount, github_file)) ; err != nil {
-        ret.Errorf("Unable to update github instance '%s' source files. %s. Use 'create' to create it first.", req.ForjjInstanceName, err)
+    if err := gws.load_yaml(path.Join(req.Args.ForjjSourceMount, github_file)) ; err != nil {
+        ret.Errorf("Unable to update github instance '%s' source files. %s. Use 'create' to create it first.", req.Args.ForjjInstanceName, err)
         return
     }
 
@@ -133,12 +133,12 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
         ret.Errorf("%s", err)
         return
     }
-    log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(req.ForjjInstanceName, github_file)))
+    log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(req.Args.ForjjInstanceName, github_file)))
 
     // Building final Post answer
     // We assume ssh is used and forjj can push with appropriate credential.
-    infra_repo := gws.github_source.Repos[req.ForjjInfra]
-    ret.Repos[req.ForjjInfra] = goforjj.PluginRepo{
+    infra_repo := gws.github_source.Repos[req.Args.ForjjInfra]
+    ret.Repos[req.Args.ForjjInfra] = goforjj.PluginRepo{
         Name: infra_repo.Name,
         Exist: infra_repo.Exist,
         Remotes: infra_repo.Remotes,
@@ -160,9 +160,9 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *goforjj.PluginData) (httpCode int) {
 
     gws := GitHubStruct{
-        source_mount: req.ForjjSourceMount,
-        workspace_mount: req.ForjjWorkspaceMount,
-        token: req.GithubToken,
+        source_mount: req.Args.ForjjSourceMount,
+        workspace_mount: req.Args.ForjjWorkspaceMount,
+        token: req.Args.GithubToken,
     }
     check := make(map[string]bool)
     check["token"] = true
@@ -173,7 +173,7 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
     }
 
     // Read the github.yaml file.
-    if err := gws.load_yaml(path.Join(req.ForjjSourceMount, req.ForjjInstanceName, github_file)) ; err != nil {
+    if err := gws.load_yaml(path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName, github_file)) ; err != nil {
         ret.Errorf("%s", err)
         return
     }
