@@ -31,180 +31,185 @@ FORJJ do his task by starting a FORJJ container, with a simple task name and fla
 When FORJJ container is started, it will interpret task and flags and call the driver.
 
 The drivers should implement following tasks:
-  - `info`    : It provide a status information in json format. (currently not used in forjj)
   - `create`  : It create requested resource. Create is used once. Return a json data.
   - `update`  : It update the infra repository. Returns a json data
   - `maintain`: It update the infra with the data from the infra repository.
 
-**Plugin json data format:**
-  - `data/`             : Plugin data structure
-  -   `[]repos/`        : Repos data
-  -      `name`         : repository configured.
-  -      `upstream`     : upstream data updated/created
-  -      `[]files`      : driver files managed
-  -   `services/[]url`  : web service url. ex: https://github.hpe.com
-  - `status`            : Driver task status message
-  - `state_code`        : driver task status code. 200 OK
-  - `error_message`     : driver error message
+A plugin implementing the REST API gets his input in json, and generate output in json.
+A plugin implementing the shell gets this input in 2 forms:
+`args` is passed as arguments of the plugin binary, prefixed by --. Ex: github-token => --github-token
+`reposdata` is encoded in json and transmitted as a string to --data option.
+The shell plguin generate the output in json, like the REST API plugin.
+
+**Plugin Input format**
+```yaml
+args:        : Collection of actions (create/update/maintain) arguments as defined in your `<plugin>.yaml`
+  <argumentName>:<ArgumentValue>
+# Following Structure data is sent to an upstream driver.
+reposdata:   : Repository Parameters for an upstream driver.
+  templates: : List of templates to apply to the repository
+  - "<templateName>"
+  title      : Repo title
+  Users:     : List of users and roles attached.
+    <user>:"<roles>"
+  Groups:    : List of users and roles attached.
+    <group>:"<roles>"
+  flow       : Flow name to apply
+  instance   : Instance owning the upstream repo.
+  options:   : Collection of options to add to the repo. This list is defined by the plugin.
+    <Name>:<Value>
+```
+
+**Plugin json output data format:**
+```yaml
+data:                : Plugin data structure
+Following `repos:` and `reposdata:` structures must be returned by an upstream driver.
+  repos:             : List of Repos Name, containing Repo data.
+    <Name>:          : repository name.
+      <Name>         : repository name.
+      remotes        : List of Remote name and remote url attached.
+       <RemoteName>:<RemoteUrl>
+      branchconnect:`: List of local branch attached to the upstream branch.
+       <LocalBranchName>:<UpstreamBranchName>
+     exist           : True if the resource exist. Otherwise false.
+  reposdata:         : Repository Parameters for an upstream driver.
+    templates:       : List of templates to apply to the repository
+    - <templateName>
+    title            : Repo title
+    Users:           : List of users and roles attached.
+      <user>:<roles>
+      <group>:<roles>
+    flow             : Flow name to apply
+    instance         : Instance owning the upstream repo.
+    options:         : Collection of options to add to the repo. This list is defined by the plugin.
+      <Name>:<Value>
+Following structures are returned by all plugins
+  services:          : web service url. ex: https://github.hpe.com
+    urls:
+     <url>
+files:               : List of driver files managed
+- <file>
+status               : Driver task status message
+state_code           : driver task status code.
+state_code: 200      : Tasks executed without issue. `status` should be non empty.
+state_code: 419      : Task aborted. `error_message` must be non empty.
+state_code: 422      : Task failure. `error_message` must be non empty.
+error_message        : driver error message
+```
 
 **In details, what your plugin needs to do?**
-
-## Plugin check task
-
-### Input
-The plugin check task get input data from the command line flags.
-The output is conform to the plugin json data format described below.
-
-### Role
-The main role of `check` is to ensure that the application can be used properly for the complete DevOps solution.
-
-The upstream check task check if :
-* the service up and running,
-* repository given already exist on the upstream server \[jq syntax '.repos | map(.name)' \]
-* the configuration file exists. \[jq syntax => '.repos | map(.config)' \] This test is done if --infra is added.
-If this test is success, `state_code` is 200.
-
-The others plugin type check task check the service up and running. If it needs to add some configuration test, it should do it here as well.
-
-### output
-If found, the json must return at least `state_code = 200` and `repos/[]/name`
-If not found; it should respond with `state_code = 200` and `error_message`
-
-The upstream plugin, should provide at least `state_code = 200`, collection of repos with `repos/[]/name`, `repos/[]/upstream`, `repos/[]/config` and the collection of services url `services/[]url`
 
 ## Plugin create task
 
 ### Input
-The plugin create task get input data from the command line flags.
-The output is conform to the plugin json data format described below.
+The plugin create task get input data from the forjj command line flags and posted as data in json (REST API) or shell flags.
+If the plugin is an upstream type, forjj add `reposdata` structure to the request.
+The list of flags is defined in your plugin yaml file, under section `flags/create:`
 
 ### Role
-`create` is a little bit special case.
-It is mainly related to the upstream (for now), in order to install the solution the first time.
-So, it will install the upstream application if needed, then configure it, with organization, infra repos, optionaly credentials (users/groups).
-At the end of that, the plugin should report the list of repositories, clone input and services.
-If at least `infra_repos` gets created successfully, with the --repos added, `create` will also create additional repositories.
+
+#### Generic driver
+`create` will generate some application source files used to install the application if needed, then configure it.
+
+At the end of that, the plugin should report the list of
+- generated source files and
+- services.
+
+#### Upstream driver
+
+In case of an upstream driver, Forjj will send out a collection of repository that the usptream driver will need to create.
+At the end of that, the plugin should report the list of
+- generated source files,
+- repositories created,
+- upstream information and
+- services.
+
+**NOTE:**
+When forjj creates a new DevOps Environment, it will create an `infra-repo` repository. This repo is the first repository that Forjj will need to create and will be used to stored all plugins source files.
+Your upstream do not need to do any extra task to handle this. Forjj will call your driver create and maintain to do this.
 
 Next time, if there is need to create new repos, delete them, it has to follow the update/maintain process.
 
 ### internal data
 
-The plugin can store any kind of data that is fully understandable by the plugin to maintain the upstream. FORJJ won't read it anymore, but the file will be considered as source and commited.
-This one is going to be the source code of the upstream.
-It must be stored under `repos/<infra_repos>/<any_kind_of_file>`. The file name can be anything the plugin want. But it has be stable and reported in `repos/[]/config` output.
+The plugin generate/store files in the `forjj-srcmount` place. Those files should be text files, human readable to permit any manual update from Dev/Ops teams.
+
+When source code generated is completed, they must be listed in the output json data (`files`)
 
 ### output
-If at least the infra repos was already created, the plugin should return an error message.
-A successful infra repos creation will return at least `state_code = 200`, collection of repos with `repos/[]/name`, `repos/[]/upstream`, `repos/[]/config` and the collection of services url `services/[]url`
+
+The output is generated in json.
+
+By default, the plugin must return `status`, `state_code = 200` and `services/urls/...`
+
+An `upstream` plugin must return also `repos` and `reposdata`.
+
+In case of abort situation, `state_code` must be `419`. `message` must not be empty.
+In that case, forjj will not interrupt the create task and will move to the next driver call.
+
+In case of errors situation, `state_code` must be `4xx` except `419`. `message` must not be empty.
+In that case, forjj will interrupt the create task and exit with the message you returned.
 
 ## Plugin update task
 
 ### input
-The plugin `update` task get input data from the command line flags.
+The plugin `update` task get input data from the command line flags and workspace yaml file. Then it posted it as data in json (REST API) or shell flags.
+
+The list of flags is defined in your plugin yaml file, under section `flags/update:`
+
+Usually, the `update` input flags is really close to what create has.
 
 ### role
 
-The plugin role in update task is mainly to update the infra repository with appropriate source to start and configure any application.
-The plugin should NEVER update the application itself. It will only update the source.
+The plugin role in update task is mainly to update the infra repository by updating the generated source files.
+
+The plugin should NEVER update the application itself, as this is the role of maintain to update the real application.
 
 ### output
 
-The output is conform to the json data format.
+The output is conform to the json output data format.
 
 ## Plugin maintain task
 
 ### input
-The plugin maintain task get input data from the command line flags. Usually, the supported flags is quitely limited to where is the infra repository.
+The plugin maintain task get input data from the command line flags, workspace yaml file, forjj option files and credential file. Then it posted it as data in json (REST API) or shell flags.
+
+The maintain flags defined in your `<plugin>.yaml` file is not exposed automatically to forjj as a plugin flag (like create/update do)
+When forjj starts maintain task, a short list of flags are authorized.
+If your plugin requires some `critical` data to connect to the service (like credentials, token, etc...) you need to define then in the `flags/maintain` section of your `<plugin>.yaml` file and define the same option in `flags/create` or `flags/update` or both.
+
+Forjj will detect this and stored the maintain flags to the `infra-repo` and create a local credential yaml file which will contains your critical flags. Usually, DevOps team will this this file in a secure place and passed it to the `forjj maintain` `--file` flag.
+
+This is totally transparent for your plugin. The critical data will be stored in `args/` as usual.
 
 ### role
 
-The main role in maintain context is to instantiate and configure the application like jenkins for the jenkins-ci plugin.
+The main role in maintain task is to instantiate and configure the application like jenkins for the jenkins-ci plugin.
 This activity is typically made by any kind of orchestration tools, like ansible/puppet or any other kind of tools you like to use.
 
-Ansible or puppet are currently not installed in the FORJJ container. But this could be done, if FORJJ can support different containers.
+If your plugin uses several tools to install and configure the application, ensure they are available in your docker image.
 
 ### output
-
-The docker container has been created to ensure your plugin environment is identified.
 
 
 ## docker image
 
-Today, there is no cli option to choose the docker image. So it uses docker.hos.hpecorp.net/devops/forjj:latest built from [this Docker directory](https://github.hpe.com/christophe-larsonneur/forjj/tree/master/docker)
-The forjj cli start only one container and FORJJ itself is not designed to start several containers, one per plugin. This is something that could be changed later so it will simplify the implementation of such feature.
+Forjj will start your plugin from a docker container. The image name must be defined in your `<plugin>.yaml` file under `runtime/docker/image`
+
+There is no pre-define image to contains your plugin program. So, you are free to create anything you need. Forjj has no interaction with his content.
 
 # FORJJ container internal
 
-when the container starts, it will do the following:
+Forjj can start your container as a REST API or shell service.
 
-*Create*
-A create is possible and succeed if the upstream driver as created a repository.
+A REST APi plugin is a foreground tool which usually create a unix socket in /lib/ and listen it.
+So forjj starts it in daemon mode. (-d)
+A shell plugin, is simply a command with flags call. Forjj starts it, and expect it to terminate shortly with the answer in json.
 
-- Ensure the infra repository is in the workspace. The upstream driver is called to check the existence of the infra repository.
-  If the infra repo exist and has already defined infra repos (yaml exists), create fails.
-  Locally, FORJJ can :
-  - TODO: Clone from a URL
-  - Create a new one, empty with 2 directories : `repos/<organization>-infra`
-  - TODO: Keep an existing directory to migrate to git.
-    TODO: We can imagine to introduce a migration step here to get source code migrated to git.
-  - TODO: Keep an unknown existing cloned repository to migrate from an external GIT upstream environment to the one FORJJ will manage.
-    TODO: We can imagine to introduce a migratioin step here to cleanup GIT commits.
+Forjj will mount several directories:
 
-  A second repository is going to be created with service information at least. It will be named suffixed by `-state`: `repos/<organization>-infra-state`
-- Start the upstream driver with 'create' task to create the GIT upstream configuration
-  - It depends on the upstream driver to properly make a valid clonable/fetchable remote upstream.
-    the driver can install the upstream application (gerrit/gitlab/...) if it is required.
-    The driver should return a json data, to the standard output as follow:
-    It should write his configuration file in the infra repo directory.
+- /lib : Used to store the socket file.
+- /src : Your plguin source directory. Forjj manages the repository where your source are located. You won't have access to any other source files.
 
-    a --infra is passed to properly create those 2 infra repositories.
-
-```json
-{ "repos": [{
-     "name": "<organization>-infra",
-     "upstream": "git@...",
-     "config": "<organization>-infra/github.yaml"
-     }, {
-     "name": "<organization>-infra-state",
-     "upstream": "git@...",
-     "config": "<organization>-infra-state/github.yaml"
-     }],
-  "services": [{
-      "upstream": "https://github.hpe.com"
-     }],
-  "state_code": 200,
-  "status": "2 repositories, 1 organization created." }
-```
-
-    If an issue occurs, the standard out is used formatted in json:
-
-```json
-{ "state_code": 404, "error_message": "An error occured..." }
-```
-
-
-- update/create the origin remote then pull it.
-Next will occur only if the repository is empty. (no commit with `repos/<organization>-infra/forj.yaml`)
-- Read the json data driver output, save it in `repos/<organization>-infra/forj.yaml` if no `error_message` is reported
-- The service is stored in the repository suffixed with `-state`. It will contains the current known service configured links. Jobs logs could be stored here.
-- Add it, add the driver configuration file and commit it all.
-- Then push it.
-
-As soon as this commit has been created in the upstream, the create is successful and is definitely done. If any change needs to occur, it will be done by the couple 'update'/'maintain' tasks.
-
-If any additionnal repositories are requested. (--repos), the 'create' task will pursue by creating those on the upstream. like it was with the infra.
-
-*update*
-
-when the container is started the *update* task, the driver is called to update the upstream configuration file ONLY.
-It should return the json output.
-
-*maintain*
-
-When the container is started the *maintain* task, the driver is called to update the upstream service configuration to reflect the configuration data.
-The container will do:
-- git clone
-- git pull to get latest update
-- call the driver to update the upstream service. json returned.
 
 FORJ Team

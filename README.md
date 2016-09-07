@@ -9,11 +9,11 @@ The core of Forjj is very limited to manage local repositories, mainly infra and
 But it have to be concretely implemented against application the end user want to use (ie jenkins + github for example). To do so, Forjj rely on a collection of tools that implement those tasks on each application. Those tools are named `FORJJ plugins`
 
 It defines as well the link between application that have to be implemented, to properly configure a DevOps flow wanted.
-Currently the task is not well defined.
+Currently the task is closed to be fully defined. See [Contributing document](CONTRIBUTING.md)
 
 For now, this repository are focused on 2 kind of tools, known as `plugins type`:
-- Continuous integration identified by `ci`
-- GIT upstream, ie git backend SCM application (like github) identified by `upstream`
+- Continuous integration identified by `ci`. Under that one, one `jenkins` plugin has been created to handle jenkins CI.
+- GIT upstream, ie git backend SCM application (like github) identified by `upstream`. Under that one, one `github` plugin has been created to handle github service.
 
 # FORJJ plugins
 
@@ -25,12 +25,9 @@ The name of the plugin is stored as :
 
 The plugin binary HAVE to be with executable bits in place. It can be any kind of binary or script.
 
-The plugin will run in the context of a Forjj container [described here](https://github.hpe.com/christophe-larsonneur/forjj/docker/Dockerfile)
-> Currently there is no way to execute a plugin in a different container. But for me it can make sense to do so.
-> We can define a dedicated plugin container with your needed packages. This one could be derived from a more generic one that has the basic generic code to help Forjj to work properly (entrypoint.sh)
-> So, if you want to get that now, consider a contribution to implement it.
+The plugin will run in the context of a Forjj container. But there is no image type to use with forjj. Forjj uses only a socket file and source mount point. Then it communicates with it through the socket file.
 
-This container is started by `forjj` automatically. For details about this part of forjj, [read it here](https://github.hpe.com/christophe-larsonneur/forjj)
+This container is started by `forjj` automatically. For details about this part of forjj, [read the source code here](https://github.hpe.com/christophe-larsonneur/forjj/raw/master/driver.go)
 
 ## Plugin tasks
 
@@ -41,8 +38,13 @@ Each plugin must implement the 3 Forjj typical tasks (create/update/maintain). F
 ```bash
 <plugin script> create/update/maintain [flags]
 ```
+A special flag --data is used by forjj to send out the reposdata information to an upstream plugin. This data is in json format.
 
 If flags are valid, it must returns data in JSON and return code null.
+
+**NOTE:** To be honest, today, even if the code is maintained to support this case, I do not have any code running like that. All plugins that I created implements the REST API plugin model in GO.
+
+So, there is no guarantee this case to work properly.
 
 ### For REST API service plugin:
 
@@ -52,7 +54,7 @@ POST <plugin url or socket>/<create/update/maintain>
 
 data posted are sent in `application/json` and result is in `application/json`.
 
-## Description of <Plugin>.yaml
+## Description of `<Plugin>.yaml`
 
 This file, in yaml format, describe the list of valid flags that the plugin requires to do the task properly.
 
@@ -100,26 +102,27 @@ A global option can be already defined by forj. For example --debug. If the plug
 You can also define another plugin option, like jenkins-ci-server. It will work, but I would suspect this to be part of a link case instead which is currently not properly defined. (**TBD**)
 
 
-Those options will be visible when the user will use the --ci or --git-us combined with --help to the `forjj` tool.
+Those options will be visible when the user will use the --apps combined with --help to the `forjj` tool.
 
 Ex:
   List forjj common options + github driver common options
-  `forjj create --git-us github --help`
+  `forjj create --apps upstream:github --help`
 
   List long help options for github driver
-  `forjj create --git-us github --help-long`
+  `forjj create --apps upstream:github --help-long`
 
   create task list of options for github driver
-  `forjj create --git-us github --help-long`
+  `forjj create --apps upstream:github --help-long`
 
 # Using you own version of forjj-contribs
 
 By default forjj is defined to get the driver options definition from [github entreprise](https://github.hpe.com/forj/forjj-contribs)
 So, getting the list of option can take some few seconds (time to read the yaml file from github)
 
-You can change and use another url or even a local path, with `forjj --contrib-repo <base url/forjj-contribs path>`
+You can change and use another url or even a local path, with `forjj --contribs-repo <base url/forjj-contribs path>`
+You can also use the CONTRIBS_REPO Environment variable.
 
-If you use another url, it must expose the description file as `<contrib-repo base url>/<branchName>/<DriverType>/<DriverName>/<DriverName>.yaml`
+If you use another url, it must expose the description file as `<contribs-repo base url>/<branchName>/<DriverType>/<DriverName>/<DriverName>.yaml`
 
 If you use a path, the yaml file must be located in `<forjj-contribs path>/<DriverType>/<DriverName>/<DriverName>.yaml`
 
