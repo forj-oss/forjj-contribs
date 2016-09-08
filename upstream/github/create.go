@@ -4,6 +4,8 @@ import (
     "gopkg.in/yaml.v2"
     "fmt"
     "io/ioutil"
+    "github.hpe.com/christophe-larsonneur/goforjj"
+    "reflect"
 )
 
 func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
@@ -22,23 +24,55 @@ func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
         g.github_source.Repos = make(map[string]RepositoryStruct)
     }
 
-    upstream := "git@" + g.Client.BaseURL.Host + ":" + g.github_source.Organization + "/" + req.Args.ForjjInfra + ".git"
-    infra, found := g.github_source.Repos[req.Args.ForjjInfra]
-    if ! found {
-        infra = RepositoryStruct{
-            Description: fmt.Sprintf("Infrastructure repository for Organization '%s' maintained by Forjj", g.github_source.Organization),
-            Users: make(map[string]string),
-            Groups: make(map[string]string),
-            Name: req.Args.ForjjInfra,
-            remotes: map[string]string {"origin":upstream},
-            branchConnect: map[string]string {"master":"origin/master"},
-        }
-        infra.Name = req.Args.ForjjInfra
+    for name, repo := range req.ReposData {
+        g.AddRepo(name, repo)
     }
-    g.github_source.Repos[req.Args.ForjjInfra] = infra
 
     // TODO: Be able to add several repos thanks to the request structure.
     return nil
+}
+
+// Add a new repository to be managed by github plugin.
+func (g *GitHubStruct)AddRepo(name string, repo goforjj.PluginRepoData) {
+    upstream := "git@" + g.Client.BaseURL.Host + ":" + g.github_source.Organization + "/" + name + ".git"
+    r, found := g.github_source.Repos[name]
+    if ! found {
+        r = RepositoryStruct{
+            Description: repo.Title,
+            Users: repo.Users,
+            Groups: repo.Groups,
+            Flow: repo.Flow,
+            Name: name,
+            remotes: map[string]string {"origin":upstream},
+            branchConnect: map[string]string {"master":"origin/master"},
+        }
+    } else {
+        r.Update(repo)
+    }
+    g.github_source.Repos[name] = r
+
+}
+
+func (r *RepositoryStruct)Update(repo goforjj.PluginRepoData) (count int){
+    if r.Description != repo.Title {
+        r.Description = repo.Title
+        count++
+    }
+
+    if r.Flow != repo.Flow {
+        r.Flow = repo.Flow
+        count++
+    }
+
+    if ! reflect.DeepEqual(r.Users, repo.Users) {
+        r.Users = repo.Users
+        count++
+    }
+    if !reflect.DeepEqual(r.Groups, repo.Groups) {
+        r.Groups = repo.Groups
+        count++
+    }
+    return
 }
 
 func (g *GitHubStruct)save_yaml(file string) error {
