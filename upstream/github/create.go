@@ -19,7 +19,6 @@ func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
         g.github_source.Organization = req.Args.GithubOrganization
     }
 
-    // Ensure Infra is already in the list of repo managed.
     if g.github_source.Repos == nil {
         g.github_source.Repos = make(map[string]RepositoryStruct)
     }
@@ -33,10 +32,10 @@ func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
 }
 
 // Add a new repository to be managed by github plugin.
-func (g *GitHubStruct)AddRepo(name string, repo goforjj.PluginRepoData) {
+func (g *GitHubStruct)AddRepo(name string, repo goforjj.PluginRepoData) bool{
     upstream := "git@" + g.Client.BaseURL.Host + ":" + g.github_source.Organization + "/" + name + ".git"
-    r, found := g.github_source.Repos[name]
-    if ! found {
+
+    if r, found := g.github_source.Repos[name] ; ! found {
         r = RepositoryStruct{
             Description: repo.Title,
             Users: repo.Users,
@@ -46,11 +45,10 @@ func (g *GitHubStruct)AddRepo(name string, repo goforjj.PluginRepoData) {
             remotes: map[string]string {"origin":upstream},
             branchConnect: map[string]string {"master":"origin/master"},
         }
-    } else {
-        r.Update(repo)
+        g.github_source.Repos[name] = r
+        return true // New added
     }
-    g.github_source.Repos[name] = r
-
+    return false
 }
 
 func (r *RepositoryStruct)Update(repo goforjj.PluginRepoData) (count int){

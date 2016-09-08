@@ -83,19 +83,12 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 
     // Building final Post answer
     // We assume ssh is used and forjj can push with appropriate credential.
-    infra_repo := gws.github_source.Repos[req.Args.ForjjInfra]
-    ret.Repos[req.Args.ForjjInfra] = goforjj.PluginRepo{
-        Name: infra_repo.Name,
-        Exist: infra_repo.exist,
-        Remotes: infra_repo.remotes,
-        BranchConnect: infra_repo.branchConnect,
-    }
     for k, v := range gws.github_source.Urls {
         ret.Services.Urls[k] = v
     }
 
-    ret.CommitMessage = fmt.Sprintf("Create github configuration")
-    ret.Files = append(ret.Files, path.Join(req.Args.ForjjInstanceName, github_file))
+    ret.CommitMessage = fmt.Sprintf("Github configuration created.")
+    ret.AddFile(path.Join(req.Args.ForjjInstanceName, github_file))
 
     return
 }
@@ -107,24 +100,47 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 // By default, if httpCode is not set (ie equal to 0), the function caller will set it to 422 in case of errors (error_message != "") or 200
 func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *goforjj.PluginData) (httpCode int) {
 
-    gws := GitHubStruct{
-        source_mount: req.Args.ForjjSourceMount,
+    log.Printf("Checking Infrastructure code existence.")
+    source_path := path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName)
+
+    if _, err := os.Stat(path.Join(source_path, github_file)) ; err == nil {
+        ret.Errorf("Unable to update the github configuration which doesn't exist.\nUse 'create' to create it (or create %s), and 'maintain' to update your github service according to his configuration.", path.Join(req.Args.ForjjInstanceName, github_file))
+        return 419
     }
+
+    var gws GitHubStruct
+
+    gws.source_mount = req.Args.ForjjSourceMount
+    gws.token= req.Args.GithubToken
+
     check := make(map[string]bool)
+    check["token"] = true
+    log.Printf("Checking parameters : %#v", gws)
 
     if gws.verify_req_fails(ret, check) {
         return 422
     }
 
+    ret.StatusAdd("Environment checked. Ready to be updated.")
     // Read the github.yaml file.
-    if err := gws.load_yaml(path.Join(req.Args.ForjjSourceMount, github_file)) ; err != nil {
+    if err := gws.load_yaml(path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName, github_file)) ; err != nil {
         ret.Errorf("Unable to update github instance '%s' source files. %s. Use 'create' to create it first.", req.Args.ForjjInstanceName, err)
+        return 419
+    }
+
+
+    // TODO: Update github source code
+    Updated := gws.update_yaml_data(req, ret)
+
+    if gws.github_connect(req.Args.GithubServer, ret) == nil {
         return
     }
 
-    // TODO: Update github source code
-    /* if err := gws.update_yaml_data(req) ; err != nil {
-        ret.Errorf("%s", err)
+    // Returns the collection of all managed repository with their existence flag.
+    gws.repos_exists(ret)
+
+    if ! Updated {
+        log.Printf(ret.StatusAdd("No update detected."))
         return
     }
 
@@ -135,20 +151,13 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
     }
     log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(req.Args.ForjjInstanceName, github_file)))
 
-    // Building final Post answer
-    // We assume ssh is used and forjj can push with appropriate credential.
-    infra_repo := gws.github_source.Repos[req.Args.ForjjInfra]
-    ret.Repos[req.Args.ForjjInfra] = goforjj.PluginRepo{
-        Name: infra_repo.Name,
-        Exist: infra_repo.Exist,
-        Remotes: infra_repo.Remotes,
-        BranchConnect: infra_repo.BranchConnect,
-    }
     for k, v := range gws.github_source.Urls {
         ret.Services.Urls[k] = v
     }
 
-    ret.CommitMessage = fmt.Sprintf("Create github configuration")*/
+    ret.CommitMessage = fmt.Sprintf("Github configuration updated.")
+    ret.AddFile(path.Join(req.Args.ForjjInstanceName, github_file))
+
     return
 }
 

@@ -116,7 +116,7 @@ func (g *GitHubStruct)ensure_organization_exists(ret *goforjj.PluginData) (s boo
     return true
 }
 
-// Return an error if at least one repo exist. Used at create time.
+// Return an error if at least one repo exist. Used at create/update time.
 func (r *GitHubStruct)repos_exists(ret *goforjj.PluginData) (err error) {
     // loop on list of repos, and ensure they exist with minimal config and rights
     for name, repo_data := range  r.github_source.Repos {
