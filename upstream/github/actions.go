@@ -103,8 +103,9 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
     log.Printf("Checking Infrastructure code existence.")
     source_path := path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName)
 
-    if _, err := os.Stat(path.Join(source_path, github_file)) ; err == nil {
+    if _, err := os.Stat(path.Join(source_path, github_file)) ; err != nil {
         ret.Errorf("Unable to update the github configuration which doesn't exist.\nUse 'create' to create it (or create %s), and 'maintain' to update your github service according to his configuration.", path.Join(req.Args.ForjjInstanceName, github_file))
+        log.Printf("Unable to update the github configuration '%s'", path.Join(source_path, github_file))
         return 419
     }
 
@@ -122,19 +123,19 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
     }
 
     ret.StatusAdd("Environment checked. Ready to be updated.")
+
     // Read the github.yaml file.
     if err := gws.load_yaml(path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName, github_file)) ; err != nil {
         ret.Errorf("Unable to update github instance '%s' source files. %s. Use 'create' to create it first.", req.Args.ForjjInstanceName, err)
         return 419
     }
 
-
-    // TODO: Update github source code
-    Updated := gws.update_yaml_data(req, ret)
-
     if gws.github_connect(req.Args.GithubServer, ret) == nil {
         return
     }
+
+    // TODO: Update github source code
+    Updated := gws.update_yaml_data(req, ret)
 
     // Returns the collection of all managed repository with their existence flag.
     gws.repos_exists(ret)
