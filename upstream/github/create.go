@@ -13,11 +13,7 @@ func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
     g.github_source.Urls = make(map[string]string)
     g.github_source.Urls["github-base-url"] = g.Client.BaseURL.String()
 
-    if orga := req.Args.GithubOrganization; orga == "" {
-        g.github_source.Organization = req.Args.ForjjOrganization
-    } else {
-        g.github_source.Organization = req.Args.GithubOrganization
-    }
+    req.InitOrganization(g)
 
     if g.github_source.Repos == nil {
         g.github_source.Repos = make(map[string]RepositoryStruct)

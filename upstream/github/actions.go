@@ -103,12 +103,6 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
     log.Printf("Checking Infrastructure code existence.")
     source_path := path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName)
 
-    if _, err := os.Stat(path.Join(source_path, github_file)) ; err != nil {
-        ret.Errorf("Unable to update the github configuration which doesn't exist.\nUse 'create' to create it (or create %s), and 'maintain' to update your github service according to his configuration.", path.Join(req.Args.ForjjInstanceName, github_file))
-        log.Printf("Unable to update the github configuration '%s'", path.Join(source_path, github_file))
-        return 419
-    }
-
     var gws GitHubStruct
 
     gws.source_mount = req.Args.ForjjSourceMount
@@ -119,10 +113,21 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
     log.Printf("Checking parameters : %#v", gws)
 
     if gws.verify_req_fails(ret, check) {
-        return 422
+        return
     }
 
-    ret.StatusAdd("Environment checked. Ready to be updated.")
+    if gws.github_connect(req.Args.GithubServer, ret) == nil {
+        return
+    }
+
+    if _, err := os.Stat(path.Join(source_path, github_file)) ; err != nil {
+        log.Printf(ret.StatusAdd("Warning! The workspace do not contain '%s'", path.Join(source_path, github_file)))
+        req.InitOrganization(&gws)
+        gws.req_repos_exists(req, ret)
+        ret.Errorf("Unable to update the github configuration which doesn't exist.\nUse 'create' to create it (or create %s), and 'maintain' to update your github service according to his configuration.", path.Join(req.Args.ForjjInstanceName, github_file))
+        log.Printf("Unable to update the github configuration '%s'", path.Join(source_path, github_file))
+        return 419
+    }
 
     // Read the github.yaml file.
     if err := gws.load_yaml(path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName, github_file)) ; err != nil {
@@ -130,11 +135,8 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
         return 419
     }
 
-    if gws.github_connect(req.Args.GithubServer, ret) == nil {
-        return
-    }
+    ret.StatusAdd("Environment checked. Ready to be updated.")
 
-    // TODO: Update github source code
     Updated := gws.update_yaml_data(req, ret)
 
     // Returns the collection of all managed repository with their existence flag.

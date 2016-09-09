@@ -10,6 +10,24 @@ import (
     "fmt"
 )
 
+func (req *CreateReq)InitOrganization(g *GitHubStruct) {
+    if orga := req.Args.GithubOrganization; orga == "" {
+        g.github_source.Organization = req.Args.ForjjOrganization
+    } else {
+        g.github_source.Organization = orga
+    }
+
+}
+
+func (req *UpdateReq)InitOrganization(g *GitHubStruct) {
+    if orga := req.Args.GithubOrganization; orga == "" {
+        g.github_source.Organization = req.Args.ForjjOrganization
+    } else {
+        g.github_source.Organization = orga
+    }
+
+}
+
 func (g *GitHubStruct)github_connect(server string, ret *goforjj.PluginData) (* github.Client) {
     ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: g.token})
     tc := oauth2.NewClient(oauth2.NoContext, ts)
@@ -143,6 +161,35 @@ func (r *GitHubStruct)repos_exists(ret *goforjj.PluginData) (err error) {
                 BranchConnect: repo_data.branchConnect,
             }
         }
+    }
+    return
+}
+
+// Populate ret.Repos with req.repos status and information
+func (g *GitHubStruct)req_repos_exists(req *UpdateReq, ret *goforjj.PluginData) (err error) {
+    if req == nil || ret == nil {
+        return fmt.Errorf("Internal error: Invalid parameters. req and ret cannot be nil.")
+    }
+
+    c := g.Client.Repositories
+
+    // loop on list of repos, and ensure they exist with minimal config and rights
+    for name, _ := range req.ReposData {
+        log.Printf("Looking for Repo '%s' from '%s'", name, g.github_source.Organization)
+        found_repo, _, err := c.Get(g.github_source.Organization, name)
+
+        r := goforjj.PluginRepo{
+            Name: name,
+            Exist: (err == nil),
+            Remotes: make(map[string]string),
+            BranchConnect: make(map[string]string),
+        }
+        if err == nil {
+            r.Remotes["origin"] = *found_repo.SSHURL
+            r.BranchConnect["master"] = "origin/master"
+        }
+
+        ret.Repos[name] = r
     }
     return
 }

@@ -4,12 +4,15 @@ package main
 
 import (
     "github.hpe.com/christophe-larsonneur/goforjj"
+    "log"
 )
 
 func (g *GitHubStruct)update_yaml_data(req *UpdateReq, ret *goforjj.PluginData) (Updated bool) {
     if g.github_source.Repos == nil {
         g.github_source.Repos = make(map[string]RepositoryStruct)
     }
+
+    log.Printf("Request has %d repository(ies)", len(req.ReposData))
 
     for name, repo := range req.ReposData {
         if g.AddRepo(name, repo) {
@@ -25,3 +28,4 @@ func (g *GitHubStruct)update_yaml_data(req *UpdateReq, ret *goforjj.PluginData) 
 
     return
 }
+
