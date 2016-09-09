@@ -116,12 +116,12 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
         return
     }
 
-    if gws.github_connect(req.Args.GithubServer, ret) == nil {
-        return
-    }
 
     if _, err := os.Stat(path.Join(source_path, github_file)) ; err != nil {
         log.Printf(ret.StatusAdd("Warning! The workspace do not contain '%s'", path.Join(source_path, github_file)))
+        if gws.github_connect(req.Args.GithubServer, ret) == nil {
+            return
+        }
         req.InitOrganization(&gws)
         gws.req_repos_exists(req, ret)
         ret.Errorf("Unable to update the github configuration which doesn't exist.\nUse 'create' to create it (or create %s), and 'maintain' to update your github service according to his configuration.", path.Join(req.Args.ForjjInstanceName, github_file))
@@ -133,6 +133,10 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
     if err := gws.load_yaml(path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName, github_file)) ; err != nil {
         ret.Errorf("Unable to update github instance '%s' source files. %s. Use 'create' to create it first.", req.Args.ForjjInstanceName, err)
         return 419
+    }
+
+    if gws.github_connect(req.Args.GithubServer, ret) == nil {
+        return
     }
 
     ret.StatusAdd("Environment checked. Ready to be updated.")

@@ -35,13 +35,14 @@ func (g *GitHubStruct)github_connect(server string, ret *goforjj.PluginData) (* 
     g.Client = github.NewClient(tc)
 
 
-    if u, found := g.github_source.Urls["github-base-url"] ; !found || (found && u == "") || server != "" {
+    if du, found := g.github_source.Urls["github-base-url"] ; !found || (found && du == "") || server != "" {
         if err := g.github_set_url(server) ; err != nil {
             ret.Errorf("Invalid url. %s", err)
             return nil
         }
     } else {
-        if u, err := url.Parse(g.github_source.Urls["github-base-url"]) ; err != nil {
+        log.Printf("Using github-base-url : %s", du)
+        if u, err := url.Parse(du) ; err != nil {
             return nil
         } else {
             g.Client.BaseURL = u
