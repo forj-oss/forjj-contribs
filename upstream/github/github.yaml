@@ -4,7 +4,7 @@ version: "0.1"
 description: "Upstream github plugin for FORJJ. It properly configure github.com or entreprise with organisation/repos"
 runtime:
   docker:
-    image: "docker.hos.hpecorp.net/forjj-us/github"
+    image: "hub.docker.hpecorp.net/devops/forjj-github"
   service_type: "REST API"
   service:
     #socket: "github.sock"
