@@ -4,7 +4,7 @@ version: "0.1"
 description: "CI jenkins plugin for FORJJ."
 runtime:
   docker:
-    image: "docker.hos.hpecorp.net/forjj-ci/jenkins"
+    image: "hub.docker.hpecorp.net/devops/forjj-jenkins"
     dood: true
   service_type: "REST API"
   service:

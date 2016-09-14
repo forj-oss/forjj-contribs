@@ -99,7 +99,7 @@ const YamlDesc="---\n" +
    "description: \"Upstream github plugin for FORJJ. It properly configure github.com or entreprise with organisation/repos\"\n" +
    "runtime:\n" +
    "  docker:\n" +
-   "    image: \"docker.hos.hpecorp.net/forjj-us/github\"\n" +
+   "    image: \"hub.docker.hpecorp.net/devops/forjj-github\"\n" +
    "  service_type: \"REST API\"\n" +
    "  service:\n" +
    "    #socket: \"github.sock\"\n" +

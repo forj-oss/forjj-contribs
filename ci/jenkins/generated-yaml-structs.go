@@ -106,7 +106,7 @@ const YamlDesc="---\n" +
    "description: \"CI jenkins plugin for FORJJ.\"\n" +
    "runtime:\n" +
    "  docker:\n" +
-   "    image: \"docker.hos.hpecorp.net/forjj-ci/jenkins\"\n" +
+   "    image: \"hub.docker.hpecorp.net/devops/forjj-jenkins\"\n" +
    "    dood: true\n" +
    "  service_type: \"REST API\"\n" +
    "  service:\n" +
