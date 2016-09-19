@@ -13,7 +13,7 @@
 # Then this job should implement the following code in jenkins
 # And jenkins-ci images for each flavors will be officially pushed to the internal registry.
 
-TAG_BASE="$(awk '$1 ~ /image:/ { print $2 }' github.yaml)"
+TAG_BASE="$(eval "echo $(awk '$1 ~ /image:/ { print $2 }' github.yaml)")"
 
 if [ ! -f releases.lst ]
 then
@@ -32,7 +32,7 @@ case "$1" in
     COMMIT="$(git log -1 --oneline| cut -d ' ' -f 1)"
     if [ "$(git tag -l --points-at $COMMIT | grep $VERSION)" = "" ]
     then
-       echo "'$COMMIT' is not tagged with '$VERSION'. Only commit tagged can publish officially this tag as docker image." 
+       echo "'$COMMIT' is not tagged with '$VERSION'. Only commit tagged can publish officially this tag as docker image."
        exit 1
     fi
     VERSION_TAG=${VERSION}_
@@ -42,7 +42,7 @@ case "$1" in
     VERSION_TAG=latest_
     ;;
   *)
-    echo "Script used to publish release and latest code ONLY. If you want to test a fork, use build. It will create a local docker image jenkins-dood:test"
+    echo "Script used to publish release and latest code ONLY. If you want to test a fork, use build. It will create a local docker image $TAG_BASE:test"
     exit 1
 esac
 
@@ -50,13 +50,13 @@ cat releases.lst | while read LINE
 do
    [[ "$LINE" =~ ^# ]] && continue
    TAGS="$(echo "$LINE" | awk -F'|' '{ print $2 }' | sed 's/,/ /g')"
-   echo "=============== Building forjj-us/github"
-   $(dirname $0)/build.sh 
+   echo "=============== Building devops/forjj-github"
+   $(dirname $0)/build.sh
    echo "=============== Publishing tags"
    for TAG in $TAGS
    do
       echo "=> $TAG_BASE:$TAG"
-      sudo docker tag -f $TAG_BASE $TAG_BASE:$TAG
+      sudo docker tag $TAG_BASE $TAG_BASE:$TAG
       sudo docker push $TAG_BASE:$TAG
    done
    echo "=============== DONE"

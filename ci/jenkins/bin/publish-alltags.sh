@@ -13,7 +13,7 @@
 # Then this job should implement the following code in jenkins
 # And jenkins-ci images for each flavors will be officially pushed to the internal registry.
 
-TAG_BASE="$(awk '$1 ~ /image:/ { print $2 }' jenkins.yaml)"
+TAG_BASE="$(eval "echo $(awk '$1 ~ /image:/ { print $2 }' jenkins.yaml)")"
 
 if [ ! -f releases.lst ]
 then
@@ -42,7 +42,7 @@ case "$1" in
     VERSION_TAG=latest_
     ;;
   *)
-    echo "Script used to publish release and latest code ONLY. If you want to test a fork, use build. It will create a local docker image jenkins-dood:test"
+    echo "Script used to publish release and latest code ONLY. If you want to test a fork, use build. It will create a local docker image $TAG_BASE:test"
     exit 1
 esac
 
