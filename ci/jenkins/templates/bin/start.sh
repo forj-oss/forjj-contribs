@@ -3,10 +3,10 @@
 #
 
 REPO=$LOGNAME
-IMAGE_NAME={{ .settings.Name }}
+IMAGE_NAME={{ .Docker.Name }}
 IMAGE_VERSION=test
 
-sudo docker rm -f {{ .settings.Name }}-dood
+sudo docker rm -f {{ .Docker.Name }}-dood
 
 if [ "$http_proxy" != "" ]
 then
@@ -34,4 +34,4 @@ fi
 
 TAG_NAME=docker.hos.hpecorp.net/$LOGNAME/$IMAGE_NAME:$IMAGE_VERSION
 
-sudo docker run -p 8080:{{ .Settings.Port }} -it --name {{ .Settings.Name }}-dood $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
+sudo docker run -p 8080:{{ .Docker.Port }} -it --name {{ .Docker.Name }}-dood $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
