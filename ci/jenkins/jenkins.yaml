@@ -85,3 +85,6 @@ actions:
         help: "List of features to add to jenkins."
   maintain:
     help: "Instantiate jenkins thanks to source code."
+    flags:
+      forjj-instance-name:
+        help: "Name of the jenkins instance given by forjj."

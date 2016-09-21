@@ -5,6 +5,7 @@ import (
     "gopkg.in/yaml.v2"
     "io/ioutil"
     "path"
+    "log"
 )
 
 type JenkinsPlugin struct {
@@ -24,10 +25,15 @@ type DockerStruct struct {
     Maintainer string
 }
 
+type DeployApp struct {
+    DeployStruct
+    DeployCommand string // Command to use to execute a Deploy
+}
+
 type YamlJenkins struct {
     Settings SettingsStruct `yaml:"forjj-settings"`
     Docker DockerStruct
-    Deploy DeployStruct
+    Deploy DeployApp
     Features []string
 }
 
@@ -49,7 +55,7 @@ func new_plugin(src string) (p *JenkinsPlugin) {
 // Update jenkins source from input sources
 func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (status bool) {
     p.yaml.Docker.SetFrom(&r.Args.SourceStruct)
-    p.yaml.Deploy = r.Args.DeployStruct
+    p.yaml.Deploy.DeployStruct = r.Args.DeployStruct
     p.yaml.Settings.SetFrom(&r.Args.SourceStruct)
     return true
 }
@@ -78,11 +84,12 @@ func (p *JenkinsPlugin)save_yaml(ret *goforjj.PluginData) (status bool) {
         return
     }
     ret.AddFile(file)
+    log.Printf("'%s' instance saved.")
     return true
 }
 
-func (p *JenkinsPlugin)load_yaml(ret *goforjj.PluginData) (status bool) {
-    file := path.Join(p.yaml.Settings.InstanceName, jenkins_file)
+func (p *JenkinsPlugin)load_yaml(instance string, ret *goforjj.PluginData) (status bool) {
+    file := path.Join(instance, jenkins_file)
 
     if d, err := ioutil.ReadFile(file) ; err != nil {
         ret.Errorf("Unable to read '%s'. %s", file, err)
@@ -93,5 +100,6 @@ func (p *JenkinsPlugin)load_yaml(ret *goforjj.PluginData) (status bool) {
             return
         }
     }
+    log.Printf("'%s' instance loaded.", file)
     return true
 }

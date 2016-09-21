@@ -60,6 +60,7 @@ type MaintainReq struct {
 }
 
 type MaintainArgReq struct {
+    ForjjInstanceName string `json:"forjj-instance-name"` // Name of the jenkins instance given by forjj.
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
@@ -74,12 +75,14 @@ func (r *CreateArgReq)SaveMaintainOptions(ret *goforjj.PluginData) {
     if ret.Options == nil {
         ret.Options = make(map[string]goforjj.PluginOption)
     }
+
 }
 
 func (r *UpdateArgReq)SaveMaintainOptions(ret *goforjj.PluginData) {
     if ret.Options == nil {
         ret.Options = make(map[string]goforjj.PluginOption)
     }
+
 }
 
 func addMaintainOptionValue(options map[string]goforjj.PluginOption, option, value, defaultv, help string) (goforjj.PluginOption){
@@ -187,5 +190,8 @@ const YamlDesc="---\n" +
    "        help: \"List of features to add to jenkins.\"\n" +
    "  maintain:\n" +
    "    help: \"Instantiate jenkins thanks to source code.\"\n" +
+   "    flags:\n" +
+   "      forjj-instance-name:\n" +
+   "        help: \"Name of the jenkins instance given by forjj.\"\n" +
    ""
 
