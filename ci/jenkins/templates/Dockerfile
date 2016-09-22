@@ -1,8 +1,8 @@
 # This file is managed by Forjj jenkins plugin at Maintain phase. Do not update it manually!
 
-FROM docker.hos.hpecorp.net/devops/jenkins-dood:0.1_2.7
+FROM hub.docker.hpecorp.net/devops/jenkins-dood:latest
 
-COPY local_plugins/*  $JENKINS_DATA_REF/plugins/
+# COPY local_plugins/*  $JENKINS_DATA_REF/plugins/
 COPY features.lst /tmp
 
 USER root

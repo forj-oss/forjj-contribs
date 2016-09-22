@@ -25,11 +25,9 @@ actions:
     flags:
       # Options related to source code
       forjj-instance-name:
-        help: "Name of the jenkins instance given by forjj."
-        group: "source"
+        help: "Name of the jenkins instance to create given by forjj."
       forjj-organization:
         help: "Organization name used in the docker repo name if --docker-repoimage not set."
-        group: "source"
       docker-image:
         help: "Base docker image name to use in Dockerfile"
         default: "jenkins"
@@ -53,7 +51,7 @@ actions:
         group: "deploy"
       service-addr:
         required: true
-        help: "CNAME or IP address of the expected jenkins instance"
+        help: "Exposed service CNAME or IP address of the expected jenkins instance"
         group: "deploy"
       service-port:
         default: "8080"
@@ -63,11 +61,7 @@ actions:
     help: "update a jenkins instance source code"
     flags:
       forjj-instance-name:
-        help: "Name of the jenkins instance given by forjj."
-        group: "source"
-      forjj-organization:
-        help: "Organization name used in the docker repo name if --docker-repoimage not set."
-        group: "source"
+        help: "Name of the jenkins instance to update given by forjj."
       docker-image-version:
         help: "Base docker image version to use in Dockerfile"
         group: "source"

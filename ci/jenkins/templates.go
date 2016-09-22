@@ -16,7 +16,8 @@ const template_file = "templates.yaml"
 type YamlTemplates struct {
     Features TmplFeatures
     Sources TmplSources
-    Run map[string]string
+    Run map[string]string `yaml:"run_deploy"`
+    Variants map[string]string
 }
 
 type TmplFeatures struct {

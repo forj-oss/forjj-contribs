@@ -13,34 +13,75 @@ It provides orchestration services for forjj:
 
 Using forjj, it is quite easy.
 
-When you create your Organization, you just need to add `--ci jenkins-ci` :
+To create a new jenkins instance to your organization, you just need to add `--apps ci:jenkins` :
 
 Ex:
 ```bash
-$ forjj create <myorg> --ci jenkins-ci <jenkins_flags> ...
+$ forjj create <workspace> --apps ci:jenkins <jenkins_flags> ...
 ```
 
-If your organization already exist and want to add jenkins:
+If you want to update an existing jenkins instance, you can use:
 
 ```bash
-$ forjj update <myorg> --ci jenkins-ci <jenkins_flags> ...
+$ forjj update <workspace> --apps ci:jenkins <jenkins_flags> ...
+```
+
+If you have several jenkins instances, you can add it in the `--apps` flag:
+
+Ex:
+```bash
+$ forjj ... --apps ci:jenkins:myinstance,ci:jenkins:anotherinstance <jenkins_flags> ...
+```
+
+Each instance requested will have his collection of jenkins flags prefixed by the instance name.
+
+Ex:
+```bash
+$ forjj ... --apps ci:jenkins:myinstance,ci:jenkins:anotherinstance --myinstance-service-addr myinstance.hpe.com --anotherinstance-service-addr ...
 ```
 
 In case of update, you probably need to follow the organization flow to approve your change and apply.
 
-forjj create/update will call this plugin to create a `ci/<CI Name>` in your infra repository.
+Depending on upstream flow choosed, forjj jenkins could generate more files to create jobs/pipelines (jobs-dsl)
 
-This directory will contains source code generated as follow:
-- Dockerfile (derived from `docker.hos.hpecorp.net/devops/jenkins-ci`)
-- features.lst with basic features:
-  - basic jenkins security (admin RW and anonymous R only)
-  - proxy settings as found on your current host.
-  - seed-job to support Jobs-dsl
-  - groovy plugin installed to maintain jenkins configuration.
-- Create jenkins-params.sh with any required jenkins parameters and credentials.
+## Jenkins source Templates
 
-Depending on upstream flow choosed, jenkins could generate more files to create jobs (jobs-dsl)
+All jenkins source files are generated from a collection of source templates (jenkins source model).
+Currently, those templates are located under templates directory.
 
+TODO: We can imagine having several templates directory as well as a different source of templates (git, tar, others...) to change jenkins sources model, but this has not been currently developped.
+
+Feel free to contribute to add this feature!
+
+The `templates/templates.yaml` defines how to generate the source model from a deploy perspective.
+
+The template mechanisms implemented is based on [golang template](https://golang.org/pkg/text/template/).
+The template data is given by the forjj-jenkins.yaml source file. The data structure is defined in [this go source file](jenkins_plugin.go#34)
+
+You can update this file manually and ask forjj to update source files.
+
+TODO: forjj-jenkins is a go binary exposing his service to forjj through a REST API. But we can image that this binary become available to simply regenerate source file from `forjj-jenkins.yaml`.
+Today you must use forjj update --apps ci:jenkins to call the plugin and regenerate source files from `forjj-jenkins.yaml`.
+
+Feel free to contribute to add this feature!
+
+### forjj Jenkins source model
+
+Currently, the embedded source model implements globally the following:
+
+- A docker image built from `hub.docker.hpecorp.net/devops/jenkins-ci` [source](https://github.hpe.com/Docker-in-Datacenter/jenkins-ci) See [Docker Trusted Registry (DTR) for versions](https://hub.docker.hpecorp.net/repositories/devops/jenkins-dood/tags)
+- A collection of default features ([source](https://github.hpe.com/RnDLabsIT/jenkins-install-inits))
+  - Basic authentication (admin user with default password & anonymous has read access)
+  - proxy setting (Set proxy from http_proxy env setting, found from the container)
+  - seed-job (One job generated to populate the other collection of jobs/pipelines)
+  - jenkins slave fixed port
+- A collection of additionnal features and templates to add for a dedicated deployement
+- A list of predefined deployement. ie:
+  - docker - To deploy to your local docker environment.
+  - ucp - To deploy to a UCP system.
+  - marathon - To deploy to dcos/mesos marathon.
+
+This list of elements are not exhaustive and can be updated time to time. Please refer to the (templates.yaml)[templates/templates.yaml] for latest updates.
 
 ## github upstream with pull-request flow setting.
 The github integration will update your `infra/ci/jenkins-ci` with the following code.

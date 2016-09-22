@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 #
 #
 
@@ -47,12 +47,12 @@ JENKINS_INSTALL_INITS_URL="https://github.hpe.com/$MYFORK/raw/$BRANCH/"
 FEATURES="--build-arg JENKINS_INSTALL_INITS_URL=$JENKINS_INSTALL_INITS_URL"
 
 set -x
-sudo docker build -t $TAG_NAME $FEATURES $PROXY $BUILD_OPTS .
+sudo -n docker build -t $TAG_NAME $FEATURES $PROXY $BUILD_OPTS .
 set +x
 
 
 if [ "$AUTO_PUSH" = true ]
 then
    set -x
-   sudo docker push $TAG_NAME
+   sudo -n docker push $TAG_NAME
 fi
