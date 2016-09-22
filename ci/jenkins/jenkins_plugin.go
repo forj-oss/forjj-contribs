@@ -26,20 +26,26 @@ type DockerStruct struct {
 }
 
 type DeployApp struct {
-    DeployStruct
+    DeployStruct `yaml:",inline"`
     DeployCommand string // Command to use to execute a Deploy
 }
 
+type ForjjStruct struct {
+    InstanceName string
+    OrganizationName string
+}
+
+// Used for the jenkins yaml source and generate template data.
 type YamlJenkins struct {
-    Settings SettingsStruct `yaml:"forjj-settings"`
+    Forjj ForjjStruct
+    // Settings SettingsStruct
     Docker DockerStruct
     Deploy DeployApp
     Features []string
 }
 
-type SettingsStruct struct {
-    InstanceName string
-}
+/*type SettingsStruct struct {
+}*/
 
 
 const jenkins_file = "forjj-jenkins.yaml"
@@ -54,9 +60,15 @@ func new_plugin(src string) (p *JenkinsPlugin) {
 
 // Update jenkins source from input sources
 func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (status bool) {
-    p.yaml.Docker.SetFrom(&r.Args.SourceStruct)
+    p.yaml.Docker.SetFrom(&r.Args.SourceStruct, r.Args.ForjjOrganization)
     p.yaml.Deploy.DeployStruct = r.Args.DeployStruct
-    p.yaml.Settings.SetFrom(&r.Args.SourceStruct)
+    p.yaml.Forjj.InstanceName = r.Args.ForjjInstanceName
+    p.yaml.Forjj.OrganizationName = r.Args.ForjjOrganization
+    // Forjj predefined settings (instance/organization) are set at create time only.
+    // I do not recommend to update them, manually by hand in the `forjj-jenkins.yaml`.
+    // Updating the instance name could be possible but not for now.
+    // As well Moving an instance to another orgnization could be possible, but I do not see a real use case.
+    // So, they are fixed and saved at create time. Update/maintain won't never update them later.
     return true
 }
 
@@ -66,12 +78,12 @@ func (p *JenkinsPlugin) load_from(ret *goforjj.PluginData) (status bool) {
 
 func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData)  (status bool) {
     p.yaml.Deploy.SetFrom(&r.Args.DeployStruct)
-    p.yaml.Docker.SetFrom(&r.Args.SourceStruct)
+    p.yaml.Docker.SetFrom(&r.Args.SourceStruct, "") // No orga name to provide for updates...
     return true
 }
 
 func (p *JenkinsPlugin)save_yaml(ret *goforjj.PluginData) (status bool) {
-    file := path.Join(p.yaml.Settings.InstanceName, jenkins_file)
+    file := path.Join(p.yaml.Forjj.InstanceName, jenkins_file)
 
     d, err := yaml.Marshal(&p.yaml)
     if  err != nil {

@@ -25,11 +25,9 @@ actions:
     flags:
       # Options related to source code
       forjj-instance-name:
-        help: "Name of the jenkins instance given by forjj."
-        group: "source"
+        help: "Name of the jenkins instance to create given by forjj."
       forjj-organization:
         help: "Organization name used in the docker repo name if --docker-repoimage not set."
-        group: "source"
       docker-image:
         help: "Base docker image name to use in Dockerfile"
         default: "jenkins"
@@ -63,11 +61,7 @@ actions:
     help: "update a jenkins instance source code"
     flags:
       forjj-instance-name:
-        help: "Name of the jenkins instance given by forjj."
-        group: "source"
-      forjj-organization:
-        help: "Organization name used in the docker repo name if --docker-repoimage not set."
-        group: "source"
+        help: "Name of the jenkins instance to update given by forjj."
       docker-image-version:
         help: "Base docker image version to use in Dockerfile"
         group: "source"
@@ -85,6 +79,3 @@ actions:
         help: "List of features to add to jenkins."
   maintain:
     help: "Instantiate jenkins thanks to source code."
-    flags:
-      forjj-instance-name:
-        help: "Name of the jenkins instance given by forjj."

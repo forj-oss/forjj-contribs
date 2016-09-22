@@ -1,10 +1,10 @@
 package main
 
-func (t *DockerStruct)SetFrom(d *SourceStruct) {
+func (t *DockerStruct)SetFrom(d *SourceStruct, org string) {
     SetIfSet(&t.Name, d.DockerImage)
     SetIfSet(&t.Version, d.DockerImageVersion)
     SetIfSet(&t.Repository, d.DockerRepoimage)
-    SetOnceIfSet(&t.Repository, d.ForjjOrganization)
+    SetOnceIfSet(&t.Repository, org)
     SetIfSet(&t.Maintainer, d.Maintainer)
 }
 
@@ -12,10 +12,6 @@ func (t *DeployStruct)SetFrom(d *DeployStruct) {
     SetIfSet(&t.DeployTo, d.DeployTo)
     SetIfSet(&t.ServiceAddr, d.ServiceAddr)
     SetIfSet(&t.ServicePort, d.ServicePort)
-}
-
-func (t *SettingsStruct)SetFrom(d *SourceStruct) {
-    t.InstanceName = d.ForjjInstanceName
 }
 
 // Set the value if the source is set

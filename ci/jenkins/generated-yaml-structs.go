@@ -17,8 +17,6 @@ type SourceStruct struct {
     DockerImageVersion string `json:"docker-image-version"` // Base docker image version to use in Dockerfile
     DockerRepoimage string `json:"docker-repoimage"` // Repository name containing your base docker image name to use in Dockerfile
     Features string `json:"features"` // List of features to add to jenkins features.lst.
-    ForjjInstanceName string `json:"forjj-instance-name"` // Name of the jenkins instance given by forjj.
-    ForjjOrganization string `json:"forjj-organization"` // Organization name used in the docker repo name if --docker-repoimage not set.
     Maintainer string `json:"maintainer"` // Jenkins image maintainer
 }
 
@@ -31,6 +29,8 @@ type CreateArgReq struct {
     DeployStruct
     SourceStruct
 
+    ForjjInstanceName string `json:"forjj-instance-name"` // Name of the jenkins instance to create given by forjj.
+    ForjjOrganization string `json:"forjj-organization"` // Organization name used in the docker repo name if --docker-repoimage not set.
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
     ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for jenkins plugin.
@@ -47,6 +47,7 @@ type UpdateArgReq struct {
     SourceStruct
 
     FeaturesAdd string `json:"features-add"` // List of features to add to jenkins.
+    ForjjInstanceName string `json:"forjj-instance-name"` // Name of the jenkins instance to update given by forjj.
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
@@ -60,7 +61,6 @@ type MaintainReq struct {
 }
 
 type MaintainArgReq struct {
-    ForjjInstanceName string `json:"forjj-instance-name"` // Name of the jenkins instance given by forjj.
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
@@ -75,14 +75,12 @@ func (r *CreateArgReq)SaveMaintainOptions(ret *goforjj.PluginData) {
     if ret.Options == nil {
         ret.Options = make(map[string]goforjj.PluginOption)
     }
-
 }
 
 func (r *UpdateArgReq)SaveMaintainOptions(ret *goforjj.PluginData) {
     if ret.Options == nil {
         ret.Options = make(map[string]goforjj.PluginOption)
     }
-
 }
 
 func addMaintainOptionValue(options map[string]goforjj.PluginOption, option, value, defaultv, help string) (goforjj.PluginOption){
@@ -130,11 +128,9 @@ const YamlDesc="---\n" +
    "    flags:\n" +
    "      # Options related to source code\n" +
    "      forjj-instance-name:\n" +
-   "        help: \"Name of the jenkins instance given by forjj.\"\n" +
-   "        group: \"source\"\n" +
+   "        help: \"Name of the jenkins instance to create given by forjj.\"\n" +
    "      forjj-organization:\n" +
    "        help: \"Organization name used in the docker repo name if --docker-repoimage not set.\"\n" +
-   "        group: \"source\"\n" +
    "      docker-image:\n" +
    "        help: \"Base docker image name to use in Dockerfile\"\n" +
    "        default: \"jenkins\"\n" +
@@ -168,11 +164,7 @@ const YamlDesc="---\n" +
    "    help: \"update a jenkins instance source code\"\n" +
    "    flags:\n" +
    "      forjj-instance-name:\n" +
-   "        help: \"Name of the jenkins instance given by forjj.\"\n" +
-   "        group: \"source\"\n" +
-   "      forjj-organization:\n" +
-   "        help: \"Organization name used in the docker repo name if --docker-repoimage not set.\"\n" +
-   "        group: \"source\"\n" +
+   "        help: \"Name of the jenkins instance to update given by forjj.\"\n" +
    "      docker-image-version:\n" +
    "        help: \"Base docker image version to use in Dockerfile\"\n" +
    "        group: \"source\"\n" +
@@ -190,8 +182,5 @@ const YamlDesc="---\n" +
    "        help: \"List of features to add to jenkins.\"\n" +
    "  maintain:\n" +
    "    help: \"Instantiate jenkins thanks to source code.\"\n" +
-   "    flags:\n" +
-   "      forjj-instance-name:\n" +
-   "        help: \"Name of the jenkins instance given by forjj.\"\n" +
    ""
 

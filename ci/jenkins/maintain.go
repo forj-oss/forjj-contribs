@@ -17,15 +17,6 @@ func (r *MaintainReq) check_source_existence(ret *goforjj.PluginData) (p *Jenkin
         return
     }
 
-    src := path.Join(r.Args.ForjjSourceMount, r.Args.ForjjInstanceName)
-    if _, err := os.Stat(path.Join(src, jenkins_file)) ; err != nil {
-        ret.Errorf("Unable to maintain jenkins instancesfor instance name '%s' which already exist.\nUse update to update it (or update %s), and maintain to update github according to his configuration.", r.Args.ForjjInstanceName, src)
-        return
-    }
-
-
-    p = new_plugin(src)
-
     ret.StatusAdd("environment checked.")
     status = true
     return

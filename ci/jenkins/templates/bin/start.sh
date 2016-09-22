@@ -25,7 +25,7 @@ then
 fi
 
 # For production case, expect
-# $LOGNAME set to {{ .Settings.Organization }}
+# $LOGNAME set to {{ .Forjj.OrganizationName }}
 if [ -f run_opts.sh ]
 then
    echo "loading run_opts.sh..."
@@ -34,4 +34,4 @@ fi
 
 TAG_NAME=docker.hos.hpecorp.net/$LOGNAME/$IMAGE_NAME:$IMAGE_VERSION
 
-sudo docker run -p 8080:{{ .Docker.Port }} -it --name {{ .Docker.Name }}-dood $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
+sudo docker run -p 8080:{{ .Deploy.ServicePort }} -it --name {{ .Docker.Name }}-dood $CREDS $PROXY $DOCKER_OPTS $TAG_NAME

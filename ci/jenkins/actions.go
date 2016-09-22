@@ -36,6 +36,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 // Do updating plugin task
 // req_data contains the request data posted by forjj. Structure generated from 'jenkins.yaml'.
 // ret_data contains the response structure to return back to forjj.
+// forjj-jenkins.yaml is loaded by default.
 //
 func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *goforjj.PluginData) (httpCode int) {
     var p *JenkinsPlugin
@@ -46,7 +47,7 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
         p = pr
     }
 
-    if ! p.load_yaml(p.yaml.Settings.InstanceName, ret) {
+    if ! p.load_yaml(req.Args.ForjjInstanceName, ret) {
         return
     }
 
@@ -54,7 +55,7 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
         return
     }
 
-    if ! p.update_jenkins_sources(ret) {
+    if ! p.update_jenkins_sources(req.Args.ForjjInstanceName, ret) {
         return
     }
 
