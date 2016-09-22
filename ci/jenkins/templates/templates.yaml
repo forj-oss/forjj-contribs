@@ -53,3 +53,9 @@ run_deploy:
   ucp: "make deploy" # not tested
   mesos: "curl -X POST -d @bin/marathon.json {{ .Mesos.MarathonUrl }}/..." # Not tested
   dcos: "curl -X POST -d @bin/marathon.json {{ .Mesos.MarathonUrl }}/... -H 'token: {{ .Mesos.Token }}" # Not tested
+# If the end user define a variant not listed in the following, the instance information will be kept in the workspace instead of forjj-jenkins.yaml source file
+# Following variants will be stored in the infra repository and considered as 'public permanent managed resource'
+# A local variant, is typically a local docker instance which will never be kept in source code as spawned on the Dev workstation.
+variants:
+  pro: # Production instance variant, used to store and manage those servers list in the repository.
+  itg: # Testing instance variant, used to store and manage those servers list in the repository. Usually, used for performance/UAT/final functional testing
