@@ -7,6 +7,7 @@ import (
     "os"
     "text/template"
     "io/ioutil"
+    "fmt"
 )
 
 // This file describes how we generate source from templates.
@@ -35,10 +36,29 @@ func (p *JenkinsPlugin)copy_source_files(instance_name string, ret *goforjj.Plug
             log.Printf(ret.Errorf("Unable to copy '%s' to '%s'. %s.", src, dest, err))
             return
         }
+
+        if err := set_rights(dest, desc.Chmod) ; err != nil {
+            ret.Errorf("%s", err)
+            return
+        }
+
         log.Printf(ret.StatusAdd("%s (%s) copied.", file, desc.Source))
         ret.AddFile(path.Join(instance_name, desc.Source))
     }
     return true
+}
+
+func set_rights(file string, rights os.FileMode) error {
+    if rights != 0 {
+        log.Printf("Setting %s rights to %d.", file, rights)
+        os.Chmod(file, rights)
+        if err := os.Chmod(file, rights) ; err != nil {
+            return fmt.Errorf("Unable to set rights to '%s' with '%d'. %s", file, rights, err)
+        }
+    } else {
+        log.Printf("No rights to apply to %s.", file)
+    }
+    return nil
 }
 
 // loop on templates to use to generate source files
@@ -79,6 +99,12 @@ func (p *JenkinsPlugin)generate_source_files(instance_name string, ret *goforjj.
             }
             out.Close()
         }
+
+        if err := set_rights(dest, desc.Chmod) ; err != nil {
+            ret.Errorf("%s", err)
+            return
+        }
+
         ret.AddFile(path.Join(instance_name, desc.Template))
         log.Printf(ret.StatusAdd("%s (%s) generated", file, desc.Template))
     }

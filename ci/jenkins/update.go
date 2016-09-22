@@ -33,12 +33,8 @@ func (r *UpdateReq) check_source_existence(ret *goforjj.PluginData) (p *JenkinsP
     return p, true
 }
 
+// We assume template file were loaded.
 func (r *JenkinsPlugin)update_jenkins_sources(instance_name string, ret *goforjj.PluginData) (status bool) {
-    if err := r.LoadTemplatesDef() ; err != nil {
-        log.Printf(ret.Errorf("%s", err))
-        return
-    }
-
     if err := r.DefineSources() ; err != nil {
         log.Printf(ret.Errorf("%s", err))
         return

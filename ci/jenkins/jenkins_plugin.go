@@ -6,6 +6,7 @@ import (
     "io/ioutil"
     "path"
     "log"
+    "fmt"
 )
 
 type JenkinsPlugin struct {
@@ -27,7 +28,7 @@ type DockerStruct struct {
 
 type DeployApp struct {
     DeployStruct `yaml:",inline"`
-    DeployCommand string // Command to use to execute a Deploy
+    Command string // Command to use to execute a Deploy
 }
 
 type ForjjStruct struct {
@@ -58,7 +59,7 @@ func new_plugin(src string) (p *JenkinsPlugin) {
     return
 }
 
-// Update jenkins source from input sources
+// At create time: create jenkins source from req
 func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (status bool) {
     p.yaml.Docker.SetFrom(&r.Args.SourceStruct, r.Args.ForjjOrganization)
     p.yaml.Deploy.DeployStruct = r.Args.DeployStruct
@@ -69,21 +70,46 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
     // Updating the instance name could be possible but not for now.
     // As well Moving an instance to another orgnization could be possible, but I do not see a real use case.
     // So, they are fixed and saved at create time. Update/maintain won't never update them later.
+    if err := p.DefineDeployCommand() ; err != nil {
+        ret.Errorf("Unable to define deployement command. %s", err)
+        return
+    }
+
     return true
 }
 
-func (p *JenkinsPlugin) load_from(ret *goforjj.PluginData) (status bool) {
-    return true
+func (p *JenkinsPlugin) DefineDeployCommand() error{
+    if err := p.LoadTemplatesDef() ; err != nil {
+        return fmt.Errorf("%s", err)
+    }
+
+    if v, ok := p.templates_def.Run[p.yaml.Deploy.DeployTo] ; !ok {
+        list := make([]string,0,len(p.templates_def.Run))
+        for element, _ := range p.templates_def.Run {
+            list = append(list, element)
+        }
+        return fmt.Errorf("'%s' deploy type is unknown (templates.yaml). Valid are %s", p.yaml.Deploy.DeployTo, list)
+    } else {
+        p.yaml.Deploy.Command = v
+    }
+    return nil
 }
 
+// TODO: Detect if the commands was manually updated to avoid updating it if end user did it alone.
+
+// At update time: Update jenkins source from req or forjj-jenkins.yaml input.
 func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData)  (status bool) {
     p.yaml.Deploy.SetFrom(&r.Args.DeployStruct)
     p.yaml.Docker.SetFrom(&r.Args.SourceStruct, "") // No orga name to provide for updates...
+    if err := p.DefineDeployCommand() ; err != nil {
+        ret.Errorf("Unable to update the deployement command. %s", err)
+        return
+    }
     return true
 }
 
 func (p *JenkinsPlugin)save_yaml(ret *goforjj.PluginData) (status bool) {
-    file := path.Join(p.yaml.Forjj.InstanceName, jenkins_file)
+    file := path.Join(p.source_path, jenkins_file)
 
     d, err := yaml.Marshal(&p.yaml)
     if  err != nil {
@@ -95,14 +121,17 @@ func (p *JenkinsPlugin)save_yaml(ret *goforjj.PluginData) (status bool) {
         ret.Errorf("Unable to save '%s'. %s", file, err)
         return
     }
-    ret.AddFile(file)
-    log.Printf("'%s' instance saved.")
+    // Be careful to not introduce the local mount which in containers can be totally different (due to docker -v)
+    ret.AddFile(path.Join(p.yaml.Forjj.InstanceName, jenkins_file))
+    ret.StatusAdd("'%s' instance saved (%s).", p.yaml.Forjj.InstanceName, path.Join(p.yaml.Forjj.InstanceName, jenkins_file))
+    log.Printf("'%s' instance saved.", file)
     return true
 }
 
-func (p *JenkinsPlugin)load_yaml(instance string, ret *goforjj.PluginData) (status bool) {
-    file := path.Join(instance, jenkins_file)
+func (p *JenkinsPlugin)load_yaml(ret *goforjj.PluginData) (status bool) {
+    file := path.Join(p.source_path, jenkins_file)
 
+    log.Printf("Loading '%s'...", file)
     if d, err := ioutil.ReadFile(file) ; err != nil {
         ret.Errorf("Unable to read '%s'. %s", file, err)
         return

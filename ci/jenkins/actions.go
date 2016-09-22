@@ -47,7 +47,7 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
         p = pr
     }
 
-    if ! p.load_yaml(req.Args.ForjjInstanceName, ret) {
+    if ! p.load_yaml(ret) {
         return
     }
 
@@ -70,16 +70,12 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 // ret_data contains the response structure to return back to forjj.
 //
 func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *goforjj.PluginData) (httpCode int) {
-    var p *JenkinsPlugin
-
-    if pr, ok := req.check_source_existence(ret) ; !ok {
+    if ! req.check_source_existence(ret)  {
         return
-    } else {
-        p = pr
     }
 
     // loop on list of jenkins instances defined by a collection of */jenkins.yaml
-    if ! p.InstantiateAll(ret) {
+    if ! InstantiateAll(req.Args.ForjjSourceMount, ret) {
         return
     }
     return
