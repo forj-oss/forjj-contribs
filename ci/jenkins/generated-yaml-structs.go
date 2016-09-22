@@ -8,7 +8,7 @@ import "github.hpe.com/christophe-larsonneur/goforjj"
 // Common group of data between create/update actions
 type DeployStruct struct {
     DeployTo string `json:"deploy-to"` // Where this jenkins source code will be deployed. Supports 'docker'. Future would be 'marathon', 'dcos' and 'host'
-    ServiceAddr string `json:"service-addr"` // CNAME or IP address of the expected jenkins instance
+    ServiceAddr string `json:"service-addr"` // Exposed service CNAME or IP address of the expected jenkins instance
     ServicePort string `json:"service-port"` // Expected jenkins instance port number.
 }
 
@@ -154,7 +154,7 @@ const YamlDesc="---\n" +
    "        group: \"deploy\"\n" +
    "      service-addr:\n" +
    "        required: true\n" +
-   "        help: \"CNAME or IP address of the expected jenkins instance\"\n" +
+   "        help: \"Exposed service CNAME or IP address of the expected jenkins instance\"\n" +
    "        group: \"deploy\"\n" +
    "      service-port:\n" +
    "        default: \"8080\"\n" +

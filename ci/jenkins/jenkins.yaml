@@ -51,7 +51,7 @@ actions:
         group: "deploy"
       service-addr:
         required: true
-        help: "CNAME or IP address of the expected jenkins instance"
+        help: "Exposed service CNAME or IP address of the expected jenkins instance"
         group: "deploy"
       service-port:
         default: "8080"
