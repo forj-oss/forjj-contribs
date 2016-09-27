@@ -8,6 +8,7 @@ import (
     "text/template"
     "io/ioutil"
     "fmt"
+    "strings"
 )
 
 // This file describes how we generate source from templates.
@@ -81,7 +82,7 @@ func (p *JenkinsPlugin)generate_source_files(instance_name string, ret *goforjj.
         if b, err := ioutil.ReadFile(src) ; err != nil {
             log.Printf(ret.Errorf("Load issue. %s", err))
         } else {
-            data = string(b)
+            data = strings.Replace(string(b), "\\\n", "", -1)
         }
 
         t, err := template.New(src).Funcs(template.FuncMap{}).Parse(data)
