@@ -20,7 +20,7 @@ features:
 sources:
   common:
     docker file:
-      source: "Dockerfile"
+      template: "Dockerfile"
     build script:
       template: "bin/build.sh"
       chmod   : 0755
