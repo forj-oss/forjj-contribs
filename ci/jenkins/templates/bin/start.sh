@@ -30,7 +30,7 @@ then
    source run_opts.sh
 fi
 
-TAG_NAME=docker.hos.hpecorp.net/$LOGNAME/$IMAGE_NAME:$IMAGE_VERSION
+TAG_NAME={{ .JenkinsImage.FinalDockerRegistryServer }}/$LOGNAME/$IMAGE_NAME:$IMAGE_VERSION
 
 {{/* Docker uses go template for --format. So need to generate a template go string */}}\
 CONTAINER_IMG="$(sudo docker ps -f name={{ .JenkinsImage.FinalDockerImage }}-dood --format "{{ "{{ .Image }}" }}")"
