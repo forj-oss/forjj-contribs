@@ -251,7 +251,6 @@ const YamlDesc="---\n" +
    "        help: \"Where this jenkins source code will be deployed. Supports 'docker'. Future would be 'marathon', 'dcos' and 'host'\"\n" +
    "        group: \"deploy\"\n" +
    "      service-addr:\n" +
-   "        required: true\n" +
    "        help: \"Exposed service CNAME or IP address of the expected jenkins instance\"\n" +
    "        group: \"deploy\"\n" +
    "      service-port:\n" +
