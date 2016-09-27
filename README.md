@@ -2,7 +2,7 @@
 
 # Introduction
 
-Forjj project is the [next generation of Forj](https://github.hpe.com/christophe-larsonneur/forjj).
+Forjj project is the [next generation of Forj](https://github.hpe.com/forjj/forjj).
 
 The core of Forjj is very limited to manage local repositories, mainly infra and have simple pre-defined tasks (create/update/maintain)
 
@@ -27,7 +27,7 @@ The plugin binary HAVE to be with executable bits in place. It can be any kind o
 
 The plugin will run in the context of a Forjj container. But there is no image type to use with forjj. Forjj uses only a socket file and source mount point. Then it communicates with it through the socket file.
 
-This container is started by `forjj` automatically. For details about this part of forjj, [read the source code here](https://github.hpe.com/christophe-larsonneur/forjj/raw/master/driver.go)
+This container is started by `forjj` automatically. For details about this part of forjj, [read the source code here](https://github.hpe.com/forjj/forjj/raw/master/driver.go)
 
 ## Plugin tasks
 
@@ -81,6 +81,7 @@ actions:                             # Collection of actions to describe. common
         help : "option help"         # Describe the optionName help.
         required: <true/false>       # false by default.
         default : "my default value" # Define the default value.
+        secure: <true/false>         # False by default. See details about how secure data are managed between forjj and the plugin.
   create:                            # create options list
     help: "<Plugin cmd description>" # Sentence describing the plugin command tasks.
     flags:
@@ -113,6 +114,41 @@ Ex:
 
   create task list of options for github driver
   `forjj create --apps upstream:github --help-long`
+
+## secure flag
+
+When a plugin requires some critical data like password or token, the plugin should never store it in the SCM. 
+If you declare this flag as secure, forjj will give a facility to store this information in his workspace or a file selected by the end user.
+It facilitates to 
+- manage this data outside forjj
+- To deliver automatically them to each stage though the workspace/forjj-creds.yaml or through an external file.
+ 
+Use case example:
+
+```bash
+# github has a secure flag called github-token.
+# The following command will sent the token to the plugin and forjj will get it back requested by the plugin to store it 
+# in the workspace/forjj-creds.yaml and declare those data in the infra repo
+forjj create ~/tmp/test --apps upstream:github --github-token $MYTOKEN
+#
+# So, now, you can update or maintain it without need to provide it again as it iw stored in the local workspace
+forjj update ~/tmp/test add-myrepo-branch --repos myrepo
+forjj maintain ~/tmp/test
+# github plugin will use the saved token from the workspace to deliver the --github-token for you.
+```
+
+You can use your own secure file, delivered from vault for example:
+```bash
+# github has a secure flag called github-token.
+# The following command will sent the token to the plugin and forjj will get it back requested by the plugin to store it 
+# in the workspace/forjj-creds.yaml and declare those data in the infra repo
+forjj create ~/tmp/test -c ~/vault/mycreds.yaml --apps upstream:github --github-token $MYTOKEN
+#
+# So, now, you can update or maintain it without need to provide it again as it iw stored in the local workspace
+forjj update ~/tmp/test add-myrepo-branch -c ~/vault/mycreds.yaml --repos myrepo
+forjj maintain ~/tmp/test -c ~/vault/mycreds.yaml
+# github plugin will use the saved token from the workspace to deliver the --github-token for you.
+```
 
 # Using you own version of forjj-contribs
 
