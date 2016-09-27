@@ -21,12 +21,13 @@ actions:
        help: "Where the source dir is located for github plugin."
      forjj-instance-name:
         help: "Name of the jenkins instance given by forjj."
- create:
-   help: "Create the github environment to manage source and infra code."
-   flags:
      github-token:
        help: "github token to access. This token must authorize organization level access."
        required: true
+       secure: true
+ create:
+   help: "Create the github environment to manage source and infra code."
+   flags:
      github-server:
        help: "Github Entreprise Server name. By default, public 'github.com' API is used."
      forjj-organization:
@@ -36,9 +37,6 @@ actions:
  update:
    help: "Update the github infrastructure in the infra repository."
    flags:
-     github-token:
-       help: "github token to access. This token must authorize organization level access."
-       required: true
      github-server:
        help: "Github Entreprise Server name. By default, public 'github.com' API is used."
      forjj-organization:
@@ -48,8 +46,5 @@ actions:
  maintain:
    help: "Maintain github infrastructure from the infra repository"
    flags:
-     github-token:
-       help: "github token to access. This token must authorize organization level access."
-       required: true
      forjj-workspace-mount:
        help: "Where the workspace dir is located for github plugin."
