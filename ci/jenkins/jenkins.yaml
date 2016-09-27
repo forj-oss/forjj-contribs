@@ -126,7 +126,6 @@ actions:
         help: "Where this jenkins source code will be deployed. Supports 'docker'. Future would be 'marathon', 'dcos' and 'host'"
         group: "deploy"
       service-addr:
-        required: true
         help: "Exposed service CNAME or IP address of the expected jenkins instance"
         group: "deploy"
       service-port:
