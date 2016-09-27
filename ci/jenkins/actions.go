@@ -75,7 +75,7 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
     }
 
     // loop on list of jenkins instances defined by a collection of */jenkins.yaml
-    if ! InstantiateAll(req.Args.ForjjSourceMount, ret) {
+    if ! req.InstantiateAll(ret) {
         return
     }
     return

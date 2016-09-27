@@ -2,12 +2,12 @@
 #
 #
 
-IMAGE_NAME={{ .Docker.Name }}
+IMAGE_NAME={{ .JenkinsImage.FinalDockerImage }}
 
 if [ "$LOGNAME" = jenkins ]
 then
-   REPO={{ .Docker.Repository }}
-   IMAGE_VERSION={{ .Docker.Version }}
+   REPO={{ .JenkinsImage.FinalDockerRepoName }}
+   IMAGE_VERSION={{ .JenkinsImage.FinalDockerImageVersion }}
 else
    REPO=$LOGNAME
    IMAGE_VERSION=test
@@ -18,7 +18,7 @@ then
    source build_opts.sh
 fi
 
-TAG_NAME=docker.hos.hpecorp.net/$REPO/$IMAGE_NAME:$IMAGE_VERSION
+TAG_NAME={{ .JenkinsImage.FinalDockerRegistryServer }}/$REPO/$IMAGE_NAME:$IMAGE_VERSION
 
 if [ "$http_proxy" != "" ]
 then
@@ -47,6 +47,7 @@ JENKINS_INSTALL_INITS_URL="https://github.hpe.com/$MYFORK/raw/$BRANCH/"
 FEATURES="--build-arg JENKINS_INSTALL_INITS_URL=$JENKINS_INSTALL_INITS_URL"
 
 set -x
+sudo -n docker pull {{ .Dockerfile.BaseDockerImage }}{{ if .Dockerfile.BaseDockerImageVersion }}:{{ .Dockerfile.BaseDockerImageVersion }}{{ end }}
 sudo -n docker build -t $TAG_NAME $FEATURES $PROXY $BUILD_OPTS .
 set +x
 

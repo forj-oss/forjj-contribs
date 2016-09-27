@@ -24,12 +24,15 @@ func (r *MaintainReq) check_source_existence(ret *goforjj.PluginData) (status bo
 
 // Looping on all instances
 // Need to define where to deploy (dev/itg/pro/local/other)
-func InstantiateAll(mount string, ret *goforjj.PluginData) (status bool) {
+func (r *MaintainReq)InstantiateAll(ret *goforjj.PluginData) (status bool) {
     elements, err := ioutil.ReadDir(".")
     if err != nil {
         ret.Errorf("Issue to read Current directory. %s", elements)
         return false
     }
+
+    mount := r.Args.ForjjSourceMount
+    auths := NewDockerAuths(r.Args.RegistryAuth)
 
     for _, instance := range elements {
         src := path.Join(mount, instance.Name())
@@ -40,7 +43,7 @@ func InstantiateAll(mount string, ret *goforjj.PluginData) (status bool) {
                 ret.Errorf("Unable to enter in '%s'. %s", src, err)
                 return false
             }
-            if ! p.InstantiateInstance(ret) {
+            if ! p.InstantiateInstance(auths, ret) {
                 return false
             }
         } else {
@@ -50,7 +53,7 @@ func InstantiateAll(mount string, ret *goforjj.PluginData) (status bool) {
     return true
 }
 
-func (p *JenkinsPlugin)InstantiateInstance(ret *goforjj.PluginData) (status bool) {
+func (p *JenkinsPlugin)InstantiateInstance(auths *DockerAuths, ret *goforjj.PluginData) (status bool) {
     if ! p.load_yaml(ret) {
         return
     }
@@ -60,6 +63,13 @@ func (p *JenkinsPlugin)InstantiateInstance(ret *goforjj.PluginData) (status bool
         ret.Errorf("Unable to instantiate to %s. Deploy Command is empty.", p.yaml.Deploy.DeployTo)
         return
     }
+
+    if err := auths.write_docker_config() ; err != nil {
+        ret.Errorf("Unable to instantiate. Unable to write the docker registry credential file. %s", err)
+        return
+    }
+    defer auths.remove_config()
+
     ret.StatusAdd("Running '%s'", p.yaml.Deploy.Command)
     s, err := run_cmd("/bin/sh", "-c", p.yaml.Deploy.Command)
     ret.StatusAdd(string(s))

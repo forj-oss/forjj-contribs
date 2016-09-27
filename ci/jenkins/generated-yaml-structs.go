@@ -12,12 +12,21 @@ type DeployStruct struct {
     ServicePort string `json:"service-port"` // Expected jenkins instance port number.
 }
 
-type SourceStruct struct {
-    DockerImage string `json:"docker-image"` // Base docker image name to use in Dockerfile
-    DockerImageVersion string `json:"docker-image-version"` // Base docker image version to use in Dockerfile
-    DockerRepoimage string `json:"docker-repoimage"` // Repository name containing your base docker image name to use in Dockerfile
-    Features string `json:"features"` // List of features to add to jenkins features.lst.
+type DockerfileStruct struct {
+    BaseDockerImage string `json:"base-docker-image"` // Base Docker image tag name to use in Dockerfile. Must respect [server/repo/]name.
+    BaseDockerImageVersion string `json:"base-docker-image-version"` // Base Docker image tag version to use in Dockerfile
     Maintainer string `json:"maintainer"` // Jenkins image maintainer
+}
+
+type FinalImageStruct struct {
+    FinalDockerImage string `json:"final-docker-image"` // Docker image name for your final generated Jenkins Image. Do not set the Server or Repo name. Use final-docker-registry-server and final-docker-repo-name.
+    FinalDockerImageVersion string `json:"final-docker-image-version"` // Docker image tag version for your generated Jenkins Image.
+    FinalDockerRegistryServer string `json:"final-docker-registry-server"` // Docker registry server name where your image will be pushed. If not set, no push will be done.
+    FinalDockerRepoName string `json:"final-docker-repo-name"` // Docker Repository Name where your image will be pushed. If not set, no push will be done.
+}
+
+type SourceStruct struct {
+    Features string `json:"features"` // List of features to add to jenkins features.lst.
 }
 
 type CreateReq struct {
@@ -27,14 +36,18 @@ type CreateReq struct {
 
 type CreateArgReq struct {
     DeployStruct
+    DockerfileStruct
+    FinalImageStruct
     SourceStruct
 
+    BaseRegistryServer string `json:"base-registry-server"` // Registry Server for docker pull of the Base image
     ForjjInstanceName string `json:"forjj-instance-name"` // Name of the jenkins instance to create given by forjj.
     ForjjOrganization string `json:"forjj-organization"` // Organization name used in the docker repo name if --docker-repoimage not set.
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
     ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for jenkins plugin.
     JenkinsDebug string `json:"jenkins-debug"` // To activate jenkins debug information
+    RegistryAuth string `json:"registry-auth"` // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
 }
 
 type UpdateReq struct {
@@ -44,15 +57,19 @@ type UpdateReq struct {
 
 type UpdateArgReq struct {
     DeployStruct
+    DockerfileStruct
+    FinalImageStruct
     SourceStruct
 
     FeaturesAdd string `json:"features-add"` // List of features to add to jenkins.
     ForjjInstanceName string `json:"forjj-instance-name"` // Name of the jenkins instance to update given by forjj.
+    ForjjOrganization string `json:"forjj-organization"` // Organization name used in the docker repo name if --docker-repoimage not set.
 
     // common flags
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
     ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for jenkins plugin.
     JenkinsDebug string `json:"jenkins-debug"` // To activate jenkins debug information
+    RegistryAuth string `json:"registry-auth"` // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
 }
 
 type MaintainReq struct {
@@ -66,6 +83,7 @@ type MaintainArgReq struct {
     ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use
     ForjjSourceMount string `json:"forjj-source-mount"` // Where the source dir is located for jenkins plugin.
     JenkinsDebug string `json:"jenkins-debug"` // To activate jenkins debug information
+    RegistryAuth string `json:"registry-auth"` // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
 }
 
 // Function which adds maintain options as part of the plugin answer in create/update phase.
@@ -75,12 +93,16 @@ func (r *CreateArgReq)SaveMaintainOptions(ret *goforjj.PluginData) {
     if ret.Options == nil {
         ret.Options = make(map[string]goforjj.PluginOption)
     }
+
+    ret.Options["registry-auth"] = addMaintainOptionValue(ret.Options, "registry-auth", r.RegistryAuth, "", "List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]")
 }
 
 func (r *UpdateArgReq)SaveMaintainOptions(ret *goforjj.PluginData) {
     if ret.Options == nil {
         ret.Options = make(map[string]goforjj.PluginOption)
     }
+
+    ret.Options["registry-auth"] = addMaintainOptionValue(ret.Options, "registry-auth", r.RegistryAuth, "", "List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]")
 }
 
 func addMaintainOptionValue(options map[string]goforjj.PluginOption, option, value, defaultv, help string) (goforjj.PluginOption){
@@ -123,6 +145,10 @@ const YamlDesc="---\n" +
    "        help: \"To activate jenkins debug information\"\n" +
    "      forjj-source-mount:\n" +
    "        help: \"Where the source dir is located for jenkins plugin.\"\n" +
+   "\n" +
+   "      registry-auth:\n" +
+   "        help: \"List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]\"\n" +
+   "        secure: true\n" +
    "  create:\n" +
    "    help: \"Create a jenkins instance source code.\"\n" +
    "    flags:\n" +
@@ -131,25 +157,43 @@ const YamlDesc="---\n" +
    "        help: \"Name of the jenkins instance to create given by forjj.\"\n" +
    "      forjj-organization:\n" +
    "        help: \"Organization name used in the docker repo name if --docker-repoimage not set.\"\n" +
-   "      docker-image:\n" +
-   "        help: \"Base docker image name to use in Dockerfile\"\n" +
-   "        default: \"jenkins\"\n" +
-   "        group: \"source\"\n" +
-   "      docker-image-version:\n" +
-   "        help: \"Base docker image version to use in Dockerfile\"\n" +
-   "        group: \"source\"\n" +
-   "      docker-repoimage:\n" +
-   "        help: \"Repository name containing your base docker image name to use in Dockerfile\"\n" +
-   "        group: \"source\"\n" +
+   "\n" +
+   "      # Information we can define for the Dockerfile.\n" +
+   "      base-docker-image:\n" +
+   "        help: \"Base Docker image tag name to use in Dockerfile. Must respect [server/repo/]name.\"\n" +
+   "        default: hub.docker.hpecorp.net/devops/jenkins-dood\n" +
+   "        group: \"dockerfile\"\n" +
+   "      base-docker-image-version:\n" +
+   "        help: \"Base Docker image tag version to use in Dockerfile\"\n" +
+   "        group: \"dockerfile\"\n" +
+   "      base-registry-server:\n" +
+   "        help: \"Registry Server for docker pull of the Base image\"\n" +
    "      maintainer:\n" +
    "        help: \"Jenkins image maintainer\"\n" +
-   "        group: \"source\"\n" +
+   "        group: \"dockerfile\"\n" +
+   "\n" +
+   "      final-docker-image:\n" +
+   "        help: \"Docker image name for your final generated Jenkins Image. Do not set the Server or Repo name. Use final-docker-registry-server and final-docker-repo-name.\"\n" +
+   "        default: jenkins\n" +
+   "        group: \"final-image\"\n" +
+   "      final-docker-image-version:\n" +
+   "        help: \"Docker image tag version for your generated Jenkins Image.\"\n" +
+   "        group: \"final-image\"\n" +
+   "      final-docker-registry-server:\n" +
+   "        help: \"Docker registry server name where your image will be pushed. If not set, no push will be done.\"\n" +
+   "        default: hub.docker.hpecorp.net\n" +
+   "        group: \"final-image\"\n" +
+   "      final-docker-repo-name:\n" +
+   "        help: \"Docker Repository Name where your image will be pushed. If not set, no push will be done.\"\n" +
+   "        group: \"final-image\"\n" +
+   "\n" +
    "      features:\n" +
    "        help: \"List of features to add to jenkins features.lst.\"\n" +
    "        group: \"source\"\n" +
+   "\n" +
    "      # Options related to deployment\n" +
    "      deploy-to:\n" +
-   "        default: \"docker\"\n" +
+   "        default: docker\n" +
    "        help: \"Where this jenkins source code will be deployed. Supports 'docker'. Future would be 'marathon', 'dcos' and 'host'\"\n" +
    "        group: \"deploy\"\n" +
    "      service-addr:\n" +
@@ -157,7 +201,7 @@ const YamlDesc="---\n" +
    "        help: \"Exposed service CNAME or IP address of the expected jenkins instance\"\n" +
    "        group: \"deploy\"\n" +
    "      service-port:\n" +
-   "        default: \"8080\"\n" +
+   "        default: 8080\n" +
    "        help: \"Expected jenkins instance port number.\"\n" +
    "        group: \"deploy\"\n" +
    "  update:\n" +
@@ -165,21 +209,55 @@ const YamlDesc="---\n" +
    "    flags:\n" +
    "      forjj-instance-name:\n" +
    "        help: \"Name of the jenkins instance to update given by forjj.\"\n" +
-   "      docker-image-version:\n" +
-   "        help: \"Base docker image version to use in Dockerfile\"\n" +
-   "        group: \"source\"\n" +
-   "      docker-image:\n" +
-   "        help: \"Base docker image name to use in Dockerfile\"\n" +
-   "        default: \"jenkins\"\n" +
-   "        group: \"source\"\n" +
-   "      docker-repoimage:\n" +
-   "        help: \"Repository name containing your base docker image name to use in Dockerfile\"\n" +
-   "        group: \"source\"\n" +
-   "      maintainer:\n" +
-   "        help: \"Jenkins image maintainer\"\n" +
-   "        group: \"source\"\n" +
+   "      forjj-organization:\n" +
+   "        help: \"Organization name used in the docker repo name if --docker-repoimage not set.\"\n" +
+   "\n" +
    "      features-add:\n" +
    "        help: \"List of features to add to jenkins.\"\n" +
+   "\n" +
+   "      # Information we can define for the Dockerfile.\n" +
+   "      base-docker-image:\n" +
+   "        help: \"Base Docker image tag name to use in Dockerfile. Must respect [server/repo/]name.\"\n" +
+   "        default: hub.docker.hpecorp.net/devops/jenkins-dood\n" +
+   "        group: \"dockerfile\"\n" +
+   "      base-docker-image-version:\n" +
+   "        help: \"Base Docker image tag version to use in Dockerfile\"\n" +
+   "        group: \"dockerfile\"\n" +
+   "      maintainer:\n" +
+   "        help: \"Jenkins image maintainer\"\n" +
+   "        group: \"dockerfile\"\n" +
+   "\n" +
+   "      final-docker-image:\n" +
+   "        help: \"Docker image name for your final generated Jenkins Image. Do not set the Server or Repo name. Use final-docker-registry-server and final-docker-repo-name.\"\n" +
+   "        default: jenkins\n" +
+   "        group: \"final-image\"\n" +
+   "      final-docker-image-version:\n" +
+   "        help: \"Docker image tag version for your generated Jenkins Image.\"\n" +
+   "        group: \"final-image\"\n" +
+   "      final-docker-registry-server:\n" +
+   "        help: \"Docker registry server name where your image will be pushed. If not set, no push will be done.\"\n" +
+   "        default: hub.docker.hpecorp.net\n" +
+   "        group: \"final-image\"\n" +
+   "      final-docker-repo-name:\n" +
+   "        help: \"Docker Repository Name where your image will be pushed. If not set, no push will be done.\"\n" +
+   "        group: \"final-image\"\n" +
+   "\n" +
+   "      features:\n" +
+   "        help: \"List of features to add to jenkins features.lst.\"\n" +
+   "        group: \"source\"\n" +
+   "      # Options related to deployment\n" +
+   "      deploy-to:\n" +
+   "        default: docker\n" +
+   "        help: \"Where this jenkins source code will be deployed. Supports 'docker'. Future would be 'marathon', 'dcos' and 'host'\"\n" +
+   "        group: \"deploy\"\n" +
+   "      service-addr:\n" +
+   "        required: true\n" +
+   "        help: \"Exposed service CNAME or IP address of the expected jenkins instance\"\n" +
+   "        group: \"deploy\"\n" +
+   "      service-port:\n" +
+   "        default: 8080\n" +
+   "        help: \"Expected jenkins instance port number.\"\n" +
+   "        group: \"deploy\"\n" +
    "  maintain:\n" +
    "    help: \"Instantiate jenkins thanks to source code.\"\n" +
    ""

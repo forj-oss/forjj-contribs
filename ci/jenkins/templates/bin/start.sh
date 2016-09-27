@@ -1,12 +1,10 @@
-#!/bin/sh
+#!/bin/sh -x
 #
 #
 
 REPO=$LOGNAME
-IMAGE_NAME={{ .Docker.Name }}
+IMAGE_NAME={{ .JenkinsImage.FinalDockerImage }}
 IMAGE_VERSION=test
-
-sudo docker rm -f {{ .Docker.Name }}-dood
 
 if [ "$http_proxy" != "" ]
 then
@@ -34,4 +32,29 @@ fi
 
 TAG_NAME=docker.hos.hpecorp.net/$LOGNAME/$IMAGE_NAME:$IMAGE_VERSION
 
-sudo docker run -d -p 8080:{{ .Deploy.ServicePort }} --name {{ .Docker.Name }}-dood $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
+{{/* Docker uses go template for --format. So need to generate a template go string */}}\
+CONTAINER_IMG="$(sudo docker ps -f name={{ .JenkinsImage.FinalDockerImage }}-dood --format "{{ "{{ .Image }}" }}")"
+
+IMAGE_ID="$(sudo docker images --format "{{ "{{ .ID }}" }}" $IMAGE_NAME)"
+
+if [ "$CONTAINER_IMG" != "" ]
+then
+    if [ "$CONTAINER_IMG" != "$TAG_NAME" ] && [ "$CONTAINER_IMG" != "$IMAGE_ID" ]
+    then
+        # TODO: Find a way to stop it safely
+        sudo docker rm -f {{ .JenkinsImage.FinalDockerImage }}-dood
+    else
+        echo "Nothing to re/start. Jenkins is still accessible at http://{{ .Deploy.ServiceAddr }}:{{ .Deploy.ServicePort }}"
+        exit 0
+    fi
+fi
+
+sudo docker run -d -p 8080:{{ .Deploy.ServicePort }} --name {{ .JenkinsImage.FinalDockerImage }}-dood $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
+
+if [ $? -ne 0 ]
+then
+    echo "Issue about jenkins startup."
+    sudo docker logs {{ .JenkinsImage.FinalDockerImage }}-dood
+    return 1
+fi
+echo "Jenkins has been started and should be accessible at http://{{ .Deploy.ServiceAddr }}:{{ .Deploy.ServicePort }}"
