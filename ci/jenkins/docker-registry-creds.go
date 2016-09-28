@@ -32,7 +32,7 @@ func (a *DockerAuths)write_docker_config() error {
     os.Chmod(protected_config, 0600)
     log.Printf("'%s' file generated.", protected_config)
 
-    if cmdlog, err := run_cmd("sudo", "/bin/docker-config-update.sh") ; err != nil {
+    if cmdlog, err := run_cmd("sudo", nil, "/bin/docker-config-update.sh") ; err != nil {
         log.Printf("Unable to update docker config file. %s. Script output: %s", err, cmdlog)
         return err
     } else {

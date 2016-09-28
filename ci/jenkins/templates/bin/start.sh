@@ -7,11 +7,11 @@ IMAGE_NAME={{ .JenkinsImage.FinalDockerImage }}
 IMAGE_VERSION=test
 
 
-# For Docker Out Of Docker case, a docker run may provides the DOOD_SRC to use in place of $(pwd)
+# For Docker Out Of Docker case, a docker run may provides the SRC to use in place of $(pwd)
 # This is required in case we use the docker -v to mount a 'local' volume (from where the docker daemon run).
-if [ "$DOOD_SRC" != "" ]
+if [ "$SRC" != "" ]
 then
-    VOL_PWD="$DOOD_SRC"
+    VOL_PWD="$SRC"
 else
    VOL_PWD="$(pwd)"
 fi
