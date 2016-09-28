@@ -6,6 +6,16 @@ REPO=$LOGNAME
 IMAGE_NAME={{ .JenkinsImage.FinalDockerImage }}
 IMAGE_VERSION=test
 
+
+# For Docker Out Of Docker case, a docker run may provides the DOOD_SRC to use in place of $(pwd)
+# This is required in case we use the docker -v to mount a 'local' volume (from where the docker daemon run).
+if [ "$DOOD_SRC" != "" ]
+then
+    VOL_PWD="$DOOD_SRC"
+else
+   VOL_PWD="$(pwd)"
+fi
+
 if [ "$http_proxy" != "" ]
 then
    PROXY=" --env http_proxy=$http_proxy --env https_proxy=$https_proxy --env no_proxy=$no_proxy"
@@ -17,9 +27,19 @@ then
    fi
 fi
 
-if [ -e jenkins_credentials.sh ]
+# A local volume is possible only when we are sure local mount is server dependent.
+# Any docker cluster cannot be used with local mount because, the container can be started any where.
+# This concerns swarm/ucp/mesos at least.
+
+if [ "$DOCKER_CLUSTER_SRC_VOL" != "" ]
 then
-   CREDS="-v $(pwd)/jenkins_credentials.sh:/tmp/jenkins_credentials.sh"
+    CREDS="-v $DOCKER_CLUSTER_SRC_VOL/jenkins_credentials.sh:/tmp/jenkins_credentials.sh"
+else
+    # The following works on native docker, Dood and DinD.
+    if [ -e jenkins_credentials.sh ]
+    then
+       CREDS="-v $VOL_PWD/jenkins_credentials.sh:/tmp/jenkins_credentials.sh"
+    fi
 fi
 
 # For production case, expect
