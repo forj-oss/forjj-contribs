@@ -36,9 +36,10 @@ func Copy(src, dst string) (int64, error) {
 
 // Simple function to call a shell command and display to stdout
 // stdout is displayed as is when it arrives, while stderr is displayed in Red, line per line.
-func run_cmd(command string, args ...string) (cmdlog []byte, err error){
+func run_cmd(command string, env []string, args ...string) (cmdlog []byte, err error){
 
     cmd := exec.Command(command, args...)
+    cmd.Env = env
     gotrace.Trace("RUNNING: %s %s", command, strings.Join(args, " "))
 
     // Execute command

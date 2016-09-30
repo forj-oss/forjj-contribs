@@ -8,9 +8,9 @@ features:
   - "feature:tcp-slave-agent-port"
   deploy:
     docker:
-    - "plugin:yet-another-docker-plugin"
+    - "feature:yet-another-docker-plugin"
     ucp:
-    - "plugin:yet-another-docker-plugin"
+    - "feature:yet-another-docker-plugin"
     mesos:
     - "feature:mesos-plugin"
     - "feature:executor"

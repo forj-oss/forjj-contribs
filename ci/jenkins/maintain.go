@@ -41,9 +41,9 @@ func (r *MaintainReq)InstantiateAll(ret *goforjj.PluginData) (status bool) {
             ret.StatusAdd("Maintaining '%s'", instance.Name())
             if err := os.Chdir(src) ; err != nil {
                 ret.Errorf("Unable to enter in '%s'. %s", src, err)
-                return false
+                return
             }
-            if ! p.InstantiateInstance(auths, ret) {
+            if ! p.InstantiateInstance(instance.Name(), auths, ret) {
                 return false
             }
         } else {
@@ -53,7 +53,7 @@ func (r *MaintainReq)InstantiateAll(ret *goforjj.PluginData) (status bool) {
     return true
 }
 
-func (p *JenkinsPlugin)InstantiateInstance(auths *DockerAuths, ret *goforjj.PluginData) (status bool) {
+func (p *JenkinsPlugin)InstantiateInstance(instance string, auths *DockerAuths, ret *goforjj.PluginData) (status bool) {
     if ! p.load_yaml(ret) {
         return
     }
@@ -71,7 +71,13 @@ func (p *JenkinsPlugin)InstantiateInstance(auths *DockerAuths, ret *goforjj.Plug
     defer auths.remove_config()
 
     ret.StatusAdd("Running '%s'", p.yaml.Deploy.Command)
-    s, err := run_cmd("/bin/sh", "-c", p.yaml.Deploy.Command)
+
+    var env []string
+    if v := os.Getenv("DOOD_SRC") ; v != "" {
+        env = append(os.Environ(), "SRC=" + path.Join(v, instance))
+    }
+
+    s, err := run_cmd("/bin/sh", env, "-c", p.yaml.Deploy.Command)
     ret.StatusAdd(string(s))
     if err != nil {
         cur_dir, _ := os.Getwd()
