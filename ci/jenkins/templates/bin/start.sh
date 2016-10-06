@@ -36,7 +36,7 @@ then
     CREDS="-v $DOCKER_CLUSTER_SRC_VOL/jenkins_credentials.sh:/tmp/jenkins_credentials.sh"
 else
     # The following works on native docker, Dood and DinD.
-    if [ -e jenkins_credentials.sh ]
+    if [ -f jenkins_credentials.sh ] && [ -r jenkins_credentials.sh ]
     then
        CREDS="-v $VOL_PWD/jenkins_credentials.sh:/tmp/jenkins_credentials.sh"
     fi
