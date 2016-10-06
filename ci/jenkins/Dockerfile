@@ -7,12 +7,12 @@ WORKDIR /src
 
 COPY ca_certificates/* /usr/local/share/ca-certificates/
 
-COPY templates/ /templates/
-
 RUN apk update &&     apk add --no-cache ca-certificates sudo &&     update-ca-certificates --fresh &&     rm -f /var/cache/apk/*tar.gz &&     adduser devops devops -D
 
 # Required for DooD
 RUN echo "devops ALL=(root:root) NOPASSWD:/bin/docker,NOPASSWD:/bin/docker-config-update.sh" >> /etc/sudoers.d/docker && chmod 600 /etc/sudoers.d/docker
+
+COPY templates/ /templates/
 
 COPY jenkins docker-config-update.sh /bin/
 
