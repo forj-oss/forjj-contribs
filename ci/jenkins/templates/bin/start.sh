@@ -53,7 +53,7 @@ fi
 TAG_NAME={{ .JenkinsImage.FinalDockerRegistryServer }}/$LOGNAME/$IMAGE_NAME:$IMAGE_VERSION
 
 {{/* Docker uses go template for --format. So need to generate a template go string */}}\
-CONTAINER_IMG="$(sudo docker ps -f name={{ .JenkinsImage.FinalDockerImage }}-dood --format "{{ "{{ .Image }}" }}")"
+CONTAINER_IMG="$(sudo docker ps -a -f name={{ .JenkinsImage.FinalDockerImage }}-dood --format "{{ "{{ .Image }}" }}")"
 
 IMAGE_ID="$(sudo docker images --format "{{ "{{ .ID }}" }}" $IMAGE_NAME)"
 
