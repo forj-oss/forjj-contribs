@@ -48,3 +48,53 @@ actions:
    flags:
      forjj-workspace-mount:
        help: "Where the workspace dir is located for github plugin."
+objects:
+  # Define github group exposure to forjj
+  group:
+    # Default is : actions: ["add", "update", "remove", "list", "rename"]
+    help: "Manage teams in github"
+    flags:
+      organization:
+        help: "To manage github teams at organization level"
+        default: "false"
+      users:
+        only-for-actions: ["add"]
+        help: "List of users to attach to the new group."
+      add-users:
+        only-for-actions: ["update"]
+        help: "Add users to github team."
+      remove-users:
+        actions: ["update"]
+        help: "remove users from github team."
+      name:
+        help: "group name"
+        required: true
+      roles:
+        only-for-actions: ["add"]
+        help: "List of roles to apply to the new group."
+      add-roles:
+        only-for-actions: ["update"]
+        help: "Roles added to the group."
+      remove-roles:
+        only-for-actions: ["update"]
+        help: "Roles removed to the group."
+  # Define github users exposure to forjj
+  user:
+    # Default is : actions: ["add", "update", "remove", "list", "rename"]
+    help: "Manage teams in github"
+    flags:
+      organization:
+        help: "To manage github users at organization level"
+        default: "false"
+      name:
+        help: "user name"
+        required: true
+      roles:
+        only-for-actions: ["add"]
+        help: "List of roles to apply to the new user."
+      add-roles:
+        only-for-actions: ["update"]
+        help: "Roles added to the user."
+      remove-roles:
+        only-for-actions: ["update"]
+        help: "Roles removed from the user."
