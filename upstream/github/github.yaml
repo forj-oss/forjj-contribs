@@ -7,50 +7,45 @@ runtime:
     image: "hub.docker.hpecorp.net/devops/forjj-github"
   service_type: "REST API"
   service:
-    #socket: "github.sock"
     parameters: [ "service", "start" ]
 created_flag_file: "{{ .InstanceName }}/{{.Name}}.yaml"
-actions:
- common:
-   flags:
-     forjj-infra:
-       help: "Name of the Infra repository to use"
-     github-debug:
-       help: "To activate github debug information"
-     forjj-source-mount:
-       help: "Where the source dir is located for github plugin."
-     forjj-instance-name:
-        help: "Name of the jenkins instance given by forjj."
-     github-token:
-       help: "github token to access. This token must authorize organization level access."
-       required: true
-       secure: true
- create:
-   help: "Create the github environment to manage source and infra code."
-   flags:
-     github-server:
-       help: "Github Entreprise Server name. By default, public 'github.com' API is used."
-     forjj-organization:
-       help: "Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization"
-     github-organization:
-       help: "Github Organization name. By default, it uses the FORJJ organization name"
- update:
-   help: "Update the github infrastructure in the infra repository."
-   flags:
-     github-server:
-       help: "Github Entreprise Server name. By default, public 'github.com' API is used."
-     forjj-organization:
-       help: "Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization"
-     github-organization:
-       help: "Github Organization name. By default, it uses the FORJJ organization name"
- maintain:
-   help: "Maintain github infrastructure from the infra repository"
-   flags:
-     forjj-workspace-mount:
-       help: "Where the workspace dir is located for github plugin."
+task_flags:
+  common:
+    debug:
+      help: "To activate github debug information"
+    forjj-source-mount:
+      help: "Where the source dir is located for github plugin container."
+    forjj-instance-name:
+       help: "Name of the jenkins instance given by forjj."
+  maintain:
+    forjj-workspace-mount:
+      help: "Where the workspace dir is located in the github plugin container."
+    token:
+      required: true
+      secure: true
 objects:
+  # Define infra object special flag for github
+  app: # already defined by Forjj
+    # Default is : actions: ["add", "update", "remove"] No need to define it.
+    flags:
+      server:
+        help: "Github Entreprise Server name. By default, public 'github.com' API is used."
+      forjj-organization:
+        only-for-actions: ["add"]
+        help: "Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization"
+      organization:
+        only-for-actions: ["add"]
+        help: "Github Organization name. By default, it uses the FORJJ organization name"
+      forjj-infra:
+        only-for-actions: ["add", "update"]
+        help: "Name of the Infra repository to use in github if requested."
+      token:
+        only-for-actions: ["add", "update"]
+        help: "github token to access. This token must authorize organization level access."
+        required: true
+        secure: true
   # Define github group exposure to forjj
-  group:
+  group: # New object type in forjj
     # Default is : actions: ["add", "update", "remove", "list", "rename"]
     help: "Manage teams in github"
     flags:
@@ -79,7 +74,7 @@ objects:
         only-for-actions: ["update"]
         help: "Roles removed to the group."
   # Define github users exposure to forjj
-  user:
+  user: # New object type in forjj
     # Default is : actions: ["add", "update", "remove", "list", "rename"]
     help: "Manage teams in github"
     flags:
@@ -98,3 +93,10 @@ objects:
       remove-roles:
         only-for-actions: ["update"]
         help: "Roles removed from the user."
+  repo: # Enhance Forjj repo object
+    flags:
+      forjj-workspace-mount:
+        help: "Where the workspace dir is located in the github plugin container."
+      token:
+        secure: true
+
