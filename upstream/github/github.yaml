@@ -9,7 +9,7 @@ runtime:
   service:
     parameters: [ "service", "start" ]
 created_flag_file: "{{ .InstanceName }}/{{.Name}}.yaml"
-task_flags:
+task_flags: # All task flags will be delivered by forjj to the plugin under forj/
   common:
     debug:
       help: "To activate github debug information"
@@ -23,7 +23,7 @@ task_flags:
     token:
       required: true
       secure: true
-objects:
+objects: # All objects will be delivered by forjj except workspace/infra under objects/<type>/<instance>/<action>/key=value
   # Define infra object special flag for github
   app: # already defined by Forjj
     # Default is : actions: ["add", "update", "remove"] No need to define it.
@@ -48,6 +48,7 @@ objects:
   group: # New object type in forjj
     # Default is : actions: ["add", "update", "remove", "list", "rename"]
     help: "Manage teams in github"
+    identified_by_flag: name
     flags:
       organization:
         help: "To manage github teams at organization level"
@@ -77,19 +78,23 @@ objects:
   user: # New object type in forjj
     # Default is : actions: ["add", "update", "remove", "list", "rename"]
     help: "Manage teams in github"
+    identified_by_flag: name
     flags:
       organization:
         help: "To manage github users at organization level"
         default: "false"
       name:
-        help: "user name"
-        required: true
+        options:
+          help: "user name"
+          required: true
       roles:
         only-for-actions: ["add"]
-        help: "List of roles to apply to the new user."
+        options:
+          help: "List of roles to apply to the new user."
       add-roles:
         only-for-actions: ["update"]
-        help: "Roles added to the user."
+        options:
+          help: "Roles added to the user."
       remove-roles:
         only-for-actions: ["update"]
         help: "Roles removed from the user."
