@@ -17,12 +17,6 @@ task_flags: # All task flags will be delivered by forjj to the plugin under forj
       help: "Where the source dir is located for github plugin container."
     forjj-instance-name:
        help: "Name of the jenkins instance given by forjj."
-  maintain:
-    forjj-workspace-mount:
-      help: "Where the workspace dir is located in the github plugin container."
-    token:
-      required: true
-      secure: true
 objects: # All objects will be delivered by forjj except workspace/infra under objects/<type>/<instance>/<action>/key=value
   # Define infra object special flag for github
   app: # already defined by Forjj
@@ -44,6 +38,7 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         help: "github token to access. This token must authorize organization level access."
         required: true
         secure: true
+        envar: "TOKEN"
   # Define github group exposure to forjj
   group: # New object type in forjj
     # Default is : actions: ["add", "update", "remove", "list", "rename"]
@@ -102,6 +97,3 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
     flags:
       forjj-workspace-mount:
         help: "Where the workspace dir is located in the github plugin container."
-      token:
-        secure: true
-
