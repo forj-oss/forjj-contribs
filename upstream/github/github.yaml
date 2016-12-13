@@ -20,7 +20,7 @@ task_flags: # All task flags will be delivered by forjj to the plugin under forj
 objects: # All objects will be delivered by forjj except workspace/infra under objects/<type>/<instance>/<action>/key=value
   # Define infra object special flag for github
   app: # already defined by Forjj
-    # Default is : actions: ["add", "update", "remove"] No need to define it.
+    # Default is : actions: ["add", "change", "remove"] No need to define it.
     flags:
       server:
         help: "Github Entreprise Server name. By default, public 'github.com' API is used."
@@ -31,17 +31,17 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         only-for-actions: ["add"]
         help: "Github Organization name. By default, it uses the FORJJ organization name"
       forjj-infra:
-        only-for-actions: ["add", "update"]
+        only-for-actions: ["add", "change"]
         help: "Name of the Infra repository to use in github if requested."
       token:
-        only-for-actions: ["add", "update"]
+        only-for-actions: ["add", "change"]
         help: "github token to access. This token must authorize organization level access."
         required: true
         secure: true
         envar: "TOKEN"
   # Define github group exposure to forjj
   group: # New object type in forjj
-    # Default is : actions: ["add", "update", "remove", "list", "rename"]
+    # Default is : actions: ["add", "change", "remove", "list", "rename"]
     help: "Manage teams in github"
     identified_by_flag: name
     flags:
@@ -52,10 +52,10 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         only-for-actions: ["add"]
         help: "List of users to attach to the new group."
       add-users:
-        only-for-actions: ["update"]
+        only-for-actions: ["change"]
         help: "Add users to github team."
       remove-users:
-        actions: ["update"]
+        actions: ["change"]
         help: "remove users from github team."
       name:
         help: "group name"
@@ -64,14 +64,14 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         only-for-actions: ["add"]
         help: "List of roles to apply to the new group."
       add-roles:
-        only-for-actions: ["update"]
+        only-for-actions: ["change"]
         help: "Roles added to the group."
       remove-roles:
-        only-for-actions: ["update"]
+        only-for-actions: ["change"]
         help: "Roles removed to the group."
   # Define github users exposure to forjj
   user: # New object type in forjj
-    # Default is : actions: ["add", "update", "remove", "list", "rename"]
+    # Default is : actions: ["add", "change", "remove", "list", "rename"]
     help: "Manage teams in github"
     identified_by_flag: name
     flags:
@@ -87,11 +87,11 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         options:
           help: "List of roles to apply to the new user."
       add-roles:
-        only-for-actions: ["update"]
+        only-for-actions: ["change"]
         options:
           help: "Roles added to the user."
       remove-roles:
-        only-for-actions: ["update"]
+        only-for-actions: ["change"]
         help: "Roles removed from the user."
   repo: # Enhance Forjj repo object
     flags:
