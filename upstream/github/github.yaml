@@ -17,6 +17,9 @@ task_flags: # All task flags will be delivered by forjj to the plugin under forj
       help: "Where the source dir is located for github plugin container."
     forjj-instance-name:
        help: "Name of the jenkins instance given by forjj."
+  maintain:
+    forjj-workspace-mount:
+      help: "Where the workspace dir is located in the github plugin container."
 objects: # All objects will be delivered by forjj except workspace/infra under objects/<type>/<instance>/<action>/key=value
   # Define infra object special flag for github
   app: # already defined by Forjj
@@ -94,6 +97,25 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         only-for-actions: ["change"]
         help: "Roles removed from the user."
   repo: # Enhance Forjj repo object
+    actions: ["add", "change"]
     flags:
+      name:
+        help: "Repository name"
+      title:
+        help: "Github Repository title"
+      users:
+        only-for-actions: ["add"]
+        help: "List of users (user:role) to attach to the repository, separated by comma."
+      groups:
+        only-for-actions: ["add"]
+        help: "List of groups (group:role) to attach to the repository, separated by comma."
+      add-users:
+        only-for-actions: ["change"]
+        help: "List of additional users (user:role) to attach to the repository, separated by comma."
+      add-groups:
+        only-for-actions: ["change"]
+        help: "List of additional groups (group:role) to attach to the repository, separated by comma."
+      flow:
+        help: "Flow activated on this repository"
       forjj-workspace-mount:
         help: "Where the workspace dir is located in the github plugin container."

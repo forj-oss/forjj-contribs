@@ -24,16 +24,4 @@ type GitHubSourceStruct struct {
     Groups map[string]string             // Collection of groups role at organization level
 }
 
-type RepositoryStruct  struct { // Used to stored the yaml source file. Not used to respond to the API requester.
-    Name string                 // Name of the Repo
-    Flow string                 // Flow applied on the repo.
-    Description string          // Title in github repository
-    Users map[string]string     // Collection of users role
-    Groups map[string]string     // Collection of groups role
-    // Following data are used at runtime but not saved. Used to respond to the API.
-    exist bool                      // True if the repo exist.
-    remotes map[string]string       // k: remote name, v: remote url
-    branchConnect map[string]string // k: local branch name, v: remote/branch
-}
-
 const github_source_file = "github.yaml"

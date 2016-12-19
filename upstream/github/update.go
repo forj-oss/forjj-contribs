@@ -7,27 +7,47 @@ import (
     "log"
 )
 
-func (g *GitHubStruct)update_yaml_data(req *UpdateReq, ret *goforjj.PluginData) (Updated bool) {
+func (g *GitHubStruct)update_yaml_data(req *UpdateReq, ret *goforjj.PluginData) ( bool) {
     if g.github_source.Repos == nil {
         g.github_source.Repos = make(map[string]RepositoryStruct)
     }
 
-    log.Printf("Request has %d repository(ies)", len(req.ReposData))
+    log.Printf("Request has %d repository(ies)", len(req.Objects.Repo))
 
-    for name, repo := range req.ReposData {
-        if g.AddRepo(name, repo) {
-            Updated = true
-            ret.StatusAdd("New Repository '%s' added.", name)
-        } else {
-            r := g.github_source.Repos[name]
-            if r.Update(repo) >0 {
-                Updated = true
-                ret.StatusAdd("Repository '%s' updated.", name)
-            }
-        }
-
+    for _, repo := range req.Objects.Repo {
+	    Updated, err_msg, mess := repo.DoUpdateIn(g)
+	    if Updated {
+		    ret.StatusAdd(mess)
+	    } else {
+		    ret.ErrorMessage = err_msg
+	    }
     }
 
-    return
+    return true
 }
 
+// Function which adds maintain options as part of the plugin answer in create/update phase.
+// forjj won't add any driver name because 'maintain' phase read the list of drivers to use from forjj-maintain.yml
+// So --git-us is not available for forjj maintain.
+func (r *UpdateArgReq) SaveMaintainOptions(ret *goforjj.PluginData) {
+    if ret.Options == nil {
+        ret.Options = make(map[string]goforjj.PluginOption)
+    }
+}
+
+func addMaintainOptionValue(options map[string]goforjj.PluginOption, option, value, defaultv, help string) goforjj.PluginOption {
+    opt, ok := options[option]
+    if ok && value != "" {
+        opt.Value = value
+        return opt
+    }
+    if !ok {
+        opt = goforjj.PluginOption{Help: help}
+        if value == "" {
+            opt.Value = defaultv
+        } else {
+            opt.Value = value
+        }
+    }
+    return opt
+}

@@ -50,7 +50,7 @@ func (g *GitHubStruct)verify_req_fails(ret *goforjj.PluginData, check map[string
 
     if v, ok := check["token"] ; ok && v {
         if g.token == "" {
-            ret.ErrorMessage = fmt.Sprintf("github-token is empty - Required")
+            ret.ErrorMessage = fmt.Sprint("github-token is empty - Required")
             return true
         }
     }
