@@ -1,21 +1,21 @@
 package main
 
-func (t *DeployStruct)SetFrom(d *DeployStruct) {
+func (t *DeployStruct)SetFrom(d *AddDeployStruct) {
     SetIfSet(&t.DeployTo, d.DeployTo)
     SetIfSet(&t.ServiceAddr, d.ServiceAddr)
     SetIfSet(&t.ServicePort, d.ServicePort)
 }
 
-func (t *DockerfileStruct)SetFrom(d *DockerfileStruct) {
-    SetIfSet(&t.BaseDockerImage, d.BaseDockerImage)
-    SetIfSet(&t.BaseDockerImageVersion, d.BaseDockerImageVersion)
+func (t *DockerfileStruct)SetFrom(d *AddDockerfileStruct) {
+    SetIfSet(&t.FromImage, d.FromImage)
+    SetIfSet(&t.FromImageVersion, d.FromImageVersion)
     SetIfSet(&t.Maintainer, d.Maintainer)
 }
 
 func (t *FinalImageStruct)SetFrom(d *FinalImageStruct, org string) {
-    SetIfSet(&t.FinalDockerImage, d.FinalDockerImage)
+    SetIfSet(&t.Name, d.Name)
     SetIfSet(&t.FinalDockerImageVersion, d.FinalDockerImageVersion)
-    SetIfSet(&t.FinalDockerRegistryServer, d.FinalDockerRegistryServer)
+    SetIfSet(&t.RegistryServer, d.RegistryServer)
 
     SetIfSet(&t.FinalDockerRepoName, d.FinalDockerRepoName)
     SetOnceIfSet(&t.FinalDockerRepoName, org)

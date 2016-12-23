@@ -72,7 +72,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
     err_code := DoCreate(w, r, &req_data, data)
 
-    req_data.Args.SaveMaintainOptions(data)
+    req_data.Objects.SaveMaintainOptions(data)
 
     if data.ErrorMessage != "" {
         if err_code == 0 {
@@ -112,7 +112,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
     err_code := DoUpdate(w, r, &req_data, data)
 
-    req_data.Args.SaveMaintainOptions(data)
+    req_data.Objects.SaveMaintainOptions(data)
 
     if data.ErrorMessage != "" {
         if err_code == 0 {

@@ -55,9 +55,17 @@ func new_plugin(src string) (p *JenkinsPlugin) {
 
 // At create time: create jenkins source from req
 func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (status bool) {
-    p.yaml.Forjj.InstanceName = r.Args.ForjjInstanceName
-    p.yaml.Forjj.OrganizationName = r.Args.ForjjOrganization
-    p.yaml.Deploy.DeployStruct = r.Args.DeployStruct
+	instance := r.Forj.ForjjInstanceName
+    p.yaml.Forjj.InstanceName = instance
+    p.yaml.Forjj.OrganizationName = r.Forj.ForjjOrganization
+	if _, found := r.Objects.App[instance] ; found {
+		ret.Errorf("Request format issue. Unable to find the jenkins instance '%s'", instance)
+		return
+	}
+    deploy_to := r.Objects.App[instance].Add.DeployTo
+	if v, found := r.Objects.Deployment[deploy_to] ; found {
+    	p.yaml.Deploy.DeployStruct.SetFrom(&v.Add.AddDeployStruct)
+	}
     // Forjj predefined settings (instance/organization) are set at create time only.
     // I do not recommend to update them, manually by hand in the `forjj-jenkins.yaml`.
     // Updating the instance name could be possible but not for now.
@@ -68,8 +76,11 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
         return
     }
 
-    p.yaml.Dockerfile = r.Args.DockerfileStruct
-    p.yaml.JenkinsImage.SetFrom(&r.Args.FinalImageStruct, r.Args.ForjjOrganization)
+	if v, found := r.Objects.App[instance] ; found {
+		p.yaml.Dockerfile.SetFrom(&v.Add.AddDockerfileStruct)
+	}
+
+    p.yaml.JenkinsImage.SetFrom(&r.Objects.App[instance].Add, r.Forj.ForjjOrganization)
     return true
 }
 
@@ -95,13 +106,13 @@ func (p *JenkinsPlugin) DefineDeployCommand() error{
 // At update time: Update jenkins source from req or forjj-jenkins.yaml input.
 func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData)  (status bool) {
     // ForjjStruct NOT UPDATABLE
-    p.yaml.Deploy.SetFrom(&r.Args.DeployStruct)
+    p.yaml.Deploy.SetFrom(&r.Objects.Deployment.DeployStruct)
     if err := p.DefineDeployCommand() ; err != nil {
         ret.Errorf("Unable to update the deployement command. %s", err)
         return
     }
-    p.yaml.Dockerfile.SetFrom(&r.Args.DockerfileStruct)
-    p.yaml.JenkinsImage.SetFrom(&r.Args.FinalImageStruct, r.Args.ForjjOrganization)// Org used only if no set anymore.
+    p.yaml.Dockerfile.SetFrom(&r.Objects.App.DockerfileStruct)
+    p.yaml.JenkinsImage.SetFrom(&r.Objects.App.FinalImageStruct, r.Objects.App.ForjjOrganization)// Org used only if no set anymore.
     return true
 }
 

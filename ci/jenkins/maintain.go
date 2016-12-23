@@ -12,8 +12,8 @@ import (
 func (r *MaintainReq) check_source_existence(ret *goforjj.PluginData) (status bool) {
     log.Printf("Checking Jenkins source code path existence.")
 
-    if _, err := os.Stat(r.Args.ForjjSourceMount) ; err != nil {
-        ret.Errorf("Unable to maintain jenkins instances. '%s' is inexistent or innacessible. %s", r.Args.ForjjSourceMount, err)
+    if _, err := os.Stat(r.Forj.ForjjSourceMount) ; err != nil {
+        ret.Errorf("Unable to maintain jenkins instances. '%s' is inexistent or innacessible. %s", r.Forj.ForjjSourceMount, err)
         return
     }
 
@@ -30,9 +30,9 @@ func (r *MaintainReq)InstantiateAll(ret *goforjj.PluginData) (status bool) {
         ret.Errorf("Issue to read Current directory. %s", elements)
         return false
     }
-
-    mount := r.Args.ForjjSourceMount
-    auths := NewDockerAuths(r.Args.RegistryAuth)
+    instance := r.Forj.ForjjInstanceName
+    mount := r.Forj.ForjjSourceMount
+    auths := NewDockerAuths(r.Objects.App[instance].Setup.RegistryAuth)
 
     for _, instance := range elements {
         src := path.Join(mount, instance.Name())
