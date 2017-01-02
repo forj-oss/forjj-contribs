@@ -25,7 +25,7 @@ type DeployApp struct {
 	// There are default deployment task and name. This can be changed at maintain time
 	// to reflect the maintain deployment task to execute.
 	DeployTo string  // Default Deployment set at create time.
-    Command string   // Default Command to use to execute a Deploy. Set at create time.
+	Command string   // Default Command used
 }
 
 type ForjjStruct struct {
@@ -62,26 +62,46 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
 	instance := r.Forj.ForjjInstanceName
     p.yaml.Forjj.InstanceName = instance
     p.yaml.Forjj.OrganizationName = r.Forj.ForjjOrganization
-	if _, found := r.Objects.App[instance] ; found {
+
+	if _, found := r.Objects.App[instance] ; !found {
 		ret.Errorf("Request format issue. Unable to find the jenkins instance '%s'", instance)
 		return
 	}
+	jenkins_instance := r.Objects.App[instance]
 
+	// Initialize deployment data and set default values
 	if p.yaml.Deploy.Deployments == nil {
 		p.yaml.Deploy.Deployments = make(map[string]DeployStruct)
 	}
-	// Set Deployments definition
-	for name, deploy_data := range r.Objects.Deployment {
-		deployment := DeployStruct{}
-		deployment.SetFrom(&deploy_data.Add.AddDeployStruct)
-		p.yaml.Deploy.Deployments[name] = deployment
+	if len(r.Objects.Deployment) == 0 {
+		// Set default deployment with docker.
+		p.yaml.Deploy.Deployments["docker"] = DeployStruct{
+			Name: "docker",
+			ServiceAddr: "localhost",
+			ServicePort: "8080",
+			DeployTo: "docker",
+		}
+		ret.StatusAdd("Added default docker deployment.")
+	} else {
+		// Set Deployments definition
+		for name, deploy_data := range r.Objects.Deployment {
+			deployment := DeployStruct{}
+			deployment.SetFrom(&deploy_data.Add.AddDeployStruct)
+			p.yaml.Deploy.Deployments[name] = deployment
+		}
 	}
 
-    deploy_to := r.Objects.App[instance].Add.DeployTo
-	if _, found := r.Objects.Deployment[deploy_to] ; !found {
+    deploy_to := jenkins_instance.Add.DeployTo
+	if deploy_to == "" {
+		deploy_to = "docker"
+		ret.StatusAdd("default deployment to 'docker'.")
+	}
+
+	if _, found := p.yaml.Deploy.Deployments[deploy_to] ; !found {
 		ret.Errorf("Unable to find deployment '%s'. You must define it.", deploy_to)
 	}
 
+	// Default deployment set
 	p.yaml.Deploy.DeployTo = deploy_to
 
     // Forjj predefined settings (instance/organization) are set at create time only.
@@ -94,10 +114,12 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
         return
     }
 
-	if v, found := r.Objects.App[instance] ; found {
-		p.yaml.Dockerfile.SetFrom(&v.Add.AddDockerfileStruct)
-	    p.yaml.JenkinsImage.SetFrom(&v.Add.AddFinalImageStruct, r.Forj.ForjjOrganization)
-	}
+	// Initialize Dockerfile data and set default values
+	p.yaml.Dockerfile.SetFrom(&jenkins_instance.Add.AddDockerfileStruct)
+
+	// Initialize Jenkins Image data and set default values
+	p.yaml.JenkinsImage.SetFrom(&jenkins_instance.Add.AddFinalImageStruct, r.Forj.ForjjOrganization)
+
     return true
 }
 
@@ -145,6 +167,7 @@ func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData)  (sta
         ret.Errorf("Unable to update the deployement command. %s", err)
         return
     }
+
     p.yaml.Dockerfile.UpdateFrom(&instance_data.ChangeDockerfileStruct)
     p.yaml.JenkinsImage.UpdateFrom(&instance_data.ChangeFinalImageStruct, r.Forj.ForjjOrganization)// Org used only if no set anymore.
 	status = true

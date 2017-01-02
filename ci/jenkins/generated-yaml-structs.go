@@ -6,48 +6,48 @@ package main
 // Object app groups structure
 
 type DockerfileStruct struct {
-	FromImage string
-	FromImageVersion string
-	Maintainer string
+	FromImage string `json:"dockerfile_from_image"`
+	FromImageVersion string `json:"dockerfile_from_image_version"`
+	Maintainer string `json:"dockerfile_maintainer"`
 }
 
 // Action groups structure
 type FinalImageStruct struct {
-	Name string
-	RegistryRepoName string
-	RegistryServer string
-	Version string
+	Name string `json:"final_image_name"`
+	RegistryRepoName string `json:"final_image_registry_repo_name"`
+	RegistryServer string `json:"final_image_registry_server"`
+	Version string `json:"final_image_version"`
 }
 
 // Action groups structure
 
 type AddDockerfileStruct struct {
-	FromImage string
-	FromImageVersion string
-	Maintainer string
+	FromImage string `json:"dockerfile_from_image"`
+	FromImageVersion string `json:"dockerfile_from_image_version"`
+	Maintainer string `json:"dockerfile_maintainer"`
 }
 
 
 type AddFinalImageStruct struct {
-	Name string
-	RegistryRepoName string
-	RegistryServer string
-	Version string
+	Name string `json:"final_image_name"`
+	RegistryRepoName string `json:"final_image_registry_repo_name"`
+	RegistryServer string `json:"final_image_registry_server"`
+	Version string `json:"final_image_version"`
 }
 
 
 type ChangeDockerfileStruct struct {
-	FromImage string
-	FromImageVersion string
-	Maintainer string
+	FromImage string `json:"dockerfile_from_image"`
+	FromImageVersion string `json:"dockerfile_from_image_version"`
+	Maintainer string `json:"dockerfile_maintainer"`
 }
 
 
 type ChangeFinalImageStruct struct {
-	Name string
-	RegistryRepoName string
-	RegistryServer string
-	Version string
+	Name string `json:"final_image_name"`
+	RegistryRepoName string `json:"final_image_registry_repo_name"`
+	RegistryServer string `json:"final_image_registry_server"`
+	Version string `json:"final_image_version"`
 }
 
 
@@ -83,43 +83,43 @@ type AppChangeStruct struct {
 // Object deployment groups structure
 
 type DeployStruct struct {
-	DeployTo string
-	Name string
-	ServiceAddr string
-	ServicePort string
+	DeployTo string `json:"deploy_deploy_to"`
+	Name string `json:"deploy_name"`
+	ServiceAddr string `json:"deploy_service_addr"`
+	ServicePort string `json:"deploy_service_port"`
 }
 
 // Action groups structure
 
 type AddDeployStruct struct {
-	DeployTo string
-	Name string
-	ServiceAddr string
-	ServicePort string
+	DeployTo string `json:"deploy_deploy_to"`
+	Name string `json:"deploy_name"`
+	ServiceAddr string `json:"deploy_service_addr"`
+	ServicePort string `json:"deploy_service_port"`
 }
 
 
 type ChangeDeployStruct struct {
-	DeployTo string
-	Name string
-	ServiceAddr string
-	ServicePort string
+	DeployTo string `json:"deploy_deploy_to"`
+	Name string `json:"deploy_name"`
+	ServiceAddr string `json:"deploy_service_addr"`
+	ServicePort string `json:"deploy_service_port"`
 }
 
 
 type ListDeployStruct struct {
-	DeployTo string
-	Name string
-	ServiceAddr string
-	ServicePort string
+	DeployTo string `json:"deploy_deploy_to"`
+	Name string `json:"deploy_name"`
+	ServiceAddr string `json:"deploy_service_addr"`
+	ServicePort string `json:"deploy_service_port"`
 }
 
 
 type RemoveDeployStruct struct {
-	DeployTo string
-	Name string
-	ServiceAddr string
-	ServicePort string
+	DeployTo string `json:"deploy_deploy_to"`
+	Name string `json:"deploy_name"`
+	ServiceAddr string `json:"deploy_service_addr"`
+	ServicePort string `json:"deploy_service_port"`
 }
 
 

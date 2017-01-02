@@ -14,10 +14,16 @@ const template_file = "templates.yaml"
 // Contains functions to manage source code from templates
 
 type YamlTemplates struct {
+    Defaults DefaultsStruct
     Features TmplFeatures
     Sources TmplSources
     Run map[string]string `yaml:"run_deploy"`
     Variants map[string]string
+}
+
+type DefaultsStruct struct {
+	Dockerfile DockerfileStruct
+    JenkinsImage FinalImageStruct
 }
 
 type TmplFeatures struct {
