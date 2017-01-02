@@ -64,7 +64,7 @@ type AppAddStruct struct {
 	DeployTo string // Deployment name used to deploy jenkins.
 	RegistryAuth string // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
 
-    // Groups
+	// Groups
 
 	AddDockerfileStruct
 	AddFinalImageStruct
@@ -74,7 +74,7 @@ type AppChangeStruct struct {
 	DeployTo string // Deployment name used to deploy jenkins.
 	RegistryAuth string // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
 
-    // Groups
+	// Groups
 
 	ChangeDockerfileStruct
 	ChangeFinalImageStruct
@@ -136,28 +136,28 @@ type DeploymentInstanceStruct struct {
 
 type DeploymentAddStruct struct {
 
-    // Groups
+	// Groups
 
 	AddDeployStruct
 }
 
 type DeploymentChangeStruct struct {
 
-    // Groups
+	// Groups
 
 	ChangeDeployStruct
 }
 
 type DeploymentListStruct struct {
 
-    // Groups
+	// Groups
 
 	ListDeployStruct
 }
 
 type DeploymentRemoveStruct struct {
 
-    // Groups
+	// Groups
 
 	RemoveDeployStruct
 }
@@ -191,7 +191,6 @@ type FeaturesRemoveStruct struct {
 }
 
 
-
 // ************************
 // Create request structure
 // ************************
@@ -212,7 +211,6 @@ type CreateArgReq struct {
 	Deployment map[string]DeploymentInstanceStruct `json:"deployment"` // Object details
 	Features map[string]FeaturesInstanceStruct `json:"features"` // Object details
 }
-
 
 // ************************
 // Update request structure
