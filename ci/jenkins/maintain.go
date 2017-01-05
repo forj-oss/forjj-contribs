@@ -10,7 +10,7 @@ import (
 
 // Return ok if the jenkins instance exist
 func (r *MaintainReq) check_source_existence(ret *goforjj.PluginData) (status bool) {
-    log.Printf("Checking Jenkins source code path existence.")
+    log.Print("Checking Jenkins source code path existence.")
 
     if _, err := os.Stat(r.Forj.ForjjSourceMount) ; err != nil {
         ret.Errorf("Unable to maintain jenkins instances. '%s' is inexistent or innacessible. %s", r.Forj.ForjjSourceMount, err)
@@ -64,11 +64,12 @@ func (p *JenkinsPlugin)InstantiateInstance(instance string, auths *DockerAuths, 
         return
     }
 
-    if err := auths.write_docker_config() ; err != nil {
-        ret.Errorf("Unable to instantiate. Unable to write the docker registry credential file. %s", err)
-        return
-    }
-    defer auths.remove_config()
+	for server := range auths.Auths {
+		if err := auths.authenticate(server) ; err != nil {
+			ret.Errorf("Unable to instantiate. %s", err)
+			return
+		}
+	}
 
     ret.StatusAdd("Running '%s'", p.yaml.Deploy.Command)
 

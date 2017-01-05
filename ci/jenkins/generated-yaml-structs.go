@@ -6,48 +6,48 @@ package main
 // Object app groups structure
 
 type DockerfileStruct struct {
-	FromImage string `json:"dockerfile_from_image"`
-	FromImageVersion string `json:"dockerfile_from_image_version"`
-	Maintainer string `json:"dockerfile_maintainer"`
+	FromImage string `json:"dockerfile-from-image"`
+	FromImageVersion string `json:"dockerfile-from-image-version"`
+	Maintainer string `json:"dockerfile-maintainer"`
 }
 
 // Action groups structure
 type FinalImageStruct struct {
-	Name string `json:"final_image_name"`
-	RegistryRepoName string `json:"final_image_registry_repo_name"`
-	RegistryServer string `json:"final_image_registry_server"`
-	Version string `json:"final_image_version"`
+	Name string `json:"final-image-name"`
+	RegistryRepoName string `json:"final-image-registry-repo-name"`
+	RegistryServer string `json:"final-image-registry-server"`
+	Version string `json:"final-image-version"`
 }
 
 // Action groups structure
 
 type AddDockerfileStruct struct {
-	FromImage string `json:"dockerfile_from_image"`
-	FromImageVersion string `json:"dockerfile_from_image_version"`
-	Maintainer string `json:"dockerfile_maintainer"`
+	FromImage string `json:"dockerfile-from-image"`
+	FromImageVersion string `json:"dockerfile-from-image-version"`
+	Maintainer string `json:"dockerfile-maintainer"`
 }
 
 
 type AddFinalImageStruct struct {
-	Name string `json:"final_image_name"`
-	RegistryRepoName string `json:"final_image_registry_repo_name"`
-	RegistryServer string `json:"final_image_registry_server"`
-	Version string `json:"final_image_version"`
+	Name string `json:"final-image-name"`
+	RegistryRepoName string `json:"final-image-registry-repo-name"`
+	RegistryServer string `json:"final-image-registry-server"`
+	Version string `json:"final-image-version"`
 }
 
 
 type ChangeDockerfileStruct struct {
-	FromImage string `json:"dockerfile_from_image"`
-	FromImageVersion string `json:"dockerfile_from_image_version"`
-	Maintainer string `json:"dockerfile_maintainer"`
+	FromImage string `json:"dockerfile-from-image"`
+	FromImageVersion string `json:"dockerfile-from-image-version"`
+	Maintainer string `json:"dockerfile-maintainer"`
 }
 
 
 type ChangeFinalImageStruct struct {
-	Name string `json:"final_image_name"`
-	RegistryRepoName string `json:"final_image_registry_repo_name"`
-	RegistryServer string `json:"final_image_registry_server"`
-	Version string `json:"final_image_version"`
+	Name string `json:"final-image-name"`
+	RegistryRepoName string `json:"final-image-registry-repo-name"`
+	RegistryServer string `json:"final-image-registry-server"`
+	Version string `json:"final-image-version"`
 }
 
 
@@ -61,8 +61,8 @@ type AppInstanceStruct struct {
 // Object instance Action structures
 
 type AppAddStruct struct {
-	DeployTo string // Deployment name used to deploy jenkins.
-	RegistryAuth string // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
+	DeployTo string `json:"deploy-to"`// Deployment name used to deploy jenkins.
+	RegistryAuth string `json:"registry-auth"`// List of Docker registry servers authentication formatted as '<server1>:<cred>[,...]'. <cred> is 'user:pwd' in base64.
 
 	// Groups
 
@@ -71,8 +71,8 @@ type AppAddStruct struct {
 }
 
 type AppChangeStruct struct {
-	DeployTo string // Deployment name used to deploy jenkins.
-	RegistryAuth string // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
+	DeployTo string `json:"deploy-to"`// Deployment name used to deploy jenkins.
+	RegistryAuth string `json:"registry-auth"`// List of Docker registry servers authentication formatted as '<server1>:<cred>[,...]'. <cred> is 'user:pwd' in base64.
 
 	// Groups
 
@@ -83,43 +83,43 @@ type AppChangeStruct struct {
 // Object deployment groups structure
 
 type DeployStruct struct {
-	DeployTo string `json:"deploy_deploy_to"`
-	Name string `json:"deploy_name"`
-	ServiceAddr string `json:"deploy_service_addr"`
-	ServicePort string `json:"deploy_service_port"`
+	DeployTo string `json:"deploy-deploy-to"`
+	Name string `json:"deploy-name"`
+	ServiceAddr string `json:"deploy-service-addr"`
+	ServicePort string `json:"deploy-service-port"`
 }
 
 // Action groups structure
 
 type AddDeployStruct struct {
-	DeployTo string `json:"deploy_deploy_to"`
-	Name string `json:"deploy_name"`
-	ServiceAddr string `json:"deploy_service_addr"`
-	ServicePort string `json:"deploy_service_port"`
+	DeployTo string `json:"deploy-deploy-to"`
+	Name string `json:"deploy-name"`
+	ServiceAddr string `json:"deploy-service-addr"`
+	ServicePort string `json:"deploy-service-port"`
 }
 
 
 type ChangeDeployStruct struct {
-	DeployTo string `json:"deploy_deploy_to"`
-	Name string `json:"deploy_name"`
-	ServiceAddr string `json:"deploy_service_addr"`
-	ServicePort string `json:"deploy_service_port"`
+	DeployTo string `json:"deploy-deploy-to"`
+	Name string `json:"deploy-name"`
+	ServiceAddr string `json:"deploy-service-addr"`
+	ServicePort string `json:"deploy-service-port"`
 }
 
 
 type ListDeployStruct struct {
-	DeployTo string `json:"deploy_deploy_to"`
-	Name string `json:"deploy_name"`
-	ServiceAddr string `json:"deploy_service_addr"`
-	ServicePort string `json:"deploy_service_port"`
+	DeployTo string `json:"deploy-deploy-to"`
+	Name string `json:"deploy-name"`
+	ServiceAddr string `json:"deploy-service-addr"`
+	ServicePort string `json:"deploy-service-port"`
 }
 
 
 type RemoveDeployStruct struct {
-	DeployTo string `json:"deploy_deploy_to"`
-	Name string `json:"deploy_name"`
-	ServiceAddr string `json:"deploy_service_addr"`
-	ServicePort string `json:"deploy_service_port"`
+	DeployTo string `json:"deploy-deploy-to"`
+	Name string `json:"deploy-name"`
+	ServiceAddr string `json:"deploy-service-addr"`
+	ServicePort string `json:"deploy-service-port"`
 }
 
 
@@ -176,18 +176,18 @@ type FeaturesInstanceStruct struct {
 // Object instance Action structures
 
 type FeaturesAddStruct struct {
-	Name string // name of the jenkins feature
-	Options string // List of feature option to use
+	Name string `json:"name"`// name of the jenkins feature
+	Options string `json:"options"`// List of feature option to use
 }
 
 type FeaturesChangeStruct struct {
-	Name string // name of the jenkins feature
-	Options string // List of feature option to use
+	Name string `json:"name"`// name of the jenkins feature
+	Options string `json:"options"`// List of feature option to use
 }
 
 type FeaturesRemoveStruct struct {
-	Name string // name of the jenkins feature
-	Options string // List of feature option to use
+	Name string `json:"name"`// name of the jenkins feature
+	Options string `json:"options"`// List of feature option to use
 }
 
 
@@ -255,7 +255,7 @@ type MaintainArgReq struct {
 
 type AppMaintainStruct struct {
 	Setup struct {
-		RegistryAuth string // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
+		RegistryAuth string `json:"registry-auth"` // List of Docker registry servers authentication formatted as '<server1>:<cred>[,...]'. <cred> is 'user:pwd' in base64.
 	}
 }
 
@@ -291,6 +291,14 @@ const YamlDesc = "---\n" +
    "      help: \"Where jenkins will be published.\"\n" +
    "objects:\n" +
    "  deployment:\n" +
+   "    on-tasks:\n" +
+   "      create:\n" +
+   "        list:\n" +
+   "          to_create:\n" +
+   "          separator: \",\"\n" +
+   "          fields: \"name:service-addr[:service-port]\"\n" +
+   "          help: \"One or more deployments\"\n" +
+   "          action: add\n" +
    "    default-actions: [\"add\", \"change\", \"remove\", \"list\"]\n" +
    "    identified-by-flag: name\n" +
    "    groups:\n" +
@@ -334,8 +342,9 @@ const YamlDesc = "---\n" +
    "            help: \"Docker Repository Name where your image will be pushed. If not set, no push will be done.\"\n" +
    "    flags:\n" +
    "      registry-auth:\n" +
-   "        help: \"List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]\"\n" +
+   "        help: \"List of Docker registry servers authentication formatted as '<server1>:<cred>[,...]'. <cred> is 'user:pwd' in base64.\"\n" +
    "        secure: true\n" +
+   "        envar: \"REGISTRY_AUTH\"\n" +
    "      deploy-to:\n" +
    "        help: \"Deployment name used to deploy jenkins.\"\n" +
    "        default: \"docker\"\n" +

@@ -73,7 +73,7 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
 	if p.yaml.Deploy.Deployments == nil {
 		p.yaml.Deploy.Deployments = make(map[string]DeployStruct)
 	}
-	if len(r.Objects.Deployment) == 0 {
+	if _, found := p.yaml.Deploy.Deployments["docker"] ; ! found {
 		// Set default deployment with docker.
 		p.yaml.Deploy.Deployments["docker"] = DeployStruct{
 			Name: "docker",
@@ -110,12 +110,14 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
     // As well Moving an instance to another organization could be possible, but I do not see a real use case.
     // So, they are fixed and saved at create time. Update/maintain won't never update them later.
     if err := p.DefineDeployCommand() ; err != nil {
-        ret.Errorf("Unable to define the default deployement command. %s", err)
+        ret.Errorf("Unable to define the default deployment command. %s", err)
         return
     }
 
 	// Initialize Dockerfile data and set default values
+	log.Printf("CreateReq : %#v\n", r)
 	p.yaml.Dockerfile.SetFrom(&jenkins_instance.Add.AddDockerfileStruct)
+	log.Printf("p.yaml.Dockerfile : %#v\n", p.yaml.Dockerfile)
 
 	// Initialize Jenkins Image data and set default values
 	p.yaml.JenkinsImage.SetFrom(&jenkins_instance.Add.AddFinalImageStruct, r.Forj.ForjjOrganization)
