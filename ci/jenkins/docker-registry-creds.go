@@ -1,12 +1,12 @@
 package main
 
 import (
-    "encoding/json"
-    "os"
     "log"
     "strings"
     "regexp"
     "fmt"
+	"encoding/base64"
+	"github.com/forj-oss/forjj-modules/trace"
 )
 
 type DockerAuths struct {
@@ -14,26 +14,18 @@ type DockerAuths struct {
 }
 
 type DockerRegistryCredsInfo struct {
-    Auth string
-    Email string `json:",omitempty"`
+    user string
+    password string
 }
 
-const protected_config = "/tmp/docker_config.json"
-
-func (a *DockerAuths)write_docker_config() error {
-    if out, err := os.Create(protected_config) ; err != nil {
-        return fmt.Errorf("Unable to create %s. %s.", protected_config, err)
-    } else {
-        defer out.Close()
-        if err := json.NewEncoder(out).Encode(a) ; err != nil {
-            return fmt.Errorf("Unable to generate the docker registry credential file '%s'. %s.", protected_config, err)
-        }
-    }
-    os.Chmod(protected_config, 0600)
-    log.Printf("'%s' file generated.", protected_config)
-
-    if cmdlog, err := run_cmd("sudo", nil, "/bin/docker-config-update.sh") ; err != nil {
-        log.Printf("Unable to update docker config file. %s. Script output: %s", err, cmdlog)
+func (a *DockerAuths)authenticate(server string) error {
+	if _, found := a.Auths[server] ; ! found {
+		return fmt.Errorf("Unable to authenticate to docker registry '%s'. Server not found.", server)
+	}
+	auth := a.Auths[server]
+	gotrace.SetDebug()
+    if cmdlog, err := run_cmd("sudo", nil, "docker", "login", "-u", auth.user, "-p", auth.password, server) ; err != nil {
+        log.Printf("Unable to authenticate. %s. docker output: %s", err, cmdlog)
         return err
     } else {
         log.Printf("%s", cmdlog)
@@ -41,15 +33,10 @@ func (a *DockerAuths)write_docker_config() error {
     return nil
 }
 
-func (a *DockerAuths)remove_config() {
-    //os.Remove(protected_config)
-    log.Printf("'%s' file Removed.", protected_config)
-}
-
 func NewDockerAuths(auths string) (a *DockerAuths) {
     auths_s := strings.Split(auths, ",")
 
-    auth_reg, _ := regexp.Compile(`([^:]+):(\w+)(:(.*@.*))?`)
+    auth_reg, _ := regexp.Compile(`([^:]+):(\w+=*)`)
 
     a = new(DockerAuths)
 
@@ -57,7 +44,14 @@ func NewDockerAuths(auths string) (a *DockerAuths) {
 
     for _, v := range auths_s {
         if substr := auth_reg.FindStringSubmatch(v) ; substr != nil {
-            auth := DockerRegistryCredsInfo{substr[2], substr[4]}
+			var user_pwd []string
+			if v, err := base64.StdEncoding.DecodeString(substr[2]) ; err != nil {
+				log.Printf("Unable to decode base64 '%s'", substr[2])
+				return
+			} else {
+				user_pwd = strings.Split(strings.TrimSpace(string(v)), ":")
+			}
+            auth := DockerRegistryCredsInfo{user_pwd[0], user_pwd[1]}
             a.Auths[substr[1]] = auth
             log.Printf("'%s' registry server credential added.", substr[1])
         }
