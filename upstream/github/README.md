@@ -57,7 +57,7 @@ The idea could be to implement the flow by calling a 'flow create/update/maintai
 For example, for a PR with github/jenkins, who will take care of configuring them (jenkins/github) ? may be both but not completely sure.
 For now, the jenkins-ci discussed a little about this flow implementation details as what we need to see on jenkins side in term of jobs.
 
-See [jenkins-ci README](https://github.hpe.com/christophe-larsonneur/forjj-contribs/ci/jenkins-ci/README.md)
+See [jenkins-ci README](https://github.com/forj-oss/forjj-contribs/ci/jenkins-ci/README.md)
 
 This will be analyzed and a proposal will be posted later.
 

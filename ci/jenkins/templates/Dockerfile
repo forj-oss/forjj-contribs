@@ -9,7 +9,7 @@ ENV JENKINS_SLAVE_AGENT_PORT=50000
 
 USER root
 
-ARG JENKINS_INSTALL_INITS_URL=https://github.hpe.com/RnDLabsIT/jenkins-install-inits/raw/master/
+ARG JENKINS_INSTALL_INITS_URL=https://github.com/forj-oss/jenkins-install-inits/raw/master/
 
 RUN /usr/local/bin/jenkins-install.sh /tmp/features.lst
 

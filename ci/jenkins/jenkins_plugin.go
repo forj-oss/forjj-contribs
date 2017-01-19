@@ -1,7 +1,7 @@
 package main
 
 import (
-    "github.hpe.com/christophe-larsonneur/goforjj"
+    "github.com/forj-oss/goforjj"
     "gopkg.in/yaml.v2"
     "io/ioutil"
     "path"

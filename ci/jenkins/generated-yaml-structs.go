@@ -3,7 +3,7 @@
 // To update those structure, update the 'jenkins.yaml' and run 'go generate'
 package main
 
-import "github.hpe.com/christophe-larsonneur/goforjj"
+import "github.com/forj-oss/goforjj"
 
 // Common group of data between create/update actions
 type DeployStruct struct {

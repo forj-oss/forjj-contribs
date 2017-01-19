@@ -37,7 +37,7 @@ Each instance requested will have his collection of jenkins flags prefixed by th
 
 Ex:
 ```bash
-$ forjj ... --apps ci:jenkins:myinstance,ci:jenkins:anotherinstance --myinstance-service-addr myinstance.hpe.com --anotherinstance-service-addr ...
+$ forjj ... --apps ci:jenkins:myinstance,ci:jenkins:anotherinstance --myinstance-service-addr myinstance.com --anotherinstance-service-addr ...
 ```
 
 In case of update, you probably need to follow the organization flow to approve your change and apply.
@@ -69,14 +69,14 @@ Feel free to contribute to add this feature!
 
 Currently, the embedded source model implements globally the following:
 
-- A docker image built from `hub.docker.hpecorp.net/devops/jenkins-ci` [source](https://github.hpe.com/Docker-in-Datacenter/jenkins-ci) See [Docker Trusted Registry (DTR) for versions](https://hub.docker.hpecorp.net/repositories/devops/jenkins-dood/tags)
-- A collection of default features ([source](https://github.hpe.com/RnDLabsIT/jenkins-install-inits))
+- A docker image built from `hub.docker.io/devops/jenkins-ci` [source](https://github.com/forj-oss/jenkins-ci) See [Docker Trusted Registry (DTR) for versions](https://hub.docker.hpecorp.net/repositories/devops/jenkins-dood/tags)
+- A collection of default features ([source](https://github.com/forj-oss/jenkins-install-inits))
   - Basic authentication (admin user with default password & anonymous has read access)
   - proxy setting (Set proxy from http_proxy env setting, found from the container)
   - seed-job (One job generated to populate the other collection of jobs/pipelines)
   - jenkins slave fixed port
-- A collection of additionnal features and templates to add for a dedicated deployement
-- A list of predefined deployement. ie:
+- A collection of additional features and templates to add for a dedicated deployment
+- A list of predefined deployment. ie:
   - docker - To deploy to your local docker environment.
   - ucp - To deploy to a UCP system.
   - marathon - To deploy to dcos/mesos marathon.

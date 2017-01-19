@@ -4,7 +4,7 @@ import (
     "gopkg.in/yaml.v2"
     "fmt"
     "io/ioutil"
-    "github.hpe.com/christophe-larsonneur/goforjj"
+    "github.com/forj-oss/goforjj"
     "reflect"
 )
 

@@ -5,7 +5,7 @@ package main
 
 import (
     "gopkg.in/alecthomas/kingpin.v2"
-    "github.hpe.com/christophe-larsonneur/goforjj"
+    "github.com/forj-oss/goforjj"
     "gopkg.in/yaml.v2"
 )
 

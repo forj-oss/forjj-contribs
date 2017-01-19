@@ -3,7 +3,7 @@
 package main
 
 import (
-    "github.hpe.com/christophe-larsonneur/goforjj"
+    "github.com/forj-oss/goforjj"
     "log"
 )
 

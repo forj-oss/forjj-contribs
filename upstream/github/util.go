@@ -2,7 +2,7 @@ package main
 
 import (
     "golang.org/x/sys/unix"
-    "github.hpe.com/christophe-larsonneur/goforjj"
+    "github.com/forj-oss/goforjj"
     "os"
     "fmt"
 )

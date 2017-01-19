@@ -43,7 +43,7 @@ then
    echo "Using current git branch 'master'. Add BRANCH= to change it."
 fi
 
-JENKINS_INSTALL_INITS_URL="https://github.hpe.com/$MYFORK/raw/$BRANCH/"
+JENKINS_INSTALL_INITS_URL="https://github.com/$MYFORK/raw/$BRANCH/"
 FEATURES="--build-arg JENKINS_INSTALL_INITS_URL=$JENKINS_INSTALL_INITS_URL"
 
 set -x
