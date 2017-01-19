@@ -3,7 +3,7 @@ package main
 import (
     "github.com/google/go-github/github"
     "golang.org/x/oauth2"
-    "github.hpe.com/christophe-larsonneur/goforjj"
+    "github.com/forj-oss/goforjj"
     "log"
     "net/url"
     "regexp"

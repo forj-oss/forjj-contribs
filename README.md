@@ -2,7 +2,7 @@
 
 # Introduction
 
-Forjj project is the [next generation of Forj](https://github.hpe.com/forjj/forjj).
+Forjj project is the [next generation of Forj](https://github.com/forj-oss/forjj).
 
 The core of Forjj is very limited to manage local repositories, mainly infra and have simple pre-defined tasks (create/update/maintain)
 
@@ -27,7 +27,7 @@ The plugin binary HAVE to be with executable bits in place. It can be any kind o
 
 The plugin will run in the context of a Forjj container. But there is no image type to use with forjj. Forjj uses only a socket file and source mount point. Then it communicates with it through the socket file.
 
-This container is started by `forjj` automatically. For details about this part of forjj, [read the source code here](https://github.hpe.com/forjj/forjj/raw/master/driver.go)
+This container is started by `forjj` automatically. For details about this part of forjj, [read the source code here](https://github.com/forj-oss/forjj/raw/master/driver.go)
 
 ## Plugin tasks
 
@@ -117,17 +117,17 @@ Ex:
 
 ## secure flag
 
-When a plugin requires some critical data like password or token, the plugin should never store it in the SCM. 
+When a plugin requires some critical data like password or token, the plugin should never store it in the SCM.
 If you declare this flag as secure, forjj will give a facility to store this information in his workspace or a file selected by the end user.
-It facilitates to 
+It facilitates to
 - manage this data outside forjj
 - To deliver automatically them to each stage though the workspace/forjj-creds.yaml or through an external file.
- 
+
 Use case example:
 
 ```bash
 # github has a secure flag called github-token.
-# The following command will sent the token to the plugin and forjj will get it back requested by the plugin to store it 
+# The following command will sent the token to the plugin and forjj will get it back requested by the plugin to store it
 # in the workspace/forjj-creds.yaml and declare those data in the infra repo
 forjj create ~/tmp/test --apps upstream:github --github-token $MYTOKEN
 #
@@ -140,7 +140,7 @@ forjj maintain ~/tmp/test
 You can use your own secure file, delivered from vault for example:
 ```bash
 # github has a secure flag called github-token.
-# The following command will sent the token to the plugin and forjj will get it back requested by the plugin to store it 
+# The following command will sent the token to the plugin and forjj will get it back requested by the plugin to store it
 # in the workspace/forjj-creds.yaml and declare those data in the infra repo
 forjj create ~/tmp/test -c ~/vault/mycreds.yaml --apps upstream:github --github-token $MYTOKEN
 #
@@ -152,7 +152,7 @@ forjj maintain ~/tmp/test -c ~/vault/mycreds.yaml
 
 # Using you own version of forjj-contribs
 
-By default forjj is defined to get the driver options definition from [github entreprise](https://github.hpe.com/forjj/forjj-contribs)
+By default forjj is defined to get the driver options definition from [github entreprise](https://github.com/forj-oss/forjj-contribs)
 So, getting the list of option can take some few seconds (time to read the yaml file from github)
 
 You can change and use another url or even a local path, with `forjj --contribs-repo <base url/forjj-contribs path>`
@@ -164,7 +164,7 @@ If you use a path, the yaml file must be located in `<forjj-contribs path>/<Driv
 
 # Want to write your own FORJJ plugin?
 
-See [goforjj project in github entreprise](https://github.hpe.com/forjj/goforjj)
+See [goforjj project in github entreprise](https://github.com/forj-oss/goforjj)
 
 # More information
 

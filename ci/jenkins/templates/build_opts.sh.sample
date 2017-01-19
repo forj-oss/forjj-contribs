@@ -4,7 +4,7 @@
 # Following parameters helps to develop your own jenkins-install-inits feature
 #
 # By default, jenkins-install-inits script (jenkins_install.sh) uses
-# https://github.hpe.com/RnDLabIT/jenkins-install-inits/raw/master to get features definition.
+# https://github.com/forj-oss/jenkins-install-inits/raw/master to get features definition.
 # where :
 # MYFORK - Where is the FORK for JENKINS_INSTALL_INITS repo. Default is RnDLabIT/jenkins-install-inits
 # MYFORK=christophe-larsonneur/jenkins-install-inits
@@ -16,7 +16,7 @@
 # AUTO_PUSH=true
 
 # To use a different image name: Default is 'jenkins-master'
-# IMAGE_NAME=vnfm-jenkins-master
+# IMAGE_NAME=project-jenkins-master
 
 # To use a different version. Default is 'test'
 # IMAGE_VERSION=myversion

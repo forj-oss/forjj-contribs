@@ -38,7 +38,7 @@
         },
         {
           "key": "env",
-          "value": "SEED_JOBS_REPO=https://github.hpe.com/{{ .Settings.Organization }}/{{ .Forjj.InfraRepo }}"
+          "value": "SEED_JOBS_REPO=https://github.com/{{ .Settings.Organization }}/{{ .Forjj.InfraRepo }}"
         }{{ set_marathon_docker_env .Settings }}
       ],
       "forcePullImage": true

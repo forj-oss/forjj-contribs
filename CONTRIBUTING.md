@@ -15,7 +15,7 @@ Because you need it??? :)
 FORJJ core is currently managing only git repositories (git push, mainly) but time to time, I believe this could be moved to the SCM part, definitely...
 And FORJJ call 3/4 differents actions to create and manage the infra from code perspective.
 
-For details about FORJJ actions, [read this page](https://github.hpe.com/christophe-larsonneur/forjj/blob/master/CONTRIBUTION.md)
+For details about FORJJ actions, [read this page](https://github.com/forj-oss/forjj/blob/master/CONTRIBUTION.md)
 
 For now, I'm focused on jenkins and github. So, I'm writing those drivers and the link between them (ie github PR flow)
 If you want to participate in this, but with more tools or others CI/SCM Upstream tools, then you will need to write your FORJJ plugin.
@@ -25,8 +25,8 @@ If you want to participate in this, but with more tools or others CI/SCM Upstrea
 The plugin notion in FORJJ is simple and basic.
 
 FORJJ do his task by starting a FORJJ container, with a simple task name and flags.
-- Flags are defined by the [yaml description file](https://github.hpe.com/christophe-larsonneur/forjj-contribs#description-of-yaml)
-- Tasks are defined [here](https://github.hpe.com/christophe-larsonneur/forjj-contribs#description-of-yaml)
+- Flags are defined by the [yaml description file](https://github.com/forj-oss/forjj-contribs#description-of-yaml)
+- Tasks are defined [here](https://github.com/forj-oss/forjj-contribs#description-of-yaml)
 
 When FORJJ container is started, it will interpret task and flags and call the driver.
 
@@ -84,7 +84,7 @@ Following `repos:` and `reposdata:` structures must be returned by an upstream d
     options:         : Collection of options to add to the repo. This list is defined by the plugin.
       <Name>:<Value>
 Following structures are returned by all plugins
-  services:          : web service url. ex: https://github.hpe.com
+  services:          : web service url. ex: https://github.com
     urls:
      <url>
 files:               : List of driver files managed

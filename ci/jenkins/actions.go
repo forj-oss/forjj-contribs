@@ -3,7 +3,7 @@ package main
 
 import (
     "net/http"
-    "github.hpe.com/christophe-larsonneur/goforjj"
+    "github.com/forj-oss/goforjj"
 )
 
 // Do creating plugin task

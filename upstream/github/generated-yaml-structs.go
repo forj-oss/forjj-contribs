@@ -3,7 +3,7 @@
 // To update those structure, update the 'github.yaml' and run 'go generate'
 package main
 
-import "github.hpe.com/christophe-larsonneur/goforjj"
+import "github.com/forj-oss/goforjj"
 
 type CreateReq struct {
     Args CreateArgReq `json:"args"`
