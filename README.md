@@ -152,7 +152,7 @@ forjj maintain ~/tmp/test -c ~/vault/mycreds.yaml
 
 # Using you own version of forjj-contribs
 
-By default forjj is defined to get the driver options definition from [github entreprise](https://github.com/forj-oss/forjj-contribs)
+By default forjj is defined to get the driver options definition from [github](https://github.com/forj-oss/forjj-contribs)
 So, getting the list of option can take some few seconds (time to read the yaml file from github)
 
 You can change and use another url or even a local path, with `forjj --contribs-repo <base url/forjj-contribs path>`
@@ -164,7 +164,7 @@ If you use a path, the yaml file must be located in `<forjj-contribs path>/<Driv
 
 # Want to write your own FORJJ plugin?
 
-See [goforjj project in github entreprise](https://github.com/forj-oss/goforjj)
+See [goforjj project in github](https://github.com/forj-oss/goforjj)
 
 # More information
 
