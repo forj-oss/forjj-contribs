@@ -31,6 +31,7 @@ type FinalImageStruct struct {
 
 type AppInstanceStruct struct {
 	RegistryAuth string `json:"registry-auth"` // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
+	SeedJobRepo string `json:"seed-job-repo"` // url to the seed job repository. By default, it uses the <YourInfraRepo>. Jobs are defined under job-dsl.
 
 	// Groups
 
@@ -51,6 +52,33 @@ type FeaturesInstanceStruct struct {
 	Options string `json:"options"` // List of feature option to use
 }
 
+// Object projects groups structure
+
+// Groups structure
+
+type GitStruct struct {
+	RemoteUrl string `json:"git-remote-url"` // with remote-type = 'git', Remote repository url.
+}
+
+type GithubStruct struct {
+	ApiUrl string `json:"github-api-url"` // with remote-type = 'github', Github API Url. By default, it uses public github API.
+	Repo string `json:"github-repo"` // with remote-type = 'github', Repository name.
+	RepoOwner string `json:"github-repo-owner"` // with remote-type = 'github', Repository owner. Can be a user or an organization.
+}
+
+
+// Object Instance structures
+
+type ProjectsInstanceStruct struct {
+	Name string `json:"name"` // Project name
+	RemoteType string `json:"remote-type"` // Define remote source  type. 'github' is used by default. Support 'git', 'github'.
+
+	// Groups
+
+	GitStruct
+	GithubStruct
+}
+
 
 // ************************
 // Create request structure
@@ -60,6 +88,7 @@ type CreateReq struct {
 	Forj struct {
 		Debug string `json:"debug"`
 		ForjjInfra string `json:"forjj-infra"`
+		ForjjInfraUpstream string `json:"forjj-infra-upstream"`
 		ForjjInstanceName string `json:"forjj-instance-name"`
 		ForjjOrganization string `json:"forjj-organization"`
 		ForjjSourceMount string `json:"forjj-source-mount"`
@@ -70,6 +99,7 @@ type CreateReq struct {
 type CreateArgReq struct {
 	App map[string]AppInstanceStruct `json:"app"` // Object details
 	Features map[string]FeaturesInstanceStruct `json:"features"` // Object details
+	Projects map[string]ProjectsInstanceStruct `json:"projects"` // Object details
 }
 
 // ************************
@@ -80,6 +110,7 @@ type UpdateReq struct {
 	Forj struct {
 		Debug string `json:"debug"`
 		ForjjInfra string `json:"forjj-infra"`
+		ForjjInfraUpstream string `json:"forjj-infra-upstream"`
 		ForjjInstanceName string `json:"forjj-instance-name"`
 		ForjjOrganization string `json:"forjj-organization"`
 		ForjjSourceMount string `json:"forjj-source-mount"`
@@ -90,6 +121,7 @@ type UpdateReq struct {
 type UpdateArgReq struct {
 	App map[string]AppInstanceStruct `json:"app"` // Object details
 	Features map[string]FeaturesInstanceStruct `json:"features"` // Object details
+	Projects map[string]ProjectsInstanceStruct `json:"projects"` // Object details
 }
 
 // **************************
@@ -100,6 +132,7 @@ type MaintainReq struct {
 	Forj struct {
 		Debug string `json:"debug"`
 		ForjjInfra string `json:"forjj-infra"`
+		ForjjInfraUpstream string `json:"forjj-infra-upstream"`
 		ForjjInstanceName string `json:"forjj-instance-name"`
 		ForjjOrganization string `json:"forjj-organization"`
 		ForjjSourceMount string `json:"forjj-source-mount"`
@@ -133,6 +166,8 @@ const YamlDesc = "---\n" +
    "created_flag_file: \"{{ .InstanceName }}/forjj-{{ .Name }}.yaml\"\n" +
    "task_flags:\n" +
    "  common:\n" +
+   "    forjj-infra-upstream:\n" +
+   "      help: \"address of the infra repository upstream\"\n" +
    "    forjj-infra:\n" +
    "      help: \"Name of the Infra repository to use\"\n" +
    "    forjj-instance-name:\n" +
@@ -183,9 +218,13 @@ const YamlDesc = "---\n" +
    "            default: 8080\n" +
    "            help: \"Expected jenkins instance port number.\"\n" +
    "    flags:\n" +
+   "      seed-job-repo:\n" +
+   "        help: \"url to the seed job repository. By default, it uses the <YourInfraRepo>. Jobs are defined under job-dsl.\"\n" +
+   "        default: \"{{ .Forjj.InfraUpstream }}\"\n" +
    "      registry-auth:\n" +
    "        help: \"List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]\"\n" +
    "        secure: true\n" +
+   "        envar: \"REGISTRY_AUTH\"\n" +
    "  features:\n" +
    "    default-actions: [\"add\", \"change\", \"remove\"]\n" +
    "    identified_by_flag: name\n" +
@@ -195,4 +234,27 @@ const YamlDesc = "---\n" +
    "        required: true\n" +
    "      options:\n" +
    "        help: \"List of feature option to use\"\n" +
+   "  projects:\n" +
+   "    default-actions: [\"add\", \"change\", \"remove\"]\n" +
+   "    identified_by_flag: name\n" +
+   "    flags:\n" +
+   "      name:\n" +
+   "        help: \"Project name\"\n" +
+   "        required: true\n" +
+   "      remote-type:\n" +
+   "        help: \"Define remote source  type. 'github' is used by default. Support 'git', 'github'.\"\n" +
+   "    groups:\n" +
+   "      github:\n" +
+   "        flags:\n" +
+   "          api-url:\n" +
+   "            default: \"https://github.com\"\n" +
+   "            help: \"with remote-type = 'github', Github API Url. By default, it uses public github API.\"\n" +
+   "          repo-owner:\n" +
+   "            help: \"with remote-type = 'github', Repository owner. Can be a user or an organization.\"\n" +
+   "          repo:\n" +
+   "            help: \"with remote-type = 'github', Repository name.\"\n" +
+   "      git:\n" +
+   "        flags:\n" +
+   "          remote-url:\n" +
+   "            help: \"with remote-type = 'git', Remote repository url.\"\n" +
    ""

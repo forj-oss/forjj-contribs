@@ -8,6 +8,9 @@ import (
 	"log"
 	"os"
 	"path"
+	"net/url"
+	"regexp"
+	"fmt"
 )
 
 // return true if instance doesn't exist.
@@ -52,8 +55,64 @@ func (r *JenkinsPlugin)create_jenkins_sources(instance_name string, ret *goforjj
 		return
 	}
 
+	if ! r.generate_jobsdsl(instance_name, ret) {
+		return
+	}
+
 	ret.CommitMessage = "Creating initial jenkins source files."
 	return true
+}
+
+// add_projects add project data in the jenkins.yaml file
+func (r *JenkinsPlugin)add_projects(req *CreateReq, ret *goforjj.PluginData) (status bool) {
+	if req.Forj.ForjjInfraUpstream == "" {
+		ret.StatusAdd("Unable to add a new project without a remote GIT repository. Jenkins JobDSL requirement. " +
+			"To enable this feature, add a remote GIT to your infra --infra-upstream or define the JobDSL Repository to clone.")
+		return true
+	}
+
+	infra_remote := req.Forj.ForjjInfraUpstream
+	ssh_format, _ := regexp.Compile(`^([a-z]+@)?(([a-z.-]+):)(/?\w[\w./-]*)?$`)
+	if r := ssh_format.FindStringSubmatch(infra_remote) ; r != nil {
+		infra_remote = fmt.Sprintf("ssh://%s%s/%s", r[1], r[2], r[4])
+	}
+
+	if v, err := url.Parse(infra_remote) ; err != nil {
+		ret.Errorf("Infra remote URL issue. %s", err)
+		return false
+	} else {
+		if v.Scheme == "" {
+			ret.Errorf("Invalid Remote GIT repository Url '%s'. A scheme must exist.", infra_remote)
+		}
+	}
+	// Initialize JobDSL structure
+	r.yaml.Projects = NewProjects(infra_remote, "jobs-dsl")
+
+	// Retrieve list of Repository (projects) to manage
+	for name, prj := range req.Objects.Projects {
+		switch prj.RemoteType {
+		case "github":
+			r.yaml.Projects.AddGithub(name, &prj.GithubStruct)
+		case "git":
+			r.yaml.Projects.AddGit(name, &prj.GitStruct)
+		}
+	}
+	status = true
+	return
+}
+
+// generate_jobsdsl generate any missing job-dsl source file.
+// TODO: Support for different Repository path that Forjj have to checkout appropriately.
+func (p *JenkinsPlugin)generate_jobsdsl(instance_name string, ret *goforjj.PluginData)(status bool) {
+	if p.yaml.Projects == nil {
+		return true // Nothing to do. But it is acceptable as not CORE.
+	}
+	if ok, err := p.yaml.Projects.Generates(instance_name, p.template_dir, p.source_path, ret) ; err != nil {
+		log.Print(ret.Errorf("%s", err))
+	} else {
+		status = ok
+	}
+	return
 }
 
 func (r *CreateArgReq) SaveMaintainOptions(ret *goforjj.PluginData) {

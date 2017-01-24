@@ -5,7 +5,8 @@ FROM {{ .Dockerfile.FromImage }}{{ if .Dockerfile.FromImageVersion }}:{{ .Docker
 # COPY local_plugins/*  $JENKINS_DATA_REF/plugins/
 COPY features.lst /tmp
 
-ENV JENKINS_SLAVE_AGENT_PORT=50000
+ENV JENKINS_SLAVE_AGENT_PORT=50000{{ if .Projects }} \
+    SEED_JOBS_REPO={{ .Projects.SeedJobRepo }}{{ end }}
 
 USER root
 

@@ -13,6 +13,8 @@ runtime:
 created_flag_file: "{{ .InstanceName }}/forjj-{{ .Name }}.yaml"
 task_flags:
   common:
+    forjj-infra-upstream:
+      help: "address of the infra repository upstream"
     forjj-infra:
       help: "Name of the Infra repository to use"
     forjj-instance-name:
@@ -63,9 +65,13 @@ objects:
             default: 8080
             help: "Expected jenkins instance port number."
     flags:
+      seed-job-repo:
+        help: "url to the seed job repository. By default, it uses the <YourInfraRepo>. Jobs are defined under job-dsl."
+        default: "{{ .Forjj.InfraUpstream }}"
       registry-auth:
         help: "List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]"
         secure: true
+        envar: "REGISTRY_AUTH"
   features:
     default-actions: ["add", "change", "remove"]
     identified_by_flag: name
@@ -75,3 +81,26 @@ objects:
         required: true
       options:
         help: "List of feature option to use"
+  projects:
+    default-actions: ["add", "change", "remove"]
+    identified_by_flag: name
+    flags:
+      name:
+        help: "Project name"
+        required: true
+      remote-type:
+        help: "Define remote source  type. 'github' is used by default. Support 'git', 'github'."
+    groups:
+      github:
+        flags:
+          api-url:
+            default: "https://github.com"
+            help: "with remote-type = 'github', Github API Url. By default, it uses public github API."
+          repo-owner:
+            help: "with remote-type = 'github', Repository owner. Can be a user or an organization."
+          repo:
+            help: "with remote-type = 'github', Repository name."
+      git:
+        flags:
+          remote-url:
+            help: "with remote-type = 'git', Remote repository url."

@@ -1,13 +1,15 @@
 # Introduction
 
-This forjj plugin is dedicated to build and maintain a jenkins system.
+Jenkins FORJJ plugin generate runnable source code to create and maintain a simple jenkins system.
 
-It is based on `docker.hos.hpecorp.net/devops/jenkins-ci` inner source image.
+By default, the source code generated from templates implements **Jenkins 2.x** with **pipeline**, several **jenkins plugins**, **basic security rights** and a collection of scripts to enhance jenkins management from code perspective.
 
-It provides orchestration services for forjj:
+Mainly it offers:
 
-- create: infrastructure initial code + README.md in the `infra` repository under `ci` directory.
-- build/maintain: Code to build and maintain your CI infra structure as described in the `infra/ci`.
+- Add/Maintain new project repository to generate jobs
+  (Jenkinsfile + JobsDSL).
+- Add/Maintain Jenkins plugins/Jenkins features
+- Deploy Jenkins (master) on Docker/Swarm/UCP/Mesos/DCOS and scale it.
 
 # How to create your jenkins CI infrastructure for your organization?
 
@@ -17,13 +19,13 @@ To create a new jenkins instance to your organization, you just need to add `--a
 
 Ex:
 ```bash
-$ forjj create <workspace> --apps ci:jenkins <jenkins_flags> ...
+$ forjj create --apps ci:jenkins <jenkins_flags> ...
 ```
 
 If you want to update an existing jenkins instance, you can use:
 
 ```bash
-$ forjj update <workspace> --apps ci:jenkins <jenkins_flags> ...
+$ forjj update --apps ci:jenkins <jenkins_flags> ...
 ```
 
 If you have several jenkins instances, you can add it in the `--apps` flag:
@@ -42,12 +44,10 @@ $ forjj ... --apps ci:jenkins:myinstance,ci:jenkins:anotherinstance --myinstance
 
 In case of update, you probably need to follow the organization flow to approve your change and apply.
 
-Depending on upstream flow choosed, forjj jenkins could generate more files to create jobs/pipelines (jobs-dsl)
-
 ## Jenkins source Templates
 
 All jenkins source files are generated from a collection of source templates (jenkins source model).
-Currently, those templates are located under templates directory.
+Currently, those templates are located under templates directory in forjj-jenkins container.
 
 TODO: We can imagine having several templates directory as well as a different source of templates (git, tar, others...) to change jenkins sources model, but this has not been currently developped.
 
@@ -69,7 +69,7 @@ Feel free to contribute to add this feature!
 
 Currently, the embedded source model implements globally the following:
 
-- A docker image built from `hub.docker.io/devops/jenkins-ci` [source](https://github.com/forj-oss/jenkins-ci) See [Docker Trusted Registry (DTR) for versions](https://hub.docker.hpecorp.net/repositories/devops/jenkins-dood/tags)
+- A docker image built from `hub.docker.io/forj/jenkins-ci` [source](https://github.com/forj-oss/jenkins-ci)
 - A collection of default features ([source](https://github.com/forj-oss/jenkins-install-inits))
   - Basic authentication (admin user with default password & anonymous has read access)
   - proxy setting (Set proxy from http_proxy env setting, found from the container)
@@ -77,7 +77,7 @@ Currently, the embedded source model implements globally the following:
   - jenkins slave fixed port
 - A collection of additional features and templates to add for a dedicated deployment
 - A list of predefined deployment. ie:
-  - docker - To deploy to your local docker environment.
+  - docker - To deploy to your local docker environment. (Default deployment)
   - ucp - To deploy to a UCP system.
   - marathon - To deploy to dcos/mesos marathon.
 

@@ -1,0 +1,23 @@
+multibranchPipelineJob('{{ .Name }}') {
+  branchSources {
+{{ if .Source == github }}\
+      github {
+          apiUri('{{ .APIUri }}')
+          includes('*')
+          repoOwner('{{ .RepoOwner }}')
+          repository('{{ .Repository }}')
+      }
+{{ end }}\
+{{ if .Source == github }}\
+      git {
+          remote('{{ .RemoteUrl }}')
+          includes('*')
+      }
+{{ end }}\
+  }
+  orphanedItemStrategy {
+      discardOldItems {
+          numToKeep(20)
+      }
+  }
+}

@@ -5,10 +5,7 @@ import (
     "log"
     "path"
     "os"
-    "text/template"
-    "io/ioutil"
     "fmt"
-    "strings"
 )
 
 // This file describes how we generate source from templates.
@@ -63,51 +60,20 @@ func set_rights(file string, rights os.FileMode) error {
 }
 
 // loop on templates to use to generate source files
-// The based data used for template is conform to the conent of
+// The based data used for template is conform to the content of
 // the forjj-jenkins.yaml file
 // See YamlJenkins in jenkins_plugin.go
 func (p *JenkinsPlugin)generate_source_files(instance_name string, ret *goforjj.PluginData) (status bool) {
     for file, desc := range p.templates {
-        src := path.Join(p.template_dir, desc.Template)
-        dest := path.Join(p.source_path, desc.Template)
-        parent := path.Dir(dest)
-
-        if  parent != "." {
-            if _, err := os.Stat(parent) ; err != nil {
-                os.MkdirAll(parent, 0755)
-            }
-        }
-
-        var data string
-        if b, err := ioutil.ReadFile(src) ; err != nil {
-            log.Printf(ret.Errorf("Load issue. %s", err))
-        } else {
-            data = strings.Replace(string(b), "\\\n", "", -1)
-        }
-
-        t, err := template.New(src).Funcs(template.FuncMap{}).Parse(data)
-        if err != nil {
-            log.Printf(ret.Errorf("Template issue. %s", err))
-            return
-        }
-
-        if out, err := os.Create(dest) ; err != nil {
-            log.Printf(ret.Errorf("Unable to create %s. %s.", dest, err))
-            return
-        } else {
-            if err := t.Execute(out, p.yaml) ; err != nil {
-                log.Printf(ret.Errorf("Unable to interpret %s. %s.", dest, err))
-            }
-            out.Close()
-        }
-
-        if err := set_rights(dest, desc.Chmod) ; err != nil {
-            ret.Errorf("%s", err)
+        if err := desc.Generate(p.yaml, p.template_dir, p.source_path, desc.Template) ; err != nil {
+            log.Printf(ret.Errorf("%s", err))
             return
         }
 
         ret.AddFile(path.Join(instance_name, desc.Template))
         log.Printf(ret.StatusAdd("%s (%s) generated", file, desc.Template))
     }
-    return true
+    status = true
+    return
 }
+
