@@ -32,14 +32,14 @@ func (a *githubApp)start_server() {
 
         // Interruption handler.
         go func () {
-            log.Printf("Interruption handler started.")
+            log.Print("Interruption handler started.")
             if _, ok := <-int_sig ; !ok {
-                log.Printf("Exiting interruption handler...")
+                log.Print("Exiting interruption handler...")
                 signal.Stop(int_sig)
                 return // Interruption handler aborted.
             }
 
-            log.Printf("Exiting and closing socket...")
+            log.Print("Exiting and closing socket...")
             Start = false // Move server to down status
             ln.Close()
         }()
@@ -54,7 +54,7 @@ func (a *githubApp)start_server() {
             if err != nil {
                 break
             }
-            time.Sleep(5)
+            time.Sleep(5 * time.Millisecond)
         }
 
         if Start {
@@ -64,11 +64,11 @@ func (a *githubApp)start_server() {
         }
 
         <- server_chan
-        log.Printf("http server is NOW off.")
+        log.Print("http server is NOW off.")
         if ! Start {
             os.Exit(0)
         }
-        log.Printf("Restarting the http server.")
+        log.Print("Restarting the http server.")
         time.Sleep(2)
     }
 }
@@ -81,7 +81,7 @@ func (a *githubApp)listen_and_serve(ln net.Listener, server_chan chan bool, Star
     srv := http.Server{Handler: router}
     err := srv.Serve(ln)
     if !*Start {
-        log.Printf("httpd server: Exiting...")
+        log.Print("httpd server: Exiting...")
     } else {
         log.Printf("httpd server: Error detected: %s", err)
     }

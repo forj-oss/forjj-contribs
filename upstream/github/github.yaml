@@ -7,44 +7,115 @@ runtime:
     image: "hub.docker.hpecorp.net/devops/forjj-github"
   service_type: "REST API"
   service:
-    #socket: "github.sock"
     parameters: [ "service", "start" ]
 created_flag_file: "{{ .InstanceName }}/{{.Name}}.yaml"
-actions:
- common:
-   flags:
-     forjj-infra:
-       help: "Name of the Infra repository to use"
-     github-debug:
-       help: "To activate github debug information"
-     forjj-source-mount:
-       help: "Where the source dir is located for github plugin."
-     forjj-instance-name:
-        help: "Name of the jenkins instance given by forjj."
-     github-token:
-       help: "github token to access. This token must authorize organization level access."
-       required: true
-       secure: true
- create:
-   help: "Create the github environment to manage source and infra code."
-   flags:
-     github-server:
-       help: "Github Entreprise Server name. By default, public 'github.com' API is used."
-     forjj-organization:
-       help: "Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization"
-     github-organization:
-       help: "Github Organization name. By default, it uses the FORJJ organization name"
- update:
-   help: "Update the github infrastructure in the infra repository."
-   flags:
-     github-server:
-       help: "Github Entreprise Server name. By default, public 'github.com' API is used."
-     forjj-organization:
-       help: "Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization"
-     github-organization:
-       help: "Github Organization name. By default, it uses the FORJJ organization name"
- maintain:
-   help: "Maintain github infrastructure from the infra repository"
-   flags:
-     forjj-workspace-mount:
-       help: "Where the workspace dir is located for github plugin."
+task_flags: # All task flags will be delivered by forjj to the plugin under forj/
+  common:
+    debug:
+      help: "To activate github debug information"
+    forjj-source-mount:
+      help: "Where the source dir is located for github plugin container."
+    forjj-instance-name:
+       help: "Name of the jenkins instance given by forjj."
+  maintain:
+    forjj-workspace-mount:
+      help: "Where the workspace dir is located in the github plugin container."
+objects: # All objects will be delivered by forjj except workspace/infra under objects/<type>/<instance>/<action>/key=value
+  # Define infra object special flag for github
+  app: # already defined by Forjj
+    # Default is : actions: ["add", "change", "remove"] No need to define it.
+    flags:
+      server:
+        help: "Github Entreprise Server name. By default, public 'github.com' API is used."
+      forjj-organization:
+        only-for-actions: ["add"]
+        help: "Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization"
+      organization:
+        only-for-actions: ["add"]
+        help: "Github Organization name. By default, it uses the FORJJ organization name"
+      forjj-infra:
+        only-for-actions: ["add", "change"]
+        help: "Name of the Infra repository to use in github if requested."
+      token:
+        only-for-actions: ["add", "change"]
+        help: "github token to access. This token must authorize organization level access."
+        required: true
+        secure: true
+        envar: "TOKEN"
+  # Define github group exposure to forjj
+  group: # New object type in forjj
+    # Default is : actions: ["add", "change", "remove", "list", "rename"]
+    help: "Manage teams in github"
+    identified_by_flag: name
+    flags:
+      organization:
+        help: "To manage github teams at organization level"
+        default: "false"
+      users:
+        only-for-actions: ["add"]
+        help: "List of users to attach to the new group."
+      add-users:
+        only-for-actions: ["change"]
+        help: "Add users to github team."
+      remove-users:
+        actions: ["change"]
+        help: "remove users from github team."
+      name:
+        help: "group name"
+        required: true
+      roles:
+        only-for-actions: ["add"]
+        help: "List of roles to apply to the new group."
+      add-roles:
+        only-for-actions: ["change"]
+        help: "Roles added to the group."
+      remove-roles:
+        only-for-actions: ["change"]
+        help: "Roles removed to the group."
+  # Define github users exposure to forjj
+  user: # New object type in forjj
+    # Default is : actions: ["add", "change", "remove", "list", "rename"]
+    help: "Manage teams in github"
+    identified_by_flag: name
+    flags:
+      organization:
+        help: "To manage github users at organization level"
+        default: "false"
+      name:
+        options:
+          help: "user name"
+          required: true
+      roles:
+        only-for-actions: ["add"]
+        options:
+          help: "List of roles to apply to the new user."
+      add-roles:
+        only-for-actions: ["change"]
+        options:
+          help: "Roles added to the user."
+      remove-roles:
+        only-for-actions: ["change"]
+        help: "Roles removed from the user."
+  repo: # Enhance Forjj repo object
+    actions: ["add", "change"]
+    flags:
+      name:
+        help: "Repository name"
+      title:
+        help: "Github Repository title"
+      users:
+        only-for-actions: ["add"]
+        help: "List of users (user:role) to attach to the repository, separated by comma."
+      groups:
+        only-for-actions: ["add"]
+        help: "List of groups (group:role) to attach to the repository, separated by comma."
+      add-users:
+        only-for-actions: ["change"]
+        help: "List of additional users (user:role) to attach to the repository, separated by comma."
+      add-groups:
+        only-for-actions: ["change"]
+        help: "List of additional groups (group:role) to attach to the repository, separated by comma."
+      flow:
+        help: "Flow activated on this repository"
+      forjj-workspace-mount:
+        help: "Where the workspace dir is located in the github plugin container."

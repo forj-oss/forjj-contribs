@@ -26,10 +26,10 @@ const github_file = "github.yaml"
 //
 // By default, if httpCode is not set (ie equal to 0), the function caller will set it to 422 in case of errors (error_message != "") or 200
 func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *goforjj.PluginData) (httpCode int){
-
+	instance := req.Forj.ForjjInstanceName
     gws := GitHubStruct{
-        source_mount: req.Args.ForjjSourceMount,
-        token: req.Args.GithubToken,
+        source_mount: req.Forj.ForjjSourceMount,
+        token: req.Objects.App[instance].Add.Token,
     }
     check := make(map[string]bool)
     check["token"] = true
@@ -42,7 +42,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 
     log.Printf("Checking github connection : %#v", gws)
 
-    if gws.github_connect(req.Args.GithubServer, ret) == nil {
+    if gws.github_connect(req.Objects.App[instance].Add.Server, ret) == nil {
         return
     }
 
@@ -60,15 +60,17 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     }
 
     // A create won't be possible if source files already exist. The Update is the only possible option.
-    log.Printf("Checking Infrastructure code existence.")
-    source_path := path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName)
+    log.Print("Checking Infrastructure code existence.")
+    source_path := path.Join(req.Forj.ForjjSourceMount, req.Forj.ForjjInstanceName)
     if _, err := os.Stat(source_path) ; err != nil {
         if err = os.MkdirAll(source_path, 0755) ; err != nil {
             ret.Errorf("Unable to create '%s'. %s", source_path, err)
         }
     }
-    if _, err := os.Stat(path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName, github_file)) ; err == nil {
-        ret.Errorf("Unable to create the github configuration which already exist.\nUse 'update' to update it (or update %s), and 'maintain' to update your github service according to his configuration.", path.Join(req.Args.ForjjInstanceName, github_file))
+    if _, err := os.Stat(path.Join(source_path, github_file)) ; err == nil {
+        ret.Errorf("Unable to create the github configuration which already exist.\nUse 'update' to update it " +
+			"(or update %s), and 'maintain' to update your github service according to his configuration.",
+			path.Join(instance, github_file))
         return 419
     }
 
@@ -79,7 +81,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
         ret.Errorf("%s", err)
         return
     }
-    log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(req.Args.ForjjInstanceName, github_file)))
+    log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(req.Forj.ForjjInstanceName, github_file)))
 
     // Building final Post answer
     // We assume ssh is used and forjj can push with appropriate credential.
@@ -87,8 +89,8 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
         ret.Services.Urls[k] = v
     }
 
-    ret.CommitMessage = fmt.Sprintf("Github configuration created.")
-    ret.AddFile(path.Join(req.Args.ForjjInstanceName, github_file))
+    ret.CommitMessage = fmt.Sprint("Github configuration created.")
+    ret.AddFile(path.Join(req.Forj.ForjjInstanceName, github_file))
 
     return
 }
@@ -99,14 +101,15 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 //
 // By default, if httpCode is not set (ie equal to 0), the function caller will set it to 422 in case of errors (error_message != "") or 200
 func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *goforjj.PluginData) (httpCode int) {
-
-    log.Printf("Checking Infrastructure code existence.")
-    source_path := path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName)
+	instance := req.Forj.ForjjInstanceName
+    log.Print("Checking Infrastructure code existence.")
 
     var gws GitHubStruct
 
-    gws.source_mount = req.Args.ForjjSourceMount
-    gws.token= req.Args.GithubToken
+    gws.source_mount = req.Forj.ForjjSourceMount
+    gws.token= req.Objects.App[instance].Change.Token
+
+	source_path := path.Join(gws.source_mount, instance)
 
     check := make(map[string]bool)
     check["token"] = true
@@ -119,23 +122,25 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 
     if _, err := os.Stat(path.Join(source_path, github_file)) ; err != nil {
         log.Printf(ret.StatusAdd("Warning! The workspace do not contain '%s'", path.Join(source_path, github_file)))
-        if gws.github_connect(req.Args.GithubServer, ret) == nil {
+        if gws.github_connect(req.Objects.App[instance].Change.Server, ret) == nil {
             return
         }
         req.InitOrganization(&gws)
         gws.req_repos_exists(req, ret)
-        ret.Errorf("Unable to update the github configuration which doesn't exist.\nUse 'create' to create it (or create %s), and 'maintain' to update your github service according to his configuration.", path.Join(req.Args.ForjjInstanceName, github_file))
+        ret.Errorf("Unable to update the github configuration which doesn't exist.\nUse 'create' to create it " +
+			"(or create %s), and 'maintain' to update your github service according to his configuration.",
+			path.Join(instance, github_file))
         log.Printf("Unable to update the github configuration '%s'", path.Join(source_path, github_file))
         return 419
     }
 
     // Read the github.yaml file.
-    if err := gws.load_yaml(path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName, github_file)) ; err != nil {
-        ret.Errorf("Unable to update github instance '%s' source files. %s. Use 'create' to create it first.", req.Args.ForjjInstanceName, err)
+    if err := gws.load_yaml(path.Join(gws.source_mount, instance, github_file)) ; err != nil {
+        ret.Errorf("Unable to update github instance '%s' source files. %s. Use 'create' to create it first.", instance, err)
         return 419
     }
 
-    if gws.github_connect(req.Args.GithubServer, ret) == nil {
+    if gws.github_connect(req.Objects.App[instance].Change.Server, ret) == nil {
         return
     }
 
@@ -156,14 +161,14 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
         ret.Errorf("%s", err)
         return
     }
-    log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(req.Args.ForjjInstanceName, github_file)))
+    log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(instance, github_file)))
 
     for k, v := range gws.github_source.Urls {
         ret.Services.Urls[k] = v
     }
 
-    ret.CommitMessage = fmt.Sprintf("Github configuration updated.")
-    ret.AddFile(path.Join(req.Args.ForjjInstanceName, github_file))
+    ret.CommitMessage = fmt.Sprint("Github configuration updated.")
+    ret.AddFile(path.Join(instance, github_file))
 
     return
 }
@@ -174,11 +179,11 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 //
 // By default, if httpCode is not set (ie equal to 0), the function caller will set it to 422 in case of errors (error_message != "") or 200
 func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *goforjj.PluginData) (httpCode int) {
-
+	instance := req.Forj.ForjjInstanceName
     gws := GitHubStruct{
-        source_mount: req.Args.ForjjSourceMount,
-        workspace_mount: req.Args.ForjjWorkspaceMount,
-        token: req.Args.GithubToken,
+        source_mount: req.Forj.ForjjSourceMount,
+        workspace_mount: req.Forj.ForjjWorkspaceMount,
+        token: req.Objects.App[instance].Setup.Token,
     }
     check := make(map[string]bool)
     check["token"] = true
@@ -189,7 +194,7 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
     }
 
     // Read the github.yaml file.
-    if err := gws.load_yaml(path.Join(req.Args.ForjjSourceMount, req.Args.ForjjInstanceName, github_file)) ; err != nil {
+    if err := gws.load_yaml(path.Join(gws.source_mount, instance, github_file)) ; err != nil {
         ret.Errorf("%s", err)
         return
     }

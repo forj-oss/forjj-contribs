@@ -11,21 +11,17 @@ import (
 )
 
 func (req *CreateReq)InitOrganization(g *GitHubStruct) {
-    if orga := req.Args.GithubOrganization; orga == "" {
-        g.github_source.Organization = req.Args.ForjjOrganization
+    instance := req.Forj.ForjjInstanceName
+    if orga := req.Objects.App[instance].Add.Organization; orga == "" {
+        g.github_source.Organization = req.Objects.App[instance].Add.ForjjOrganization
     } else {
         g.github_source.Organization = orga
     }
 
 }
 
+// No change for now.
 func (req *UpdateReq)InitOrganization(g *GitHubStruct) {
-    if orga := req.Args.GithubOrganization; orga == "" {
-        g.github_source.Organization = req.Args.ForjjOrganization
-    } else {
-        g.github_source.Organization = orga
-    }
-
 }
 
 func (g *GitHubStruct)github_connect(server string, ret *goforjj.PluginData) (* github.Client) {
@@ -183,7 +179,7 @@ func (g *GitHubStruct)req_repos_exists(req *UpdateReq, ret *goforjj.PluginData) 
     c := g.Client.Repositories
 
     // loop on list of repos, and ensure they exist with minimal config and rights
-    for name, _ := range req.ReposData {
+    for name, _ := range req.Objects.Repo {
         log.Printf("Looking for Repo '%s' from '%s'", name, g.github_source.Organization)
         found_repo, _, err := c.Get(g.github_source.Organization, name)
 
