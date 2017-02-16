@@ -1,24 +1,49 @@
 package main
 
-func (t *DeployStruct)SetFrom(d *DeployStruct) {
+func (t *DeployStruct)SetFrom(d *AddDeployStruct) bool {
+	if t == nil {
+		return false
+	}
+    SetIfSet(&t.DeployTo, d.DeployTo)
+    SetIfSet(&t.ServiceAddr, d.ServiceAddr)
+    SetIfSet(&t.ServicePort, d.ServicePort)
+	return true
+}
+
+func (t *DeployStruct)UpdateFrom(d *ChangeDeployStruct) {
     SetIfSet(&t.DeployTo, d.DeployTo)
     SetIfSet(&t.ServiceAddr, d.ServiceAddr)
     SetIfSet(&t.ServicePort, d.ServicePort)
 }
 
-func (t *DockerfileStruct)SetFrom(d *DockerfileStruct) {
-    SetIfSet(&t.BaseDockerImage, d.BaseDockerImage)
-    SetIfSet(&t.BaseDockerImageVersion, d.BaseDockerImageVersion)
+func (t *DockerfileStruct)SetFrom(d *AddDockerfileStruct) {
+    SetIfSet(&t.FromImage, d.FromImage)
+    SetIfSet(&t.FromImageVersion, d.FromImageVersion)
     SetIfSet(&t.Maintainer, d.Maintainer)
 }
 
-func (t *FinalImageStruct)SetFrom(d *FinalImageStruct, org string) {
-    SetIfSet(&t.FinalDockerImage, d.FinalDockerImage)
-    SetIfSet(&t.FinalDockerImageVersion, d.FinalDockerImageVersion)
-    SetIfSet(&t.FinalDockerRegistryServer, d.FinalDockerRegistryServer)
+func (t *DockerfileStruct)UpdateFrom(d *ChangeDockerfileStruct) {
+	SetIfSet(&t.FromImage, d.FromImage)
+	SetIfSet(&t.FromImageVersion, d.FromImageVersion)
+	SetIfSet(&t.Maintainer, d.Maintainer)
+}
 
-    SetIfSet(&t.FinalDockerRepoName, d.FinalDockerRepoName)
-    SetOnceIfSet(&t.FinalDockerRepoName, org)
+func (t *FinalImageStruct)SetFrom(d *AddFinalImageStruct, org string) {
+    SetIfSet(&t.Name, d.Name)
+    SetIfSet(&t.Version, d.Version)
+    SetIfSet(&t.RegistryServer, d.RegistryServer)
+
+    SetIfSet(&t.RegistryRepoName, d.RegistryRepoName)
+    SetOnceIfSet(&t.RegistryRepoName, org)
+}
+
+func (t *FinalImageStruct)UpdateFrom(d *ChangeFinalImageStruct, org string) {
+	SetIfSet(&t.Name, d.Name)
+	SetIfSet(&t.Version, d.Version)
+	SetIfSet(&t.RegistryServer, d.RegistryServer)
+
+	SetIfSet(&t.RegistryRepoName, d.RegistryRepoName)
+	SetOnceIfSet(&t.RegistryRepoName, org)
 }
 
 // Set the value if the source is set

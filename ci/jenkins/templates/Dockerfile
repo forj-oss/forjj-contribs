@@ -1,6 +1,6 @@
 # This file is managed by Forjj jenkins plugin at Maintain phase. Do not update it manually!
 
-FROM {{ .Dockerfile.BaseDockerImage }}{{ if .Dockerfile.BaseDockerImageVersion }}:{{ .Dockerfile.BaseDockerImageVersion }}{{ end }}
+FROM {{ .Dockerfile.FromImage }}{{ if .Dockerfile.FromImageVersion }}:{{ .Dockerfile.FromImageVersion }}{{ end }}
 
 # COPY local_plugins/*  $JENKINS_DATA_REF/plugins/
 COPY features.lst /tmp

@@ -11,126 +11,77 @@ runtime:
     #socket: "jenkins.sock"
     parameters: [ "service", "start", "--templates", "/templates"]
 created_flag_file: "{{ .InstanceName }}/forjj-{{ .Name }}.yaml"
-actions:
+task_flags:
   common:
+    forjj-infra:
+      help: "Name of the Infra repository to use"
+    forjj-instance-name:
+    forjj-source-mount:
+    forjj-organization:
+    debug:
+      help: "To activate jenkins debug information"
+    forjj-source-mount:
+      help: "Where the source dir is located for jenkins plugin."
+  maintain:
+    deploy-to:
+      default: docker
+      help: "Where jenkins will be published."
+objects:
+  deployment:
+    default-actions: ["add", "change", "remove", "list"]
+    identified-by-flag: name
+    groups:
+      deploy:
+        flags:
+          service-addr:
+            help: "Exposed service CNAME or IP address of the expected jenkins instance"
+          service-port:
+            default: 8080
+            help: "Expected jenkins instance port number."
+          name:
+            required: true
+            help: "Name of the jenkins deployment"
+          deploy-to:
+            help: "Where jenkins will be deployed."
+  app:
+    default-actions: ["add", "change"]
+    groups:
+      dockerfile:
+        flags:
+          # Information we can define for the Dockerfile.
+          from-image:
+            help: "Base Docker image tag name to use in Dockerfile. Must respect [server/repo/]name."
+            default: hub.docker.hpecorp.net/devops/jenkins-dood
+          from-image-version:
+            help: "Base Docker image tag version to use in Dockerfile"
+          maintainer:
+            help: "Jenkins image maintainer"
+      final-image:
+        flags:
+          name:
+            help: "Docker image name for your final generated Jenkins Image. Do not set the Server or Repo name. Use final-docker-registry-server and final-docker-repo-name."
+            default: jenkins
+            group: "final-image"
+          version:
+            help: "Docker image tag version for your generated Jenkins Image."
+          registry-server:
+            help: "Docker registry server name where your image will be pushed. If not set, no push will be done."
+            default: hub.docker.hpecorp.net
+          registry-repo-name:
+            help: "Docker Repository Name where your image will be pushed. If not set, no push will be done."
     flags:
-      forjj-infra:
-        help: "Name of the Infra repository to use"
-      jenkins-debug:
-        help: "To activate jenkins debug information"
-      forjj-source-mount:
-        help: "Where the source dir is located for jenkins plugin."
-
       registry-auth:
         help: "List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]"
         secure: true
-  create:
-    help: "Create a jenkins instance source code."
-    flags:
-      # Options related to source code
-      forjj-instance-name:
-        help: "Name of the jenkins instance to create given by forjj."
-      forjj-organization:
-        help: "Organization name used in the docker repo name if --docker-repoimage not set."
-
-      # Information we can define for the Dockerfile.
-      base-docker-image:
-        help: "Base Docker image tag name to use in Dockerfile. Must respect [server/repo/]name."
-        default: hub.docker.hpecorp.net/devops/jenkins-dood
-        group: "dockerfile"
-      base-docker-image-version:
-        help: "Base Docker image tag version to use in Dockerfile"
-        group: "dockerfile"
-      base-registry-server:
-        help: "Registry Server for docker pull of the Base image"
-      maintainer:
-        help: "Jenkins image maintainer"
-        group: "dockerfile"
-
-      final-docker-image:
-        help: "Docker image name for your final generated Jenkins Image. Do not set the Server or Repo name. Use final-docker-registry-server and final-docker-repo-name."
-        default: jenkins
-        group: "final-image"
-      final-docker-image-version:
-        help: "Docker image tag version for your generated Jenkins Image."
-        group: "final-image"
-      final-docker-registry-server:
-        help: "Docker registry server name where your image will be pushed. If not set, no push will be done."
-        default: hub.docker.hpecorp.net
-        group: "final-image"
-      final-docker-repo-name:
-        help: "Docker Repository Name where your image will be pushed. If not set, no push will be done."
-        group: "final-image"
-
-      features:
-        help: "List of features to add to jenkins features.lst."
-        group: "source"
-
-      # Options related to deployment
       deploy-to:
-        default: docker
-        help: "Where this jenkins source code will be deployed. Supports 'docker'. Future would be 'marathon', 'dcos' and 'host'"
-        group: "deploy"
-      service-addr:
+        help: "Deployment name used to deploy jenkins."
+        default: "docker"
+  features:
+    default-actions: ["add", "change", "remove"]
+    identified_by_flag: name
+    flags:
+      name:
+        help: "name of the jenkins feature"
         required: true
-        help: "Exposed service CNAME or IP address of the expected jenkins instance"
-        group: "deploy"
-      service-port:
-        default: 8080
-        help: "Expected jenkins instance port number."
-        group: "deploy"
-  update:
-    help: "update a jenkins instance source code"
-    flags:
-      forjj-instance-name:
-        help: "Name of the jenkins instance to update given by forjj."
-      forjj-organization:
-        help: "Organization name used in the docker repo name if --docker-repoimage not set."
-
-      features-add:
-        help: "List of features to add to jenkins."
-
-      # Information we can define for the Dockerfile.
-      base-docker-image:
-        help: "Base Docker image tag name to use in Dockerfile. Must respect [server/repo/]name."
-        default: hub.docker.hpecorp.net/devops/jenkins-dood
-        group: "dockerfile"
-      base-docker-image-version:
-        help: "Base Docker image tag version to use in Dockerfile"
-        group: "dockerfile"
-      maintainer:
-        help: "Jenkins image maintainer"
-        group: "dockerfile"
-
-      final-docker-image:
-        help: "Docker image name for your final generated Jenkins Image. Do not set the Server or Repo name. Use final-docker-registry-server and final-docker-repo-name."
-        default: jenkins
-        group: "final-image"
-      final-docker-image-version:
-        help: "Docker image tag version for your generated Jenkins Image."
-        group: "final-image"
-      final-docker-registry-server:
-        help: "Docker registry server name where your image will be pushed. If not set, no push will be done."
-        default: hub.docker.hpecorp.net
-        group: "final-image"
-      final-docker-repo-name:
-        help: "Docker Repository Name where your image will be pushed. If not set, no push will be done."
-        group: "final-image"
-
-      features:
-        help: "List of features to add to jenkins features.lst."
-        group: "source"
-      # Options related to deployment
-      deploy-to:
-        default: docker
-        help: "Where this jenkins source code will be deployed. Supports 'docker'. Future would be 'marathon', 'dcos' and 'host'"
-        group: "deploy"
-      service-addr:
-        help: "Exposed service CNAME or IP address of the expected jenkins instance"
-        group: "deploy"
-      service-port:
-        default: 8080
-        help: "Expected jenkins instance port number."
-        group: "deploy"
-  maintain:
-    help: "Instantiate jenkins thanks to source code."
+      options:
+        help: "List of feature option to use"

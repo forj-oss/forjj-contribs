@@ -3,7 +3,7 @@
 #
 
 REPO=$LOGNAME
-IMAGE_NAME={{ .JenkinsImage.FinalDockerImage }}
+IMAGE_NAME="{{ .JenkinsImage.Name }}"
 IMAGE_VERSION=test
 
 
@@ -50,10 +50,28 @@ then
    source run_opts.sh
 fi
 
-TAG_NAME={{ .JenkinsImage.FinalDockerRegistryServer }}/$LOGNAME/$IMAGE_NAME:$IMAGE_VERSION
+# Loading deployment environment ($1)
+if [ -f source_$1.sh ]
+then
+   echo "Loading deployment environment '$1'"
+   source source_$1.sh
+fi
+
+if [ "$SERVICE_ADDR" = "" ]
+then
+   echo "SERVICE_ADDR not defined by any deployment environment. Set 'localhost'"
+   SERVICE_ADDR="localhost"
+fi
+if [ "$SERVICE_PORT" = "" ]
+then
+   echo "SERVICE_PORT not defined by any deployment environment. Set '8080'"
+   SERVICE_PORT=8080
+fi
+
+TAG_NAME={{ .JenkinsImage.RegistryServer }}/$LOGNAME/$IMAGE_NAME:$IMAGE_VERSION
 
 {{/* Docker uses go template for --format. So need to generate a template go string */}}\
-CONTAINER_IMG="$(sudo docker ps -a -f name={{ .JenkinsImage.FinalDockerImage }}-dood --format "{{ "{{ .Image }}" }}")"
+CONTAINER_IMG="$(sudo docker ps -a -f name={{ .JenkinsImage.Name }}-dood --format "{{ "{{ .Image }}" }}")"
 
 IMAGE_ID="$(sudo docker images --format "{{ "{{ .ID }}" }}" $IMAGE_NAME)"
 
@@ -62,19 +80,19 @@ then
     if [ "$CONTAINER_IMG" != "$TAG_NAME" ] && [ "$CONTAINER_IMG" != "$IMAGE_ID" ]
     then
         # TODO: Find a way to stop it safely
-        sudo docker rm -f {{ .JenkinsImage.FinalDockerImage }}-dood
+        sudo docker rm -f {{ .JenkinsImage.Name }}-dood
     else
-        echo "Nothing to re/start. Jenkins is still accessible at http://{{ .Deploy.ServiceAddr }}:{{ .Deploy.ServicePort }}"
+        echo "Nothing to re/start. Jenkins is still accessible at http://$SERVICE_PORT:$SERVICE_PORT"
         exit 0
     fi
 fi
 
-sudo docker run -d -p 8080:{{ .Deploy.ServicePort }} --name {{ .JenkinsImage.FinalDockerImage }}-dood $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
+sudo docker run -d -p 8080:$SERVICE_PORT --name {{ .JenkinsImage.Name }}-dood $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
 
 if [ $? -ne 0 ]
 then
     echo "Issue about jenkins startup."
-    sudo docker logs {{ .JenkinsImage.FinalDockerImage }}-dood
+    sudo docker logs {{ .JenkinsImage.Name }}-dood
     return 1
 fi
-echo "Jenkins has been started and should be accessible at http://{{ .Deploy.ServiceAddr }}:{{ .Deploy.ServicePort }}"
+echo "Jenkins has been started and should be accessible at http://$SERVICE_ADDR:$SERVICE_PORT"
