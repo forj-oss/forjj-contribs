@@ -5,7 +5,6 @@ import (
     "fmt"
     "io/ioutil"
     "github.com/forj-oss/goforjj"
-    "reflect"
 )
 
 func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
