@@ -8,6 +8,7 @@ import (
     "net/url"
     "regexp"
     "fmt"
+    "context"
 )
 
 func (req *CreateReq)InitOrganization(g *GitHubStruct) {
@@ -26,7 +27,8 @@ func (req *UpdateReq)InitOrganization(g *GitHubStruct) {
 
 func (g *GitHubStruct)github_connect(server string, ret *goforjj.PluginData) (* github.Client) {
     ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: g.token})
-    tc := oauth2.NewClient(oauth2.NoContext, ts)
+    g.ctxt = context.Background()
+    tc := oauth2.NewClient(g.ctxt, ts)
 
     g.Client = github.NewClient(tc)
 
@@ -46,7 +48,7 @@ func (g *GitHubStruct)github_connect(server string, ret *goforjj.PluginData) (* 
     }
     log.Printf("Github Base URL used : %s", g.Client.BaseURL)
 
-    if user , _, err := g.Client.Users.Get("") ; err != nil {
+    if user , _, err := g.Client.Users.Get(g.ctxt, "") ; err != nil {
         ret.Errorf("Unable to get the owner of the token given. %s", err)
         return nil
     } else {
@@ -93,7 +95,7 @@ type GithubEntrepriseOrganization struct {
 func (g *GitHubStruct)ensure_organization_exists(ret *goforjj.PluginData) (s bool) {
 
     s = false
-    _, resp, err := g.Client.Organizations.Get(g.github_source.Organization)
+    _, resp, err := g.Client.Organizations.Get(g.ctxt, g.github_source.Organization)
     if err != nil && resp == nil {
         log.Printf(ret.Errorf("Unable to get '%s' organization information. %s", g.github_source.Organization, err))
         return
@@ -109,12 +111,12 @@ func (g *GitHubStruct)ensure_organization_exists(ret *goforjj.PluginData) (s boo
             return
         }
 
-        _, err = g.Client.Do(req, res_orga)
+        _, err = g.Client.Do(g.ctxt, req, res_orga)
         if err != nil {
             log.Printf(ret.Errorf("Unable to create '%s' as organization. %s.\nYour credentials is probably insufficient.\nYou can update your token access rights or ask to create the organization and attach a Full control access token to the organization owner dedicated to Forjj.\nAs soon as fixed, your can restart forjj maintain", g.github_source.Organization, err))
             return
         }
-        _, resp, err = g.Client.Organizations.Get(g.github_source.Organization)
+        _, resp, err = g.Client.Organizations.Get(g.ctxt, g.github_source.Organization)
         if err != nil && resp == nil {
             log.Printf(ret.Errorf("Unable to get '%s' organization information. %s", g.github_source.Organization, err))
             return
@@ -126,7 +128,7 @@ func (g *GitHubStruct)ensure_organization_exists(ret *goforjj.PluginData) (s boo
         log.Printf(ret.StatusAdd("'%s' organization created", g.github_source.Organization))
     } else {
         // Ensure the organization is writable
-        _, resp, err := g.Client.Organizations.IsMember(g.github_source.Organization, g.user)
+        _, resp, err := g.Client.Organizations.IsMember(g.ctxt, g.github_source.Organization, g.user)
         if err != nil && resp == nil {
             log.Printf(ret.Errorf("Unable to verify '%s' organization ownership. %s", g.github_source.Organization, err))
             return
@@ -146,7 +148,7 @@ func (g *GitHubStruct)repos_exists(ret *goforjj.PluginData) (err error) {
 
     // loop on list of repos, and ensure they exist with minimal config and rights
     for name, repo_data := range g.github_source.Repos {
-        if found_repo, _, e := c.Get(g.github_source.Organization, name) ; e == nil {
+        if found_repo, _, e := c.Get(g.ctxt, g.github_source.Organization, name) ; e == nil {
             if err == nil {
                 err = fmt.Errorf("At least '%s' already exist in github server.", name)
             }
@@ -181,7 +183,7 @@ func (g *GitHubStruct)req_repos_exists(req *UpdateReq, ret *goforjj.PluginData) 
     // loop on list of repos, and ensure they exist with minimal config and rights
     for name, _ := range req.Objects.Repo {
         log.Printf("Looking for Repo '%s' from '%s'", name, g.github_source.Organization)
-        found_repo, _, err := c.Get(g.github_source.Organization, name)
+        found_repo, _, err := c.Get(g.ctxt, g.github_source.Organization, name)
 
         r := goforjj.PluginRepo{
             Name: name,
@@ -201,7 +203,7 @@ func (g *GitHubStruct)req_repos_exists(req *UpdateReq, ret *goforjj.PluginData) 
 
 func (r *RepositoryStruct)exists(gws *GitHubStruct) bool{
     c := gws.Client.Repositories
-    _, _, err := c.Get(gws.github_source.Organization, r.Name)
+    _, _, err := c.Get(gws.ctxt, gws.github_source.Organization, r.Name)
 
     if err == nil { // repos exist
         return true
@@ -214,14 +216,14 @@ func (r *RepositoryStruct)exists(gws *GitHubStruct) bool{
 func (r *RepositoryStruct)ensure_exists(gws *GitHubStruct, ret *goforjj.PluginData) error{
      // test existence
     c := gws.Client.Repositories
-    found_repo, _, err := c.Get(gws.github_source.Organization, r.Name)
+    found_repo, _, err := c.Get(gws.ctxt, gws.github_source.Organization, r.Name)
     if err != nil {
         // Creating repository
         github_repo := github.Repository{
             Description: &r.Description,
             Name: &r.Name,
         }
-        found_repo, _, err = c.Create(gws.github_source.Organization, &github_repo)
+        found_repo, _, err = c.Create(gws.ctxt, gws.github_source.Organization, &github_repo)
         if err != nil {
             ret.Errorf("Unable to create '%s' in organization '%s'. %s.", r.Name, gws.github_source.Organization, err)
             return err
@@ -234,7 +236,7 @@ func (r *RepositoryStruct)ensure_exists(gws *GitHubStruct, ret *goforjj.PluginDa
         if repo_updated == nil {
             log.Printf(ret.StatusAdd("Repo '%s': No change", r.Name))
         } else {
-            found_repo, _, err = c.Edit(gws.github_source.Organization, r.Name, repo_updated)
+            found_repo, _, err = c.Edit(gws.ctxt, gws.github_source.Organization, r.Name, repo_updated)
             if err != nil {
                 ret.Errorf("Unable to update '%s' in organization '%s'. %s.", r.Name, gws.github_source.Organization, err)
                 return err
