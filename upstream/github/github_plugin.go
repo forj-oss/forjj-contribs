@@ -3,6 +3,7 @@ package main
 import (
     "github.com/forj-oss/goforjj"
     "github.com/google/go-github/github"
+    "context"
 )
 
 type GitHubStruct struct {
@@ -11,6 +12,7 @@ type GitHubStruct struct {
     token string
     debug bool
     user string                      // github user name
+    ctxt context.Context
     Client *github.Client
     github_source GitHubSourceStruct // github source structure (yaml)
 }
