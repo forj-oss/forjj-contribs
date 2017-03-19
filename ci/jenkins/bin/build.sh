@@ -1,25 +1,30 @@
-#!/bin/bash
-#
-#
+#!/usr/bin/env bash
 
-TAG="-t $(awk '$0 ~ /^ *image: ".*"$/ { print $0 }' jenkins.yaml | sed 's/^ *image: "*\(.*\)".*$/\1/g')"
+set -e
 
-echo "Local go build, then create a docker image..."
-CGO_ENABLED=0 go build
-if [ $? -ne 0 ]
+if [ "$BUILD_ENV_LOADED" != "true" ]
 then
+   echo "Please go to your project and load your build environment. 'source build-env.sh'"
    exit 1
 fi
 
-if [ "$http_proxy" != "" ]
+TAG="-t $(awk '$0 ~ /^ *image: ".*"$/ { print $0 }' $(basename $BUILD_ENV_PROJECT).yaml | sed 's/^ *image: "*\(.*\)".*$/\1/g')"
+
+cd $BUILD_ENV_PROJECT
+
+create-build-env.sh
+
+if [ "$GOPATH" = "" ]
 then
-   PROXY=" --build-arg http_proxy=$http_proxy --build-arg https_proxy=$https_proxy --build-arg no_proxy=$no_proxy"
-   echo "Using your local proxy setting : $http_proxy"
-   if [ "$no_proxy" != "" ]
-   then
-      PROXY="$PROXY --build-arg no_proxy=$no_proxy"
-      echo "no_proxy : $http_proxy"
-   fi
+    echo "Unable to build without GOPATH. Please set it (build)env or your local personal '.be-gopath')"
+    exit 1
 fi
 
-sudo docker build $PROXY $DOCKERFILE $TAG .
+glide i
+
+# Requires forjj to be static.
+export CGO_ENABLED=0
+go build
+
+set -x
+$BUILD_ENV_DOCKER build $PROXY $DOCKERFILE $TAG .

@@ -13,7 +13,13 @@
 # Then this job should implement the following code in jenkins
 # And jenkins-ci images for each flavors will be officially pushed to the internal registry.
 
-TAG_BASE="$(eval "echo $(awk '$1 ~ /image:/ { print $2 }' jenkins.yaml)")"
+if [ "$BUILD_ENV_LOADED" != "true" ]
+then
+   echo "Please go to your project and load your build environment. 'source build-env.sh'"
+   exit 1
+fi
+
+TAG_BASE="$(eval "echo $(awk '$1 ~ /image:/ { print $2 }' $(basename $BUILD_ENV_PROJECT).yaml)")"
 
 if [ ! -f releases.lst ]
 then
@@ -23,7 +29,7 @@ fi
 
 case "$1" in
   release-it )
-    VERSION=$(eval "echo $(awk '$1 ~ /version:/ { print $2 }' jenkins.yaml)")
+    VERSION=$(eval "echo $(awk '$1 ~ /version:/ { print $2 }' $(basename $BUILD_ENV_PROJECT).yaml)")
     if [ "$(git tag -l $VERSION)" = "" ]
     then
        echo "Unable to publish a release version. git tag missing"
@@ -46,23 +52,17 @@ case "$1" in
     exit 1
 esac
 
-if [ ! -f releases.lst ]
-then
-    echo "Missing releases.lst or not in the plugin source path."
-    exit 1
-fi
-
 cat releases.lst | while read LINE
 do
    [[ "$LINE" =~ ^# ]] && continue
    TAGS="$(echo "$LINE" | awk -F'|' '{ print $2 }' | sed 's/,/ /g')"
-   echo "=============== Building forjj-us/github"
+   echo "=============== Building devops/forjj-$(basename $BUILD_ENV_PROJECT)"
    $(dirname $0)/build.sh
    echo "=============== Publishing tags"
    for TAG in $TAGS
    do
       echo "=> $TAG_BASE:$TAG"
-      sudo docker tag -f $TAG_BASE $TAG_BASE:$TAG
+      sudo docker tag $TAG_BASE $TAG_BASE:$TAG
       sudo docker push $TAG_BASE:$TAG
    done
    echo "=============== DONE"
