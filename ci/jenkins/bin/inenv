@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+
+if [ "$http_proxy" != "" ]
+then
+   PROXY="-e http_proxy=$http_proxy -e https_proxy=$http_proxy -e no_proxy=$no_proxy"
+fi
+
+USER="-u $(id -u)"
+PROJECT="$(basename $BUILD_ENV_PROJECT)"
+echo "PROJECT = $PROJECT"
+
+if [ "$GOPATH" = "" ]
+then
+   echo "GOPATH not set. Please set it."
+   exit 1
+fi
+
+MOUNT="-v $GOPATH:/go -w /go/src/$PROJECT"
+
+$BUILD_ENV_DOCKER run --rm -it $MOUNT $PROXY $USER forjj-golang-env bash
+
+
