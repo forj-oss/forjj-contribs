@@ -16,7 +16,7 @@ then
    exit 1
 fi
 
-MOUNT="-v $GOPATH:/go -w /go/src/$PROJECT"
+MOUNT="-v $GOPATH:/go -w /go/src/$BUILD_ENV_PROJECT_REL"
 
 if [ -t 1 ]
 then
