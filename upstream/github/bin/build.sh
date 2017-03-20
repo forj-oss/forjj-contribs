@@ -12,6 +12,11 @@ TAG="-t $(awk '$0 ~ /^ *image: ".*"$/ { print $0 }' github.yaml | sed 's/^ *imag
 
 cd $BUILD_ENV_PROJECT
 
+if [ "$http_proxy" != "" ]
+then
+   PROXY="--build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg no_proxy=$no_proxy"
+fi
+
 create-build-env.sh
 
 if [ "$GOPATH" = "" ]
@@ -26,4 +31,5 @@ glide i
 export CGO_ENABLED=0
 go build
 
+set -x
 $BUILD_ENV_DOCKER build $PROXY $DOCKERFILE $TAG .
