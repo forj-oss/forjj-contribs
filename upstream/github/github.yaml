@@ -48,54 +48,29 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
     help: "Manage teams in github"
     identified_by_flag: name
     flags:
-      organization:
-        help: "To manage github teams at organization level"
-        default: "false"
       users:
         only-for-actions: ["add"]
         help: "List of users to attach to the new group."
-      add-users:
-        only-for-actions: ["change"]
-        help: "Add users to github team."
-      remove-users:
-        actions: ["change"]
-        help: "remove users from github team."
       name:
         help: "group name"
         required: true
-      roles:
+      role:
         only-for-actions: ["add"]
         help: "List of roles to apply to the new group."
-      add-roles:
-        only-for-actions: ["change"]
-        help: "Roles added to the group."
-      remove-roles:
-        only-for-actions: ["change"]
-        help: "Roles removed to the group."
   # Define github users exposure to forjj
   user: # New object type in forjj
     # Default is : actions: ["add", "change", "remove", "list", "rename"]
-    help: "Manage teams in github"
+    help: "Manage organization list of users"
     identified_by_flag: name
     flags:
-      organization:
-        help: "To manage github users at organization level"
-        default: "false"
       name:
         options:
           help: "user name"
           required: true
-      roles:
+      role:
         only-for-actions: ["add"]
         options:
           help: "List of roles to apply to the new user."
-      add-roles:
-        only-for-actions: ["change"]
-        options:
-          help: "Roles added to the user."
-      remove-roles:
-        only-for-actions: ["change"]
-        help: "Roles removed from the user."
   repo: # Enhance Forjj repo object
     actions: ["add", "change"]
     flags:
@@ -105,16 +80,12 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         help: "Github Repository title"
       users:
         only-for-actions: ["add"]
-        help: "List of users (user:role) to attach to the repository, separated by comma."
+        help: "List of users to attach to the repository, separated by comma."
+        format-regexp: "[+-]?[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9]))*,"
       groups:
         only-for-actions: ["add"]
-        help: "List of groups (group:role) to attach to the repository, separated by comma."
-      add-users:
-        only-for-actions: ["change"]
-        help: "List of additional users (user:role) to attach to the repository, separated by comma."
-      add-groups:
-        only-for-actions: ["change"]
-        help: "List of additional groups (group:role) to attach to the repository, separated by comma."
+        help: "List of groups to attach to the repository, separated by comma."
+        format-regexp: "[+-]?[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9]))*,"
       flow:
         help: "Flow activated on this repository"
       forjj-workspace-mount:

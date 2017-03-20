@@ -26,13 +26,8 @@ type AppInstanceStruct struct {
 // Object Instance structures
 
 type GroupInstanceStruct struct {
-	AddRoles string `json:"add-roles"`// Roles added to the group.
-	AddUsers string `json:"add-users"`// Add users to github team.
 	Name string `json:"name"`// group name
-	Organization string `json:"organization"`// To manage github teams at organization level
-	RemoveRoles string `json:"remove-roles"`// Roles removed to the group.
-	RemoveUsers string `json:"remove-users"`// remove users from github team.
-	Roles string `json:"roles"`// List of roles to apply to the new group.
+	Role string `json:"role"`// List of roles to apply to the new group.
 	Users string `json:"users"`// List of users to attach to the new group.
 }
 
@@ -44,14 +39,12 @@ type GroupInstanceStruct struct {
 // Object Instance structures
 
 type RepoInstanceStruct struct {
-	AddGroups string `json:"add-groups"`// List of additional groups (group:role) to attach to the repository, separated by comma.
-	AddUsers string `json:"add-users"`// List of additional users (user:role) to attach to the repository, separated by comma.
 	Flow string `json:"flow"`// Flow activated on this repository
 	ForjjWorkspaceMount string `json:"forjj-workspace-mount"`// Where the workspace dir is located in the github plugin container.
-	Groups string `json:"groups"`// List of groups (group:role) to attach to the repository, separated by comma.
+	Groups string `json:"groups"`// List of groups to attach to the repository, separated by comma.
 	Name string `json:"name"`// Repository name
 	Title string `json:"title"`// Github Repository title
-	Users string `json:"users"`// List of users (user:role) to attach to the repository, separated by comma.
+	Users string `json:"users"`// List of users to attach to the repository, separated by comma.
 }
 
 // Object user groups structure
@@ -62,11 +55,8 @@ type RepoInstanceStruct struct {
 // Object Instance structures
 
 type UserInstanceStruct struct {
-	AddRoles string `json:"add-roles"`// 
 	Name string `json:"name"`// 
-	Organization string `json:"organization"`// To manage github users at organization level
-	RemoveRoles string `json:"remove-roles"`// Roles removed from the user.
-	Roles string `json:"roles"`// 
+	Role string `json:"role"`// 
 }
 
 
@@ -186,54 +176,29 @@ const YamlDesc = "---\n" +
    "    help: \"Manage teams in github\"\n" +
    "    identified_by_flag: name\n" +
    "    flags:\n" +
-   "      organization:\n" +
-   "        help: \"To manage github teams at organization level\"\n" +
-   "        default: \"false\"\n" +
    "      users:\n" +
    "        only-for-actions: [\"add\"]\n" +
    "        help: \"List of users to attach to the new group.\"\n" +
-   "      add-users:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        help: \"Add users to github team.\"\n" +
-   "      remove-users:\n" +
-   "        actions: [\"change\"]\n" +
-   "        help: \"remove users from github team.\"\n" +
    "      name:\n" +
    "        help: \"group name\"\n" +
    "        required: true\n" +
-   "      roles:\n" +
+   "      role:\n" +
    "        only-for-actions: [\"add\"]\n" +
    "        help: \"List of roles to apply to the new group.\"\n" +
-   "      add-roles:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        help: \"Roles added to the group.\"\n" +
-   "      remove-roles:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        help: \"Roles removed to the group.\"\n" +
    "  # Define github users exposure to forjj\n" +
    "  user: # New object type in forjj\n" +
    "    # Default is : actions: [\"add\", \"change\", \"remove\", \"list\", \"rename\"]\n" +
-   "    help: \"Manage teams in github\"\n" +
+   "    help: \"Manage organization list of users\"\n" +
    "    identified_by_flag: name\n" +
    "    flags:\n" +
-   "      organization:\n" +
-   "        help: \"To manage github users at organization level\"\n" +
-   "        default: \"false\"\n" +
    "      name:\n" +
    "        options:\n" +
    "          help: \"user name\"\n" +
    "          required: true\n" +
-   "      roles:\n" +
+   "      role:\n" +
    "        only-for-actions: [\"add\"]\n" +
    "        options:\n" +
    "          help: \"List of roles to apply to the new user.\"\n" +
-   "      add-roles:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        options:\n" +
-   "          help: \"Roles added to the user.\"\n" +
-   "      remove-roles:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        help: \"Roles removed from the user.\"\n" +
    "  repo: # Enhance Forjj repo object\n" +
    "    actions: [\"add\", \"change\"]\n" +
    "    flags:\n" +
@@ -243,16 +208,12 @@ const YamlDesc = "---\n" +
    "        help: \"Github Repository title\"\n" +
    "      users:\n" +
    "        only-for-actions: [\"add\"]\n" +
-   "        help: \"List of users (user:role) to attach to the repository, separated by comma.\"\n" +
+   "        help: \"List of users to attach to the repository, separated by comma.\"\n" +
+   "        format-regexp: \"[+-]?[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9]))*,\"\n" +
    "      groups:\n" +
    "        only-for-actions: [\"add\"]\n" +
-   "        help: \"List of groups (group:role) to attach to the repository, separated by comma.\"\n" +
-   "      add-users:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        help: \"List of additional users (user:role) to attach to the repository, separated by comma.\"\n" +
-   "      add-groups:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        help: \"List of additional groups (group:role) to attach to the repository, separated by comma.\"\n" +
+   "        help: \"List of groups to attach to the repository, separated by comma.\"\n" +
+   "        format-regexp: \"[+-]?[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9]))*,\"\n" +
    "      flow:\n" +
    "        help: \"Flow activated on this repository\"\n" +
    "      forjj-workspace-mount:\n" +
