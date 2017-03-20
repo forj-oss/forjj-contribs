@@ -13,8 +13,8 @@ import (
 
 func (req *CreateReq)InitOrganization(g *GitHubStruct) {
     instance := req.Forj.ForjjInstanceName
-    if orga := req.Objects.App[instance].Add.Organization; orga == "" {
-        g.github_source.Organization = req.Objects.App[instance].Add.ForjjOrganization
+    if orga := req.Objects.App[instance].Organization; orga == "" {
+        g.github_source.Organization = req.Objects.App[instance].ForjjOrganization
     } else {
         g.github_source.Organization = orga
     }

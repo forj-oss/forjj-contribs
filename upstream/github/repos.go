@@ -18,7 +18,7 @@ type RepositoryStruct  struct { // Used to stored the yaml source file. Not used
 	branchConnect map[string]string // k: local branch name, v: remote/branch
 }
 
-func (r *RepositoryStruct)set(repo RepoAddStruct, remotes, branchConnect map[string]string) *RepositoryStruct {
+func (r *RepositoryStruct)set(repo *RepoInstanceStruct, remotes, branchConnect map[string]string) *RepositoryStruct {
 	if r == nil {
 		r = new(RepositoryStruct)
 	}
@@ -73,7 +73,7 @@ func (r *RepositoryStruct)AddGroups(groups string) {
 
 }
 
-func (r *RepositoryStruct)Update(repo RepoChangeStruct) (count int){
+func (r *RepositoryStruct)Update(repo *RepoInstanceStruct) (count int){
 	if r.Description != repo.Title {
 		r.Description = repo.Title
 		count++
@@ -92,24 +92,24 @@ func (r *RepositoryStruct)Update(repo RepoChangeStruct) (count int){
 // DoUpdateIn GitHubStruct with data from request.
 //
 func (r *RepoInstanceStruct) DoUpdateIn(g *GitHubStruct) (Updated bool, err, mess string) {
-	if r.Add.Name != "" {
+	if r.Name != "" {
 		// Add repo request type
-		if g.AddRepo(r.Add.Name, r.Add) {
+		if g.AddRepo(r.Name, r) {
 			Updated = true
-			mess = fmt.Sprintf("New Repository '%s' added.", r.Add.Name)
+			mess = fmt.Sprintf("New Repository '%s' added.", r.Name)
 		} else {
-			err = fmt.Sprintf("Repository '%s' already exist.", r.Add.Name)
+			err = fmt.Sprintf("Repository '%s' already exist.", r.Name)
 		}
 	}
 
-	if r.Change.Name != "" {
+	if r.Name != "" {
 		// Change repo request type
-		repo := g.github_source.Repos[r.Change.Name]
-		if repo.Update(r.Change) > 0 {
+		repo := g.github_source.Repos[r.Name]
+		if repo.Update(r) > 0 {
 			Updated = true
-			mess = fmt.Sprintf("Repository '%s' updated.", r.Change.Name)
+			mess = fmt.Sprintf("Repository '%s' updated.", r.Name)
 		} else {
-			err = fmt.Sprintf("Repository '%s' doesn't exist. You must add it first.", r.Change.Name)
+			err = fmt.Sprintf("Repository '%s' doesn't exist. You must add it first.", r.Name)
 		}
 	}
 	return

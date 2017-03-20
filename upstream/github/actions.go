@@ -29,7 +29,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 	instance := req.Forj.ForjjInstanceName
     gws := GitHubStruct{
         source_mount: req.Forj.ForjjSourceMount,
-        token: req.Objects.App[instance].Add.Token,
+        token: req.Objects.App[instance].Token,
     }
     check := make(map[string]bool)
     check["token"] = true
@@ -42,7 +42,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 
     log.Printf("Checking github connection : %#v", gws)
 
-    if gws.github_connect(req.Objects.App[instance].Add.Server, ret) == nil {
+    if gws.github_connect(req.Objects.App[instance].Server, ret) == nil {
         return
     }
 
@@ -107,7 +107,7 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
     var gws GitHubStruct
 
     gws.source_mount = req.Forj.ForjjSourceMount
-    gws.token= req.Objects.App[instance].Change.Token
+    gws.token= req.Objects.App[instance].Token
 
 	source_path := path.Join(gws.source_mount, instance)
 
@@ -122,7 +122,7 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 
     if _, err := os.Stat(path.Join(source_path, github_file)) ; err != nil {
         log.Printf(ret.StatusAdd("Warning! The workspace do not contain '%s'", path.Join(source_path, github_file)))
-        if gws.github_connect(req.Objects.App[instance].Change.Server, ret) == nil {
+        if gws.github_connect(req.Objects.App[instance].Server, ret) == nil {
             return
         }
         req.InitOrganization(&gws)
@@ -140,7 +140,7 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
         return 419
     }
 
-    if gws.github_connect(req.Objects.App[instance].Change.Server, ret) == nil {
+    if gws.github_connect(req.Objects.App[instance].Server, ret) == nil {
         return
     }
 
