@@ -38,8 +38,16 @@ func (r *RepositoryStruct)AddUsers(users string) {
 	}
 	for _, user_role := range strings.Split(users, ",") {
 		user_role_array := strings.Split(user_role, ":")
-		user := user_role_array[0]
-		role := user_role_array[1]
+		user := ""
+		role := ""
+		if users_num := len(user_role_array) ; users_num >= 2 {
+			user = user_role_array[0]
+			role = user_role_array[1]
+		} else {
+			if  users_num == 1 {
+				user = user_role_array[0]
+			}
+		}
 		if user == "" {
 			log.Printf("Invalid user:role '%s' combination", user_role)
 			continue
@@ -58,8 +66,16 @@ func (r *RepositoryStruct)AddGroups(groups string) {
 	}
 	for _, group_role := range strings.Split(groups, ",") {
 		group_role_array := strings.Split(group_role, ":")
-		group := group_role_array[0]
-		role := group_role_array[1]
+		group := ""
+		role := ""
+		if groups_num := len(group_role_array) ; groups_num >= 2 {
+			group = group_role_array[0]
+			role = group_role_array[1]
+		} else {
+			if  groups_num == 1 {
+				group = group_role_array[0]
+			}
+		}
 		if group == "" {
 			log.Printf("Invalid group:role '%s' combination", group_role)
 			continue
