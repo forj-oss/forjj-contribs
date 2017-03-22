@@ -19,7 +19,7 @@ func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
     }
 
     for name, repo := range req.Objects.Repo {
-        g.AddRepo(name, repo.Add )
+        g.AddRepo(name, &repo )
     }
 
     // TODO: Be able to add several repos thanks to the request structure.
@@ -27,7 +27,7 @@ func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
 }
 
 // Add a new repository to be managed by github plugin.
-func (g *GitHubStruct)AddRepo(name string, repo RepoAddStruct) bool{
+func (g *GitHubStruct)AddRepo(name string, repo *RepoInstanceStruct) bool{
     upstream := "git@" + g.Client.BaseURL.Host + ":" + g.github_source.Organization + "/" + name + ".git"
 
     if r, found := g.github_source.Repos[name] ; ! found {

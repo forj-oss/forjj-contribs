@@ -8,9 +8,9 @@ then
    exit 1
 fi
 
-TAG="-t $(awk '$0 ~ /^ *image: ".*"$/ { print $0 }' github.yaml | sed 's/^ *image: "*\(.*\)".*$/\1/g')"
-
 cd $BUILD_ENV_PROJECT
+
+TAG="-t $(awk '$0 ~ /^ *image: ".*"$/ { print $0 }' $(basename $BUILD_ENV_PROJECT).yaml | sed 's/^ *image: "*\(.*\)".*$/\1/g')"
 
 if [ "$http_proxy" != "" ]
 then

@@ -18,7 +18,7 @@ type RepositoryStruct  struct { // Used to stored the yaml source file. Not used
 	branchConnect map[string]string // k: local branch name, v: remote/branch
 }
 
-func (r *RepositoryStruct)set(repo RepoAddStruct, remotes, branchConnect map[string]string) *RepositoryStruct {
+func (r *RepositoryStruct)set(repo *RepoInstanceStruct, remotes, branchConnect map[string]string) *RepositoryStruct {
 	if r == nil {
 		r = new(RepositoryStruct)
 	}
@@ -38,8 +38,16 @@ func (r *RepositoryStruct)AddUsers(users string) {
 	}
 	for _, user_role := range strings.Split(users, ",") {
 		user_role_array := strings.Split(user_role, ":")
-		user := user_role_array[0]
-		role := user_role_array[1]
+		user := ""
+		role := ""
+		if users_num := len(user_role_array) ; users_num >= 2 {
+			user = user_role_array[0]
+			role = user_role_array[1]
+		} else {
+			if  users_num == 1 {
+				user = user_role_array[0]
+			}
+		}
 		if user == "" {
 			log.Printf("Invalid user:role '%s' combination", user_role)
 			continue
@@ -58,8 +66,16 @@ func (r *RepositoryStruct)AddGroups(groups string) {
 	}
 	for _, group_role := range strings.Split(groups, ",") {
 		group_role_array := strings.Split(group_role, ":")
-		group := group_role_array[0]
-		role := group_role_array[1]
+		group := ""
+		role := ""
+		if groups_num := len(group_role_array) ; groups_num >= 2 {
+			group = group_role_array[0]
+			role = group_role_array[1]
+		} else {
+			if  groups_num == 1 {
+				group = group_role_array[0]
+			}
+		}
 		if group == "" {
 			log.Printf("Invalid group:role '%s' combination", group_role)
 			continue
@@ -73,7 +89,7 @@ func (r *RepositoryStruct)AddGroups(groups string) {
 
 }
 
-func (r *RepositoryStruct)Update(repo RepoChangeStruct) (count int){
+func (r *RepositoryStruct)Update(repo *RepoInstanceStruct) (count int){
 	if r.Description != repo.Title {
 		r.Description = repo.Title
 		count++
@@ -92,24 +108,24 @@ func (r *RepositoryStruct)Update(repo RepoChangeStruct) (count int){
 // DoUpdateIn GitHubStruct with data from request.
 //
 func (r *RepoInstanceStruct) DoUpdateIn(g *GitHubStruct) (Updated bool, err, mess string) {
-	if r.Add.Name != "" {
+	if r.Name != "" {
 		// Add repo request type
-		if g.AddRepo(r.Add.Name, r.Add) {
+		if g.AddRepo(r.Name, r) {
 			Updated = true
-			mess = fmt.Sprintf("New Repository '%s' added.", r.Add.Name)
+			mess = fmt.Sprintf("New Repository '%s' added.", r.Name)
 		} else {
-			err = fmt.Sprintf("Repository '%s' already exist.", r.Add.Name)
+			err = fmt.Sprintf("Repository '%s' already exist.", r.Name)
 		}
 	}
 
-	if r.Change.Name != "" {
+	if r.Name != "" {
 		// Change repo request type
-		repo := g.github_source.Repos[r.Change.Name]
-		if repo.Update(r.Change) > 0 {
+		repo := g.github_source.Repos[r.Name]
+		if repo.Update(r) > 0 {
 			Updated = true
-			mess = fmt.Sprintf("Repository '%s' updated.", r.Change.Name)
+			mess = fmt.Sprintf("Repository '%s' updated.", r.Name)
 		} else {
-			err = fmt.Sprintf("Repository '%s' doesn't exist. You must add it first.", r.Change.Name)
+			err = fmt.Sprintf("Repository '%s' doesn't exist. You must add it first.", r.Name)
 		}
 	}
 	return

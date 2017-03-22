@@ -3,6 +3,63 @@
 // To update those structure, update the 'github.yaml' and run 'go generate'
 package main
 
+// Object app groups structure
+
+// Groups structure
+
+
+// Object Instance structures
+
+type AppInstanceStruct struct {
+	ForjjInfra string `json:"forjj-infra"`// Name of the Infra repository to use in github if requested.
+	ForjjOrganization string `json:"forjj-organization"`// Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
+	Organization string `json:"organization"`// Github Organization name. By default, it uses the FORJJ organization name
+	Server string `json:"server"`// Github Entreprise Server name. By default, public 'github.com' API is used.
+	Token string `json:"token"`// github token to access. This token must authorize organization level access.
+}
+
+// Object group groups structure
+
+// Groups structure
+
+
+// Object Instance structures
+
+type GroupInstanceStruct struct {
+	Name string `json:"name"`// group name
+	Role string `json:"role"`// List of roles to apply to the new group.
+	Users string `json:"users"`// List of users to attach to the new group.
+}
+
+// Object repo groups structure
+
+// Groups structure
+
+
+// Object Instance structures
+
+type RepoInstanceStruct struct {
+	Flow string `json:"flow"`// Flow activated on this repository
+	ForjjWorkspaceMount string `json:"forjj-workspace-mount"`// Where the workspace dir is located in the github plugin container.
+	Groups string `json:"groups"`// List of groups to attach to the repository, separated by comma.
+	Name string `json:"name"`// Repository name
+	Title string `json:"title"`// Github Repository title
+	Users string `json:"users"`// List of users to attach to the repository, separated by comma.
+}
+
+// Object user groups structure
+
+// Groups structure
+
+
+// Object Instance structures
+
+type UserInstanceStruct struct {
+	Name string `json:"name"`// 
+	Role string `json:"role"`// 
+}
+
+
 // ************************
 // Create request structure
 // ************************
@@ -22,144 +79,6 @@ type CreateArgReq struct {
 	Repo map[string]RepoInstanceStruct `json:"repo"` // Object details
 	User map[string]UserInstanceStruct `json:"user"` // Object details
 }
-
-type AppInstanceStruct struct {
-	Add AppAddStruct
-	Change AppChangeStruct
-	List AppListStruct
-	Remove AppRemoveStruct
-	Rename AppRenameStruct
-}
-
-type GroupInstanceStruct struct {
-	Add GroupAddStruct
-	Change GroupChangeStruct
-	List GroupListStruct
-	Remove GroupRemoveStruct
-	Rename GroupRenameStruct
-}
-
-type RepoInstanceStruct struct {
-	Add RepoAddStruct
-	Change RepoChangeStruct
-}
-
-type UserInstanceStruct struct {
-	Add UserAddStruct
-	Change UserChangeStruct
-	List UserListStruct
-	Remove UserRemoveStruct
-	Rename UserRenameStruct
-}
-
-
-type AppAddStruct struct {
-	ForjjInfra string // Name of the Infra repository to use in github if requested.
-	ForjjOrganization string // Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
-	Organization string // Github Organization name. By default, it uses the FORJJ organization name
-	Server string // Github Entreprise Server name. By default, public 'github.com' API is used.
-	Token string // github token to access. This token must authorize organization level access.
-}
-
-type AppChangeStruct struct {
-	ForjjInfra string // Name of the Infra repository to use in github if requested.
-	Server string // Github Entreprise Server name. By default, public 'github.com' API is used.
-	Token string // github token to access. This token must authorize organization level access.
-}
-
-type AppListStruct struct {
-	Server string // Github Entreprise Server name. By default, public 'github.com' API is used.
-}
-
-type AppRemoveStruct struct {
-	Server string // Github Entreprise Server name. By default, public 'github.com' API is used.
-}
-
-type AppRenameStruct struct {
-	Server string // Github Entreprise Server name. By default, public 'github.com' API is used.
-}
-
-type GroupAddStruct struct {
-	Name string // group name
-	Organization string // To manage github teams at organization level
-	RemoveUsers string // remove users from github team.
-	Roles string // List of roles to apply to the new group.
-	Users string // List of users to attach to the new group.
-}
-
-type GroupChangeStruct struct {
-	AddRoles string // Roles added to the group.
-	AddUsers string // Add users to github team.
-	Name string // group name
-	Organization string // To manage github teams at organization level
-	RemoveRoles string // Roles removed to the group.
-	RemoveUsers string // remove users from github team.
-}
-
-type GroupListStruct struct {
-	Name string // group name
-	Organization string // To manage github teams at organization level
-	RemoveUsers string // remove users from github team.
-}
-
-type GroupRemoveStruct struct {
-	Name string // group name
-	Organization string // To manage github teams at organization level
-	RemoveUsers string // remove users from github team.
-}
-
-type GroupRenameStruct struct {
-	Name string // group name
-	Organization string // To manage github teams at organization level
-	RemoveUsers string // remove users from github team.
-}
-
-type RepoAddStruct struct {
-	Flow string // Flow activated on this repository
-	ForjjWorkspaceMount string // Where the workspace dir is located in the github plugin container.
-	Groups string // List of groups (group:role) to attach to the repository, separated by comma.
-	Name string // Repository name
-	Title string // Github Repository title
-	Users string // List of users (user:role) to attach to the repository, separated by comma.
-}
-
-type RepoChangeStruct struct {
-	AddGroups string // List of additional groups (group:role) to attach to the repository, separated by comma.
-	AddUsers string // List of additional users (user:role) to attach to the repository, separated by comma.
-	Flow string // Flow activated on this repository
-	ForjjWorkspaceMount string // Where the workspace dir is located in the github plugin container.
-	Name string // Repository name
-	Title string // Github Repository title
-}
-
-type UserAddStruct struct {
-	Name string // 
-	Organization string // To manage github users at organization level
-	Roles string // 
-}
-
-type UserChangeStruct struct {
-	AddRoles string // 
-	Name string // 
-	Organization string // To manage github users at organization level
-	RemoveRoles string // Roles removed from the user.
-}
-
-type UserListStruct struct {
-	Name string // 
-	Organization string // To manage github users at organization level
-}
-
-type UserRemoveStruct struct {
-	Name string // 
-	Organization string // To manage github users at organization level
-}
-
-type UserRenameStruct struct {
-	Name string // 
-	Organization string // To manage github users at organization level
-}
-
 
 // ************************
 // Update request structure
@@ -201,7 +120,7 @@ type MaintainArgReq struct {
 
 type AppMaintainStruct struct {
 	Setup struct {
-		Token string // github token to access. This token must authorize organization level access.
+		Token string `json:"token"` // github token to access. This token must authorize organization level access.
 	}
 }
 
@@ -213,7 +132,7 @@ const YamlDesc = "---\n" +
    "description: \"Upstream github plugin for FORJJ. It properly configure github.com or entreprise with organisation/repos\"\n" +
    "runtime:\n" +
    "  docker:\n" +
-   "    image: \"hub.docker.hpecorp.net/devops/forjj-github\"\n" +
+   "    image: \"forjdevops/forjj-github\"\n" +
    "  service_type: \"REST API\"\n" +
    "  service:\n" +
    "    parameters: [ \"service\", \"start\" ]\n" +
@@ -257,54 +176,29 @@ const YamlDesc = "---\n" +
    "    help: \"Manage teams in github\"\n" +
    "    identified_by_flag: name\n" +
    "    flags:\n" +
-   "      organization:\n" +
-   "        help: \"To manage github teams at organization level\"\n" +
-   "        default: \"false\"\n" +
    "      users:\n" +
    "        only-for-actions: [\"add\"]\n" +
    "        help: \"List of users to attach to the new group.\"\n" +
-   "      add-users:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        help: \"Add users to github team.\"\n" +
-   "      remove-users:\n" +
-   "        actions: [\"change\"]\n" +
-   "        help: \"remove users from github team.\"\n" +
    "      name:\n" +
    "        help: \"group name\"\n" +
    "        required: true\n" +
-   "      roles:\n" +
+   "      role:\n" +
    "        only-for-actions: [\"add\"]\n" +
    "        help: \"List of roles to apply to the new group.\"\n" +
-   "      add-roles:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        help: \"Roles added to the group.\"\n" +
-   "      remove-roles:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        help: \"Roles removed to the group.\"\n" +
    "  # Define github users exposure to forjj\n" +
    "  user: # New object type in forjj\n" +
    "    # Default is : actions: [\"add\", \"change\", \"remove\", \"list\", \"rename\"]\n" +
-   "    help: \"Manage teams in github\"\n" +
+   "    help: \"Manage organization list of users\"\n" +
    "    identified_by_flag: name\n" +
    "    flags:\n" +
-   "      organization:\n" +
-   "        help: \"To manage github users at organization level\"\n" +
-   "        default: \"false\"\n" +
    "      name:\n" +
    "        options:\n" +
    "          help: \"user name\"\n" +
    "          required: true\n" +
-   "      roles:\n" +
+   "      role:\n" +
    "        only-for-actions: [\"add\"]\n" +
    "        options:\n" +
    "          help: \"List of roles to apply to the new user.\"\n" +
-   "      add-roles:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        options:\n" +
-   "          help: \"Roles added to the user.\"\n" +
-   "      remove-roles:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        help: \"Roles removed from the user.\"\n" +
    "  repo: # Enhance Forjj repo object\n" +
    "    actions: [\"add\", \"change\"]\n" +
    "    flags:\n" +
@@ -314,16 +208,12 @@ const YamlDesc = "---\n" +
    "        help: \"Github Repository title\"\n" +
    "      users:\n" +
    "        only-for-actions: [\"add\"]\n" +
-   "        help: \"List of users (user:role) to attach to the repository, separated by comma.\"\n" +
+   "        help: \"List of users to attach to the repository, separated by comma.\"\n" +
+   "        format-regexp: \"[+-]?[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9]))*,\"\n" +
    "      groups:\n" +
    "        only-for-actions: [\"add\"]\n" +
-   "        help: \"List of groups (group:role) to attach to the repository, separated by comma.\"\n" +
-   "      add-users:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        help: \"List of additional users (user:role) to attach to the repository, separated by comma.\"\n" +
-   "      add-groups:\n" +
-   "        only-for-actions: [\"change\"]\n" +
-   "        help: \"List of additional groups (group:role) to attach to the repository, separated by comma.\"\n" +
+   "        help: \"List of groups to attach to the repository, separated by comma.\"\n" +
+   "        format-regexp: \"[+-]?[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9]))*,\"\n" +
    "      flow:\n" +
    "        help: \"Flow activated on this repository\"\n" +
    "      forjj-workspace-mount:\n" +
