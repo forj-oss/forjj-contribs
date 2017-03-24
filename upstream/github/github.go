@@ -54,6 +54,9 @@ func (g *GitHubStruct)github_connect(server string, ret *goforjj.PluginData) (* 
 // and set the url object when base-url is not empty (private GitHub)
 func (g *GitHubStruct)github_set_url(server string) (err error) {
     gh_url := ""
+	if g.github_source.Urls == nil {
+		g.github_source.Urls = make(map[string]string)
+	}
     if ! g.maintain_ctxt {
         if server == ""  || server == "api.github.com" || server == "github.com" {
             g.github_source.Urls["github-base-url"] = "" // Default public link
