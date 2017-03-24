@@ -101,6 +101,11 @@ func (g *GitHubStruct)ensure_organization_exists(ret *goforjj.PluginData) (s boo
         var orga GithubEntrepriseOrganization = GithubEntrepriseOrganization{ g.github_source.Organization, g.github_source.OrgDisplayName, g.user }
         var res_orga github.Organization
 
+	    if v, found := g.github_source.Urls["github-base-url"] ; !found || v == "" {
+		    log.Printf(ret.StatusAdd("Unable to create an organization on github.com. You must do it manually."))
+		    return false
+	    }
+
         req, err := g.Client.NewRequest("POST", "admin/organizations", orga)
         if err != nil {
             log.Printf(ret.Errorf("Unable to create '%s' as organization. Request is failing. %s", g.github_source.Organization, err))
