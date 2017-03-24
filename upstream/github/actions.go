@@ -188,6 +188,7 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
         source_mount: req.Forj.ForjjSourceMount,
         workspace_mount: req.Forj.ForjjWorkspaceMount,
         token: req.Objects.App[instance].Token,
+	    maintain_ctxt: true,
     }
     check := make(map[string]bool)
     check["token"] = true
@@ -203,7 +204,7 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
         return
     }
 
-    if gws.github_connect(gws.github_source.Urls["github-base-url"], ret) == nil {
+    if gws.github_connect("", ret) == nil {
         return
     }
 

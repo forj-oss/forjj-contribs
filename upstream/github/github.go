@@ -32,20 +32,11 @@ func (g *GitHubStruct)github_connect(server string, ret *goforjj.PluginData) (* 
 
     g.Client = github.NewClient(tc)
 
-
-    if du, found := g.github_source.Urls["github-base-url"] ; !found || (found && du == "") || server != "" {
-        if err := g.github_set_url(server) ; err != nil {
-            ret.Errorf("Invalid url. %s", err)
-            return nil
-        }
-    } else {
-        log.Printf("Using github-base-url : %s", du)
-        if u, err := url.Parse(du) ; err != nil {
-            return nil
-        } else {
-            g.Client.BaseURL = u
-        }
+    if err := g.github_set_url(server) ; err != nil {
+        ret.Errorf("Invalid url. %s", err)
+        return nil
     }
+
     log.Printf("Github Base URL used : %s", g.Client.BaseURL)
 
     if user , _, err := g.Client.Users.Get(g.ctxt, "") ; err != nil {
@@ -59,27 +50,29 @@ func (g *GitHubStruct)github_connect(server string, ret *goforjj.PluginData) (* 
     return  g.Client
 }
 
+// github_set_url will set Urls/github-base-url in create/update context
+// and set the url object when base-url is not empty (private GitHub)
 func (g *GitHubStruct)github_set_url(server string) (err error) {
-    if server == ""  || server == "github.com" || server == "https://github.com"{
+    gh_url := ""
+    if ! g.maintain_ctxt {
+        if server == ""  || server == "api.github.com" || server == "github.com" {
+            g.github_source.Urls["github-base-url"] = "" // Default public link
+        } else {
+            // To accept GitHub entreprise without ssl, permit server to have url format.
+            if found, _ := regexp.MatchString("^https?://.*", server) ; found {
+                gh_url = server
+            } else {
+                gh_url = "https://" + server
+            }
+            g.github_source.Urls["github-base-url"] = gh_url
+        }
+    }
+
+    if gh_url == "" {
         return
     }
 
-    if found, _ := regexp.MatchString("^https?://.*", server) ; found {
-        g.Client.BaseURL, err = url.Parse(server)
-        if err != nil {
-            return
-        }
-    } else {
-        g.Client.BaseURL.Host = server
-    }
-
-    if g.Client.BaseURL.Path == "/" {
-        g.Client.BaseURL.Path = "/api/v3/"
-    }
-
-    if g.Client.BaseURL.Scheme == "" {
-        g.Client.BaseURL.Scheme = "https"
-    }
+    g.Client.BaseURL, err = url.Parse(gh_url)
     return
 }
 
