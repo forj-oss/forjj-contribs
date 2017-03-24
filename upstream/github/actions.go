@@ -180,10 +180,15 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 // By default, if httpCode is not set (ie equal to 0), the function caller will set it to 422 in case of errors (error_message != "") or 200
 func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *goforjj.PluginData) (httpCode int) {
 	instance := req.Forj.ForjjInstanceName
+    if _, found := req.Objects.App[instance] ; !found {
+	    ret.Errorf("Invalid request. Missing Objects/App/%s", instance)
+	    return
+    }
     gws := GitHubStruct{
         source_mount: req.Forj.ForjjSourceMount,
         workspace_mount: req.Forj.ForjjWorkspaceMount,
-        token: req.Objects.App[instance].Setup.Token,
+        token: req.Objects.App[instance].Token,
+	    maintain_ctxt: true,
     }
     check := make(map[string]bool)
     check["token"] = true
@@ -199,7 +204,7 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
         return
     }
 
-    if gws.github_connect(gws.github_source.Urls["github-base-url"], ret) == nil {
+    if gws.github_connect("", ret) == nil {
         return
     }
 

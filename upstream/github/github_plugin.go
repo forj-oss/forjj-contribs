@@ -15,6 +15,7 @@ type GitHubStruct struct {
     ctxt context.Context
     Client *github.Client
     github_source GitHubSourceStruct // github source structure (yaml)
+    maintain_ctxt bool
 }
 
 type GitHubSourceStruct struct {

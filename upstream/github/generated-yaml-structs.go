@@ -119,9 +119,7 @@ type MaintainArgReq struct {
 }
 
 type AppMaintainStruct struct {
-	Setup struct {
-		Token string `json:"token"` // github token to access. This token must authorize organization level access.
-	}
+	Token string `json:"token"` // github token to access. This token must authorize organization level access.
 }
 
 
