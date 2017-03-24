@@ -24,7 +24,10 @@ then
    exit 1
 fi
 
-if [ "$CGO_ENABLED" = "0" ]
+# go generate in static fails generate with:
+# go install net: open /usr/local/go/pkg/linux_amd64/net.a: permission denied
+# We could fix that upstream, but for now the workaround is to NOT build static the generate code.
+if [ "$CGO_ENABLED" = "0" ] && [ $1 != "generate" ]
 then
    GOBIN="/usr/local/go/bin/go-static"
 else

@@ -86,12 +86,12 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
 		// Set Deployments definition
 		for name, deploy_data := range r.Objects.Deployment {
 			deployment := DeployStruct{}
-			deployment.SetFrom(&deploy_data.Add.AddDeployStruct)
+			deployment.SetFrom(&deploy_data.DeployStruct)
 			p.yaml.Deploy.Deployments[name] = deployment
 		}
 	}
 
-    deploy_to := jenkins_instance.Add.DeployTo
+    deploy_to := jenkins_instance.DeployTo
 	if deploy_to == "" {
 		deploy_to = "docker"
 		ret.StatusAdd("default deployment to 'docker'.")
@@ -116,11 +116,11 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
 
 	// Initialize Dockerfile data and set default values
 	log.Printf("CreateReq : %#v\n", r)
-	p.yaml.Dockerfile.SetFrom(&jenkins_instance.Add.AddDockerfileStruct)
+	p.yaml.Dockerfile.SetFrom(&jenkins_instance.DockerfileStruct)
 	log.Printf("p.yaml.Dockerfile : %#v\n", p.yaml.Dockerfile)
 
 	// Initialize Jenkins Image data and set default values
-	p.yaml.JenkinsImage.SetFrom(&jenkins_instance.Add.AddFinalImageStruct, r.Forj.ForjjOrganization)
+	p.yaml.JenkinsImage.SetFrom(&jenkins_instance.FinalImageStruct, r.Forj.ForjjOrganization)
 
     return true
 }
@@ -148,18 +148,18 @@ func (p *JenkinsPlugin) DefineDeployCommand() error{
 func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData)  (status bool) {
     // ForjjStruct NOT UPDATABLE
 	instance := r.Forj.ForjjInstanceName
-	instance_data := r.Objects.App[instance].Change
+	instance_data := r.Objects.App[instance]
 	if d, found := r.Objects.Deployment[instance_data.DeployTo] ; !found {
 		ret.Errorf("Unable to find deployment '%s'", instance_data.DeployTo)
 		return
 	} else {
 		deploy := DeployStruct{}
 		if _, found := r.Objects.Deployment[instance_data.DeployTo] ; !found {
-			deploy.SetFrom(&d.Add.AddDeployStruct)
+			deploy.SetFrom(&d.DeployStruct)
 			ret.StatusAdd("Deployment '%s' added.", instance_data.DeployTo)
 		} else {
 			deploy = p.yaml.Deploy.Deployments[instance_data.DeployTo]
-			deploy.UpdateFrom(&d.Change.ChangeDeployStruct)
+			deploy.UpdateFrom(&d.DeployStruct)
 			ret.StatusAdd("Deployment '%s' updated.", instance_data.DeployTo)
 		}
 		p.yaml.Deploy.Deployments[instance_data.DeployTo] = deploy
@@ -170,8 +170,8 @@ func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData)  (sta
         return
     }
 
-    p.yaml.Dockerfile.UpdateFrom(&instance_data.ChangeDockerfileStruct)
-    p.yaml.JenkinsImage.UpdateFrom(&instance_data.ChangeFinalImageStruct, r.Forj.ForjjOrganization)// Org used only if no set anymore.
+    p.yaml.Dockerfile.UpdateFrom(&instance_data.DockerfileStruct)
+    p.yaml.JenkinsImage.UpdateFrom(&instance_data.FinalImageStruct, r.Forj.ForjjOrganization)// Org used only if no set anymore.
 	status = true
     return
 }
