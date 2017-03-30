@@ -33,7 +33,7 @@ fi
 
 if [ -z "$MYFORK" ]
 then
-   MYFORK="RnDLabsIT/jenkins-install-inits"
+   MYFORK="forj-oss/jenkins-install-inits"
    echo "Using default Organisation/repo ($MYFORK) for jenkins-install-inits. Add MYFORK= to change it."
 fi
 

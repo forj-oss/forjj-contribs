@@ -5,45 +5,15 @@ package main
 
 // Object app groups structure
 
+// Groups structure
+
 type DockerfileStruct struct {
 	FromImage string `json:"dockerfile-from-image"`
 	FromImageVersion string `json:"dockerfile-from-image-version"`
 	Maintainer string `json:"dockerfile-maintainer"`
 }
 
-// Action groups structure
 type FinalImageStruct struct {
-	Name string `json:"final-image-name"`
-	RegistryRepoName string `json:"final-image-registry-repo-name"`
-	RegistryServer string `json:"final-image-registry-server"`
-	Version string `json:"final-image-version"`
-}
-
-// Action groups structure
-
-type AddDockerfileStruct struct {
-	FromImage string `json:"dockerfile-from-image"`
-	FromImageVersion string `json:"dockerfile-from-image-version"`
-	Maintainer string `json:"dockerfile-maintainer"`
-}
-
-
-type AddFinalImageStruct struct {
-	Name string `json:"final-image-name"`
-	RegistryRepoName string `json:"final-image-registry-repo-name"`
-	RegistryServer string `json:"final-image-registry-server"`
-	Version string `json:"final-image-version"`
-}
-
-
-type ChangeDockerfileStruct struct {
-	FromImage string `json:"dockerfile-from-image"`
-	FromImageVersion string `json:"dockerfile-from-image-version"`
-	Maintainer string `json:"dockerfile-maintainer"`
-}
-
-
-type ChangeFinalImageStruct struct {
 	Name string `json:"final-image-name"`
 	RegistryRepoName string `json:"final-image-registry-repo-name"`
 	RegistryServer string `json:"final-image-registry-server"`
@@ -54,68 +24,20 @@ type ChangeFinalImageStruct struct {
 // Object Instance structures
 
 type AppInstanceStruct struct {
-	Add AppAddStruct
-	Change AppChangeStruct
-}
-
-// Object instance Action structures
-
-type AppAddStruct struct {
 	DeployTo string `json:"deploy-to"`// Deployment name used to deploy jenkins.
-	RegistryAuth string `json:"registry-auth"`// List of Docker registry servers authentication formatted as '<server1>:<cred>[,...]'. <cred> is 'user:pwd' in base64.
+	RegistryAuth string `json:"registry-auth"`// List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
 
 	// Groups
 
-	AddDockerfileStruct
-	AddFinalImageStruct
-}
-
-type AppChangeStruct struct {
-	DeployTo string `json:"deploy-to"`// Deployment name used to deploy jenkins.
-	RegistryAuth string `json:"registry-auth"`// List of Docker registry servers authentication formatted as '<server1>:<cred>[,...]'. <cred> is 'user:pwd' in base64.
-
-	// Groups
-
-	ChangeDockerfileStruct
-	ChangeFinalImageStruct
+	DockerfileStruct
+	FinalImageStruct
 }
 
 // Object deployment groups structure
 
+// Groups structure
+
 type DeployStruct struct {
-	DeployTo string `json:"deploy-deploy-to"`
-	Name string `json:"deploy-name"`
-	ServiceAddr string `json:"deploy-service-addr"`
-	ServicePort string `json:"deploy-service-port"`
-}
-
-// Action groups structure
-
-type AddDeployStruct struct {
-	DeployTo string `json:"deploy-deploy-to"`
-	Name string `json:"deploy-name"`
-	ServiceAddr string `json:"deploy-service-addr"`
-	ServicePort string `json:"deploy-service-port"`
-}
-
-
-type ChangeDeployStruct struct {
-	DeployTo string `json:"deploy-deploy-to"`
-	Name string `json:"deploy-name"`
-	ServiceAddr string `json:"deploy-service-addr"`
-	ServicePort string `json:"deploy-service-port"`
-}
-
-
-type ListDeployStruct struct {
-	DeployTo string `json:"deploy-deploy-to"`
-	Name string `json:"deploy-name"`
-	ServiceAddr string `json:"deploy-service-addr"`
-	ServicePort string `json:"deploy-service-port"`
-}
-
-
-type RemoveDeployStruct struct {
 	DeployTo string `json:"deploy-deploy-to"`
 	Name string `json:"deploy-name"`
 	ServiceAddr string `json:"deploy-service-addr"`
@@ -126,66 +48,20 @@ type RemoveDeployStruct struct {
 // Object Instance structures
 
 type DeploymentInstanceStruct struct {
-	Add DeploymentAddStruct
-	Change DeploymentChangeStruct
-	List DeploymentListStruct
-	Remove DeploymentRemoveStruct
-}
-
-// Object instance Action structures
-
-type DeploymentAddStruct struct {
 
 	// Groups
 
-	AddDeployStruct
-}
-
-type DeploymentChangeStruct struct {
-
-	// Groups
-
-	ChangeDeployStruct
-}
-
-type DeploymentListStruct struct {
-
-	// Groups
-
-	ListDeployStruct
-}
-
-type DeploymentRemoveStruct struct {
-
-	// Groups
-
-	RemoveDeployStruct
+	DeployStruct
 }
 
 // Object features groups structure
+
+// Groups structure
 
 
 // Object Instance structures
 
 type FeaturesInstanceStruct struct {
-	Add FeaturesAddStruct
-	Change FeaturesChangeStruct
-	Remove FeaturesRemoveStruct
-}
-
-// Object instance Action structures
-
-type FeaturesAddStruct struct {
-	Name string `json:"name"`// name of the jenkins feature
-	Options string `json:"options"`// List of feature option to use
-}
-
-type FeaturesChangeStruct struct {
-	Name string `json:"name"`// name of the jenkins feature
-	Options string `json:"options"`// List of feature option to use
-}
-
-type FeaturesRemoveStruct struct {
 	Name string `json:"name"`// name of the jenkins feature
 	Options string `json:"options"`// List of feature option to use
 }
@@ -254,9 +130,7 @@ type MaintainArgReq struct {
 }
 
 type AppMaintainStruct struct {
-	Setup struct {
-		RegistryAuth string `json:"registry-auth"` // List of Docker registry servers authentication formatted as '<server1>:<cred>[,...]'. <cred> is 'user:pwd' in base64.
-	}
+	RegistryAuth string `json:"registry-auth"` // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
 }
 
 
@@ -267,7 +141,7 @@ const YamlDesc = "---\n" +
    "description: \"CI jenkins plugin for FORJJ.\"\n" +
    "runtime:\n" +
    "  docker:\n" +
-   "    image: \"hub.docker.hpecorp.net/devops/forjj-jenkins\"\n" +
+   "    image: \"forjdevops/forjj-jenkins\"\n" +
    "    dood: true\n" +
    "  service_type: \"REST API\"\n" +
    "  service:\n" +
@@ -291,14 +165,6 @@ const YamlDesc = "---\n" +
    "      help: \"Where jenkins will be published.\"\n" +
    "objects:\n" +
    "  deployment:\n" +
-   "    on-tasks:\n" +
-   "      create:\n" +
-   "        list:\n" +
-   "          to_create:\n" +
-   "          separator: \",\"\n" +
-   "          fields: \"name:service-addr[:service-port]\"\n" +
-   "          help: \"One or more deployments\"\n" +
-   "          action: add\n" +
    "    default-actions: [\"add\", \"change\", \"remove\", \"list\"]\n" +
    "    identified-by-flag: name\n" +
    "    groups:\n" +
@@ -342,9 +208,8 @@ const YamlDesc = "---\n" +
    "            help: \"Docker Repository Name where your image will be pushed. If not set, no push will be done.\"\n" +
    "    flags:\n" +
    "      registry-auth:\n" +
-   "        help: \"List of Docker registry servers authentication formatted as '<server1>:<cred>[,...]'. <cred> is 'user:pwd' in base64.\"\n" +
+   "        help: \"List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]\"\n" +
    "        secure: true\n" +
-   "        envar: \"REGISTRY_AUTH\"\n" +
    "      deploy-to:\n" +
    "        help: \"Deployment name used to deploy jenkins.\"\n" +
    "        default: \"docker\"\n" +

@@ -32,7 +32,7 @@ func (r *MaintainReq)InstantiateAll(ret *goforjj.PluginData) (status bool) {
     }
     instance := r.Forj.ForjjInstanceName
     mount := r.Forj.ForjjSourceMount
-    auths := NewDockerAuths(r.Objects.App[instance].Setup.RegistryAuth)
+    auths := NewDockerAuths(r.Objects.App[instance].RegistryAuth)
 
     for _, instance := range elements {
         src := path.Join(mount, instance.Name())

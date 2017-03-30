@@ -12,6 +12,11 @@ TAG="-t $(awk '$0 ~ /^ *image: ".*"$/ { print $0 }' $(basename $BUILD_ENV_PROJEC
 
 cd $BUILD_ENV_PROJECT
 
+if [ "$http_proxy" != "" ]
+then
+   PROXY="--build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg no_proxy=$no_proxy"
+fi
+
 create-build-env.sh
 
 if [ "$GOPATH" = "" ]
