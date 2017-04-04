@@ -11,7 +11,7 @@ type RepositoryStruct  struct { // Used to stored the yaml source file. Not used
 	Name string                                       // Name of the Repo
 	Flow string                                       // Flow applied on the repo.
 	Description string                                // Title in github repository
-	IssueTracker bool        `yaml:"isuer_tracker"`   // Issue tracker option
+	IssueTracker bool        `yaml:"issue_tracker"`   // Issue tracker option
 	Users map[string]string                           // Collection of users role
 	Groups map[string]string                          // Collection of groups role
 	// Following data are used at runtime but not saved. Used to respond to the API.
@@ -28,7 +28,10 @@ func (r *RepositoryStruct)set(repo *RepoInstanceStruct, remotes, branchConnect m
 	r.Description = repo.Title
 	if v, err := strconv.ParseBool(repo.Issue_tracker) ; err == nil {
 		r.IssueTracker = v
+		log.Printf("Issue_tracker '%s' => %t", repo.Issue_tracker, v)
 	} else {
+		log.Printf("IssueTracker has an invalid boolean string representation '%s'. Ignored. Tracker is set to true.",
+			repo.Issue_tracker)
 		r.IssueTracker = true
 	}
 	r.Flow = repo.Flow
