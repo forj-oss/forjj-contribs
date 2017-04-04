@@ -69,13 +69,23 @@ func (g *GitHubStruct)github_set_url(server string) (err error) {
             }
             g.github_source.Urls["github-base-url"] = gh_url
         }
-    }
+    } else {
+		gh_url = g.github_source.Urls["github-base-url"]
+	}
 
     if gh_url == "" {
         return
     }
 
     g.Client.BaseURL, err = url.Parse(gh_url)
+	if err != nil { return }
+
+	// Adding api/V3 for server given or url without path, ie http?://<server> instead or http?://<server>/<path>?
+	if g.Client.BaseURL.Path == "" {
+		log.Printf("Adding /api/v3 to github url given %s", gh_url)
+		g.Client.BaseURL.Path = "/api/v3/"
+		g.github_source.Urls["github-base-url"] = g.Client.BaseURL.String()
+	}
     return
 }
 
