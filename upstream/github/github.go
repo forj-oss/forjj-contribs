@@ -291,10 +291,16 @@ func (r *RepositoryStruct)maintain(e_repo *github.Repository) *github.Repository
     update := false
     ret := github.Repository{}
     ret.Name = e_repo.Name
-    if e_repo.Description != &r.Description {
+    if *e_repo.Description != r.Description {
         update = true
-        ret.Description = &r.Description
+		log.Printf("description: %s => %s", *e_repo.Description, r.Description)
+		ret.Description = &r.Description
     }
+	if *e_repo.HasIssues != r.IssueTracker {
+		log.Printf("Issue tracker: %t => %t", *e_repo.HasIssues, r.IssueTracker)
+		ret.HasIssues = &r.IssueTracker
+		update = true
+	}
 
     if update {
         return &ret
