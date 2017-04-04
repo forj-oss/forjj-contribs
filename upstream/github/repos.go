@@ -4,14 +4,16 @@ import (
 	"log"
 	"strings"
 	"fmt"
+	"strconv"
 )
 
 type RepositoryStruct  struct { // Used to stored the yaml source file. Not used to respond to the API requester.
-	Name string                 // Name of the Repo
-	Flow string                 // Flow applied on the repo.
-	Description string          // Title in github repository
-	Users map[string]string     // Collection of users role
-	Groups map[string]string     // Collection of groups role
+	Name string                                       // Name of the Repo
+	Flow string                                       // Flow applied on the repo.
+	Description string                                // Title in github repository
+	IssueTracker bool        `yaml:"isuer_tracker"`   // Issue tracker option
+	Users map[string]string                           // Collection of users role
+	Groups map[string]string                          // Collection of groups role
 	// Following data are used at runtime but not saved. Used to respond to the API.
 	exist bool                      // True if the repo exist.
 	remotes map[string]string       // k: remote name, v: remote url
@@ -24,6 +26,11 @@ func (r *RepositoryStruct)set(repo *RepoInstanceStruct, remotes, branchConnect m
 	}
 	r.Name = repo.Name
 	r.Description = repo.Title
+	if v, err := strconv.ParseBool(repo.Issue_tracker) ; err == nil {
+		r.IssueTracker = v
+	} else {
+		r.IssueTracker = true
+	}
 	r.Flow = repo.Flow
 	r.AddUsers(repo.Users)
 	r.AddGroups(repo.Groups)

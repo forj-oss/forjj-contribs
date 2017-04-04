@@ -78,6 +78,9 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         help: "Repository name"
       title:
         help: "Github Repository title"
+      issue_tracker:
+        help: "To activate the Issue tracker to the Repository"
+        default: "true"
       users:
         only-for-actions: ["add"]
         help: "List of users to attach to the repository, separated by comma."
