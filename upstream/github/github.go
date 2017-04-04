@@ -233,6 +233,7 @@ func (r *RepositoryStruct)ensure_exists(gws *GitHubStruct, ret *goforjj.PluginDa
         github_repo := github.Repository{
             Description: &r.Description,
             Name: &r.Name,
+			HasIssues: &r.IssueTracker,
         }
         found_repo, _, err = c.Create(gws.ctxt, gws.github_source.Organization, &github_repo)
         if err != nil {

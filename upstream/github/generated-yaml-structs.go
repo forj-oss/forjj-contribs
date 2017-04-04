@@ -42,6 +42,7 @@ type RepoInstanceStruct struct {
 	Flow string `json:"flow"`// Flow activated on this repository
 	ForjjWorkspaceMount string `json:"forjj-workspace-mount"`// Where the workspace dir is located in the github plugin container.
 	Groups string `json:"groups"`// List of groups to attach to the repository, separated by comma.
+	Issue_tracker string `json:"issue_tracker"`// To activate the Issue tracker to the Repository
 	Name string `json:"name"`// Repository name
 	Title string `json:"title"`// Github Repository title
 	Users string `json:"users"`// List of users to attach to the repository, separated by comma.
@@ -204,6 +205,9 @@ const YamlDesc = "---\n" +
    "        help: \"Repository name\"\n" +
    "      title:\n" +
    "        help: \"Github Repository title\"\n" +
+   "      issue_tracker:\n" +
+   "        help: \"To activate the Issue tracker to the Repository\"\n" +
+   "        default: \"true\"\n" +
    "      users:\n" +
    "        only-for-actions: [\"add\"]\n" +
    "        help: \"List of users to attach to the repository, separated by comma.\"\n" +
