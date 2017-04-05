@@ -212,6 +212,9 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
     if ! gws.ensure_organization_exists(ret) {
         return
     }
+    if ! gws.setOrganizationTeams(ret) {
+        return
+    }
     log.Printf(ret.StatusAdd("Organization maintained."))
 
     // loop on list of repos, and ensure they exist with minimal config and rights
