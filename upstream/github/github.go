@@ -288,23 +288,46 @@ func (r *RepositoryStruct)ensure_exists(gws *GitHubStruct, ret *goforjj.PluginDa
 }
 
 func (r *RepositoryStruct)maintain(e_repo *github.Repository) *github.Repository {
+	if e_repo == nil {
+		return nil
+	}
     update := false
     ret := github.Repository{}
     ret.Name = e_repo.Name
-    if *e_repo.Description != r.Description {
-        update = true
-		log.Printf("description: %s => %s", *e_repo.Description, r.Description)
-		ret.Description = &r.Description
-    }
-	if *e_repo.HasIssues != r.IssueTracker {
-		log.Printf("Issue tracker: %t => %t", *e_repo.HasIssues, r.IssueTracker)
-		ret.HasIssues = &r.IssueTracker
-		update = true
-	}
+	update = update || updateString(e_repo.Description, &ret.Description, r.Description,  "Description")
+	update = update || updateBool(  e_repo.HasIssues,   &ret.HasIssues,   r.IssueTracker, "Issue tracker")
 
-    if update {
-        return &ret
-    }
+    if update { return &ret }
     return nil
 
+}
+
+func updateString(orig *string, dest **string, to, field string) (updated bool) {
+	var from string
+
+	defer func() {
+		if updated {
+			log.Printf("%s: %s => %s", field, from, to)
+			*dest = &to
+		}
+	}()
+
+	if orig != nil { from = *orig }
+	if from != to { updated = true }
+	return
+}
+
+
+func updateBool(orig *bool, dest **bool, to bool, field string) (updated bool) {
+	var from bool
+	defer func() {
+		if updated {
+			log.Printf("%s: %t => %t", field, from, to)
+			*dest = &to
+		}
+	}()
+
+	if orig != nil { from = *orig }
+	if from != to { updated = true }
+	return
 }
