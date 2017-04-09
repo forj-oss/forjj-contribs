@@ -153,6 +153,147 @@ func (g *GitHubStruct)ensure_organization_exists(ret *goforjj.PluginData) (s boo
     return true
 }
 
+// setOrganizationTeams maintain the list of teams as defined by the github.yaml file.
+func (g *GitHubStruct)setOrganizationTeams(ret *goforjj.PluginData) (_ bool) {
+	// Load teams list already defined in github.
+	github_teams, resp, err := g.Client.Organizations.ListTeams(g.ctxt, g.github_source.Organization, nil)
+	if err != nil && resp == nil {
+		log.Printf(ret.Errorf("Unable to verify '%s' organization teams. %s", g.github_source.Organization, err))
+		return
+	}
+
+	teams := make(map[string]*github.Team)
+	// Loop on github list to find out undefined team in github.yaml, then remove them
+	if resp.StatusCode == 200 {
+		for _, github_team := range github_teams {
+			// TODO: Support more teams options to maintain
+			if _, found := g.github_source.Groups[*github_team.Name] ; !found {
+				// Remove team
+				log.Printf(ret.StatusAdd("Removing uncontrolled team '%s'.", *github_team.Name))
+				resp, err = g.Client.Organizations.DeleteTeam(g.ctxt, *github_team.ID)
+				if err != nil && resp == nil {
+					log.Printf(ret.Errorf("Unable to remove team '%s' from '%s' organization. %s",
+						*github_team.Name, g.github_source.Organization, err))
+					return
+				}
+			} else {
+				teams[*github_team.Name] = github_team
+			}
+		}
+	}
+
+	valid_roles := map[string]string{"admin":"admin", "push":"push", "pull":"pull"}
+
+	// Loop on github.yaml group to create/update teams
+	for name, team := range g.github_source.Groups {
+		if github_team, found := teams[name] ; found {
+			updated := false
+			team_to_update := github.Team{ Name: github_team.Name }
+			if _, valid := valid_roles[team.Role] ; !valid {
+				team.Role = "pull"
+			}
+			if team.Role != *github_team.Permission {
+				team_to_update.Permission = &team.Role
+				updated = true
+			}
+			if updated {
+				log.Printf(ret.StatusAdd("Updating team '%s'.", name))
+
+				_, resp, err = g.Client.Organizations.EditTeam(g.ctxt, *github_team.ID, &team_to_update)
+				if err != nil && resp == nil {
+					log.Printf(ret.Errorf("Unable to update organization team '%s'. %s", name, err))
+					return
+				}
+				if resp.StatusCode != 200 {
+					log.Printf(ret.Errorf("Unable to update organization team '%s'. %s", name, resp.Status))
+					return
+				}
+			} else {
+				log.Printf(ret.StatusAdd("No change on team '%s'.", name))
+			}
+			g.setOrganizationTeamsMembers(ret, github_team)
+			continue
+		}
+
+		// Team have to be created
+		log.Printf(ret.StatusAdd("Creating team '%s'.", name))
+		github_team := new(github.Team)
+		github_team.Name = &name
+		if _, valid := valid_roles[team.Role] ; valid {
+			github_team.Permission = &team.Role
+		} else {
+			github_team.Permission = nil
+		}
+		github_team, resp, err = g.Client.Organizations.CreateTeam(g.ctxt, g.github_source.Organization, github_team)
+		if err != nil && resp == nil {
+			log.Printf(ret.Errorf("Unable to create organization team '%s'. %s", name, err))
+			return
+		}
+		if resp.StatusCode != 201 {
+			log.Printf(ret.Errorf("Unable to create organization team '%s'. %s", name, resp.Status))
+			return
+		}
+
+		g.setOrganizationTeamsMembers(ret, github_team)
+	}
+	return true
+}
+
+func (g *GitHubStruct)setOrganizationTeamsMembers(ret *goforjj.PluginData, team *github.Team) (_ bool) {
+	github_users, resp, err := g.Client.Organizations.ListTeamMembers(g.ctxt, *team.ID, nil)
+	if err != nil && resp == nil {
+		log.Printf(ret.Errorf("Unable to check team '%s'. %s", team.Name, err))
+		return false
+	}
+	users := make(map[string]int)
+	var team_source TeamStruct
+	if t, found := g.github_source.Groups[*team.Name] ; !found {
+		log.Printf(ret.StatusAdd("Warning. team '%s' has no membership declared", *team.Name))
+		return false
+	} else {
+		team_source = t
+	}
+
+	// GetTeamMembers and remove those missing in github.yaml
+	for _, user := range github_users {
+		if found, _ := goforjj.InArray(*user.Login, team_source.Users) ; !found {
+			log.Printf(ret.StatusAdd("Removing unknown user '%s'.", *user.Login))
+			resp, err = g.Client.Organizations.RemoveTeamMembership(g.ctxt, *team.ID, *user.Login)
+			if err != nil && resp == nil {
+				log.Printf(ret.Errorf("Unable to remove team member '%s' from team '%s'. %s",
+					*user.Login, *team.Name, err))
+				return
+			}
+			if resp.StatusCode != 204 {
+				log.Printf(ret.Errorf("Unable to remove team member '%s' from team '%s'. %s",
+					*user.Name, *team.Name, resp.Status))
+				return
+			}
+			continue
+		}
+		users[*user.Login] = 1 // Use map key facility only
+	}
+
+	// TODO: Detect new members to add
+	for _, user := range team_source.Users {
+		if _, found := users[user] ; !found {
+			log.Printf(ret.StatusAdd("Adding missing user '%s'.", user))
+			_, resp, err = g.Client.Organizations.AddTeamMembership(g.ctxt, *team.ID, user, nil)
+			if err != nil && resp == nil {
+				log.Printf(ret.Errorf("Unable to add team member '%s' to team '%s'. %s",
+					user, *team.Name, err))
+				return
+			}
+			if resp.StatusCode != 200 {
+				log.Printf(ret.Errorf("Unable to add team member '%s' to team '%s'. %s",
+					user, *team.Name, resp.Status))
+				return
+			}
+		}
+	}
+	return true
+}
+
 // Return an error if at least one repo exist. Used at create/update time.
 func (g *GitHubStruct)repos_exists(ret *goforjj.PluginData) (err error) {
     c := g.Client.Repositories
