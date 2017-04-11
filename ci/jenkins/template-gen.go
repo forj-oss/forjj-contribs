@@ -1,63 +1,68 @@
 package main
 
-func (t *DeployStruct)SetFrom(d *DeployStruct) bool {
+func (t *DeployStruct)SetFrom(d *DeployStruct) (status bool) {
 	if t == nil {
 		return false
 	}
-    SetIfSet(&t.DeployTo, d.DeployTo)
-    SetIfSet(&t.ServiceAddr, d.ServiceAddr)
-    SetIfSet(&t.ServicePort, d.ServicePort)
-	return true
+    status = SetIfSet(&t.ServiceAddr, d.ServiceAddr)
+    return SetIfSet(&t.ServicePort, d.ServicePort) || status
 }
 
-func (t *DeployStruct)UpdateFrom(d *DeployStruct) {
-    SetIfSet(&t.DeployTo, d.DeployTo)
-    SetIfSet(&t.ServiceAddr, d.ServiceAddr)
-    SetIfSet(&t.ServicePort, d.ServicePort)
+func (t *DeployStruct)UpdateFrom(d *DeployStruct) (status bool) {
+    status = SetIfSet(&t.ServiceAddr, d.ServiceAddr)
+	return SetIfSet(&t.ServicePort, d.ServicePort) || status
 }
 
-func (t *DockerfileStruct)SetFrom(d *DockerfileStruct) {
-    SetIfSet(&t.FromImage, d.FromImage)
-    SetIfSet(&t.FromImageVersion, d.FromImageVersion)
-    SetIfSet(&t.Maintainer, d.Maintainer)
+func (t *DockerfileStruct)SetFrom(d *DockerfileStruct) (status bool) {
+    status = SetIfSet(&t.FromImage, d.FromImage)
+	status = SetIfSet(&t.FromImageVersion, d.FromImageVersion) || status
+	return SetIfSet(&t.Maintainer, d.Maintainer) || status
 }
 
-func (t *DockerfileStruct)UpdateFrom(d *DockerfileStruct) {
-	SetIfSet(&t.FromImage, d.FromImage)
-	SetIfSet(&t.FromImageVersion, d.FromImageVersion)
-	SetIfSet(&t.Maintainer, d.Maintainer)
+func (t *DockerfileStruct)UpdateFrom(d *DockerfileStruct) (status bool) {
+	status = SetIfSet(&t.FromImage, d.FromImage)
+	status = SetIfSet(&t.FromImageVersion, d.FromImageVersion) || status
+	return SetIfSet(&t.Maintainer, d.Maintainer) || status
 }
 
-func (t *FinalImageStruct)SetFrom(d *FinalImageStruct, org string) {
-    SetIfSet(&t.Name, d.Name)
-    SetIfSet(&t.Version, d.Version)
-    SetIfSet(&t.RegistryServer, d.RegistryServer)
+func (t *FinalImageStruct)SetFrom(d *FinalImageStruct, org string) (status bool) {
+    status = SetIfSet(&t.Name, d.Name)
+	status = SetIfSet(&t.Version, d.Version) || status
+	status = SetIfSet(&t.RegistryServer, d.RegistryServer) || status
 
-    SetIfSet(&t.RegistryRepoName, d.RegistryRepoName)
-    SetOnceIfSet(&t.RegistryRepoName, org)
+	status = SetIfSet(&t.RegistryRepoName, d.RegistryRepoName) || status
+	return SetOnceIfSet(&t.RegistryRepoName, org) || status
 }
 
-func (t *FinalImageStruct)UpdateFrom(d *FinalImageStruct, org string) {
-	SetIfSet(&t.Name, d.Name)
-	SetIfSet(&t.Version, d.Version)
-	SetIfSet(&t.RegistryServer, d.RegistryServer)
+func (t *FinalImageStruct)UpdateFrom(d *FinalImageStruct, org string) (status bool) {
+	status = SetIfSet(&t.Name, d.Name)
+	status = SetIfSet(&t.Version, d.Version) || status
+	status = SetIfSet(&t.RegistryServer, d.RegistryServer) || status
 
-	SetIfSet(&t.RegistryRepoName, d.RegistryRepoName)
-	SetOnceIfSet(&t.RegistryRepoName, org)
+	status = SetIfSet(&t.RegistryRepoName, d.RegistryRepoName) || status
+	return SetOnceIfSet(&t.RegistryRepoName, org) ||status
 }
 
 // Set the value if the source is set
-func SetIfSet(s *string, source string) {
+func SetIfSet(s *string, source string) (_ bool) {
     if source == "" {
         return
     }
-    *s = source
+	if *s != source {
+		*s = source
+		return true
+	}
+    return
 }
 
 // Set the value originally empty from source if set.
-func SetOnceIfSet(s *string, source string) {
+func SetOnceIfSet(s *string, source string) (_ bool){
     if *s != "" || source == "" {
         return
     }
-    *s = source
+	if *s != source {
+		*s = source
+		return true
+	}
+	return
 }

@@ -52,7 +52,7 @@ func (p *JenkinsPlugin)InstantiateInstance(instance string, auths *DockerAuths, 
 
     // start a command as described by the source code.
     if p.yaml.Deploy.Command == "" {
-        log.Printf(ret.Errorf("Unable to instantiate to %s. Deploy Command is empty.", p.yaml.Deploy.DeployTo))
+        log.Printf(ret.Errorf("Unable to instantiate to %s. Deploy Command is empty.", p.yaml.Deploy.Deployment.To))
         return
     }
 

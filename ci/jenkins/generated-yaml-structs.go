@@ -10,6 +10,7 @@ package main
 type DeployStruct struct {
 	ServiceAddr string `json:"deploy-service-addr"`
 	ServicePort string `json:"deploy-service-port"`
+	To string `json:"deploy-to"`
 }
 
 type DockerfileStruct struct {
@@ -29,7 +30,6 @@ type FinalImageStruct struct {
 // Object Instance structures
 
 type AppInstanceStruct struct {
-	DeployTo string `json:"deploy-to"`// Deployment name used to deploy jenkins.
 	RegistryAuth string `json:"registry-auth"`// List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
 
 	// Groups
@@ -174,6 +174,9 @@ const YamlDesc = "---\n" +
    "            help: \"Docker Repository Name where your image will be pushed. If not set, no push will be done.\"\n" +
    "      deploy:\n" +
    "        flags:\n" +
+   "          to:\n" +
+   "            help: \"Deployment name used to deploy jenkins.\"\n" +
+   "            default: \"docker\"\n" +
    "          service-addr:\n" +
    "            help: \"Exposed service CNAME or IP address of the expected jenkins instance\"\n" +
    "          service-port:\n" +
@@ -183,9 +186,6 @@ const YamlDesc = "---\n" +
    "      registry-auth:\n" +
    "        help: \"List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]\"\n" +
    "        secure: true\n" +
-   "      deploy-to:\n" +
-   "        help: \"Deployment name used to deploy jenkins.\"\n" +
-   "        default: \"docker\"\n" +
    "  features:\n" +
    "    default-actions: [\"add\", \"change\", \"remove\"]\n" +
    "    identified_by_flag: name\n" +

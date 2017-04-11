@@ -66,7 +66,7 @@ func (p *JenkinsPlugin)DefineSources() error {
         p.yaml.Features = append(p.yaml.Features, f)
     }
 
-    if deploy_features, ok:= p.templates_def.Features.Deploy[p.yaml.Deploy.DeployTo] ; ok {
+    if deploy_features, ok:= p.templates_def.Features.Deploy[p.yaml.Deploy.Deployment.To] ; ok {
         for _, f := range deploy_features {
             p.yaml.Features = append(p.yaml.Features, f)
         }
@@ -87,7 +87,7 @@ func (p *JenkinsPlugin)DefineSources() error {
         }
     }
 
-    if deploy_sources, ok:= p.templates_def.Sources.Deploy[p.yaml.Deploy.DeployTo] ; ok {
+    if deploy_sources, ok:= p.templates_def.Sources.Deploy[p.yaml.Deploy.Deployment.To] ; ok {
         for file, f := range deploy_sources {
             if f.Template == "" {
                 p.sources[file] = f
