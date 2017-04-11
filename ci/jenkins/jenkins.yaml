@@ -27,22 +27,6 @@ task_flags:
       default: docker
       help: "Where jenkins will be published."
 objects:
-  deployment:
-    default-actions: ["add", "change", "remove", "list"]
-    identified-by-flag: name
-    groups:
-      deploy:
-        flags:
-          service-addr:
-            help: "Exposed service CNAME or IP address of the expected jenkins instance"
-          service-port:
-            default: 8080
-            help: "Expected jenkins instance port number."
-          name:
-            required: true
-            help: "Name of the jenkins deployment"
-          deploy-to:
-            help: "Where jenkins will be deployed."
   app:
     default-actions: ["add", "change"]
     groups:
@@ -68,6 +52,13 @@ objects:
             default: hub.docker.com
           registry-repo-name:
             help: "Docker Repository Name where your image will be pushed. If not set, no push will be done."
+      deploy:
+        flags:
+          service-addr:
+            help: "Exposed service CNAME or IP address of the expected jenkins instance"
+          service-port:
+            default: 8080
+            help: "Expected jenkins instance port number."
     flags:
       registry-auth:
         help: "List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]"

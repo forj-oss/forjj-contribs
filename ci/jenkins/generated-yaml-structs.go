@@ -7,6 +7,11 @@ package main
 
 // Groups structure
 
+type DeployStruct struct {
+	ServiceAddr string `json:"deploy-service-addr"`
+	ServicePort string `json:"deploy-service-port"`
+}
+
 type DockerfileStruct struct {
 	FromImage string `json:"dockerfile-from-image"`
 	FromImageVersion string `json:"dockerfile-from-image-version"`
@@ -29,29 +34,9 @@ type AppInstanceStruct struct {
 
 	// Groups
 
+	DeployStruct
 	DockerfileStruct
 	FinalImageStruct
-}
-
-// Object deployment groups structure
-
-// Groups structure
-
-type DeployStruct struct {
-	DeployTo string `json:"deploy-deploy-to"`
-	Name string `json:"deploy-name"`
-	ServiceAddr string `json:"deploy-service-addr"`
-	ServicePort string `json:"deploy-service-port"`
-}
-
-
-// Object Instance structures
-
-type DeploymentInstanceStruct struct {
-
-	// Groups
-
-	DeployStruct
 }
 
 // Object features groups structure
@@ -84,7 +69,6 @@ type CreateReq struct {
 
 type CreateArgReq struct {
 	App map[string]AppInstanceStruct `json:"app"` // Object details
-	Deployment map[string]DeploymentInstanceStruct `json:"deployment"` // Object details
 	Features map[string]FeaturesInstanceStruct `json:"features"` // Object details
 }
 
@@ -105,7 +89,6 @@ type UpdateReq struct {
 
 type UpdateArgReq struct {
 	App map[string]AppInstanceStruct `json:"app"` // Object details
-	Deployment map[string]DeploymentInstanceStruct `json:"deployment"` // Object details
 	Features map[string]FeaturesInstanceStruct `json:"features"` // Object details
 }
 
@@ -164,22 +147,6 @@ const YamlDesc = "---\n" +
    "      default: docker\n" +
    "      help: \"Where jenkins will be published.\"\n" +
    "objects:\n" +
-   "  deployment:\n" +
-   "    default-actions: [\"add\", \"change\", \"remove\", \"list\"]\n" +
-   "    identified-by-flag: name\n" +
-   "    groups:\n" +
-   "      deploy:\n" +
-   "        flags:\n" +
-   "          service-addr:\n" +
-   "            help: \"Exposed service CNAME or IP address of the expected jenkins instance\"\n" +
-   "          service-port:\n" +
-   "            default: 8080\n" +
-   "            help: \"Expected jenkins instance port number.\"\n" +
-   "          name:\n" +
-   "            required: true\n" +
-   "            help: \"Name of the jenkins deployment\"\n" +
-   "          deploy-to:\n" +
-   "            help: \"Where jenkins will be deployed.\"\n" +
    "  app:\n" +
    "    default-actions: [\"add\", \"change\"]\n" +
    "    groups:\n" +
@@ -188,7 +155,7 @@ const YamlDesc = "---\n" +
    "          # Information we can define for the Dockerfile.\n" +
    "          from-image:\n" +
    "            help: \"Base Docker image tag name to use in Dockerfile. Must respect [server/repo/]name.\"\n" +
-   "            default: hub.docker.hpecorp.net/devops/jenkins-dood\n" +
+   "            default: forjdevops/jenkins-dood\n" +
    "          from-image-version:\n" +
    "            help: \"Base Docker image tag version to use in Dockerfile\"\n" +
    "          maintainer:\n" +
@@ -198,14 +165,20 @@ const YamlDesc = "---\n" +
    "          name:\n" +
    "            help: \"Docker image name for your final generated Jenkins Image. Do not set the Server or Repo name. Use final-docker-registry-server and final-docker-repo-name.\"\n" +
    "            default: jenkins\n" +
-   "            group: \"final-image\"\n" +
    "          version:\n" +
    "            help: \"Docker image tag version for your generated Jenkins Image.\"\n" +
    "          registry-server:\n" +
    "            help: \"Docker registry server name where your image will be pushed. If not set, no push will be done.\"\n" +
-   "            default: hub.docker.hpecorp.net\n" +
+   "            default: hub.docker.com\n" +
    "          registry-repo-name:\n" +
    "            help: \"Docker Repository Name where your image will be pushed. If not set, no push will be done.\"\n" +
+   "      deploy:\n" +
+   "        flags:\n" +
+   "          service-addr:\n" +
+   "            help: \"Exposed service CNAME or IP address of the expected jenkins instance\"\n" +
+   "          service-port:\n" +
+   "            default: 8080\n" +
+   "            help: \"Expected jenkins instance port number.\"\n" +
    "    flags:\n" +
    "      registry-auth:\n" +
    "        help: \"List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]\"\n" +
