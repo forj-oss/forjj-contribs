@@ -20,11 +20,10 @@ type JenkinsPlugin struct {
 }
 
 type DeployApp struct {
-    Deployments map[string]DeployStruct
+    Deployment DeployStruct
 	// Those 2 different parameters are defined at create time and can be updated with change.
 	// There are default deployment task and name. This can be changed at maintain time
 	// to reflect the maintain deployment task to execute.
-	DeployTo string  // Default Deployment set at create time.
 	Command string   // Default Command used
 }
 
@@ -69,40 +68,21 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
 	}
 	jenkins_instance := r.Objects.App[instance]
 
+	p.yaml.Deploy.Deployment.SetFrom(&jenkins_instance.DeployStruct)
 	// Initialize deployment data and set default values
-	if p.yaml.Deploy.Deployments == nil {
-		p.yaml.Deploy.Deployments = make(map[string]DeployStruct)
+	if p.yaml.Deploy.Deployment.To == ""          {
+		p.yaml.Deploy.Deployment.To = "docker"
+		ret.StatusAdd("Default to 'docker' Deployment.")
 	}
-	if _, found := p.yaml.Deploy.Deployments["docker"] ; ! found {
-		// Set default deployment with docker.
-		p.yaml.Deploy.Deployments["docker"] = DeployStruct{
-			Name: "docker",
-			ServiceAddr: "localhost",
-			ServicePort: "8080",
-			DeployTo: "docker",
-		}
-		ret.StatusAdd("Added default docker deployment.")
-	} else {
-		// Set Deployments definition
-		for name, deploy_data := range r.Objects.Deployment {
-			deployment := DeployStruct{}
-			deployment.SetFrom(&deploy_data.DeployStruct)
-			p.yaml.Deploy.Deployments[name] = deployment
-		}
+	if p.yaml.Deploy.Deployment.ServiceAddr == "" {
+		p.yaml.Deploy.Deployment.ServiceAddr = "localhost"
+		ret.StatusAdd("Default to 'localhost' deployment service name.")
 	}
+	if p.yaml.Deploy.Deployment.ServicePort == "" {
+		p.yaml.Deploy.Deployment.ServicePort = "8080"
+		ret.StatusAdd("Default to '8080' deployment service port.")
 
-    deploy_to := jenkins_instance.DeployTo
-	if deploy_to == "" {
-		deploy_to = "docker"
-		ret.StatusAdd("default deployment to 'docker'.")
 	}
-
-	if _, found := p.yaml.Deploy.Deployments[deploy_to] ; !found {
-		ret.Errorf("Unable to find deployment '%s'. You must define it.", deploy_to)
-	}
-
-	// Default deployment set
-	p.yaml.Deploy.DeployTo = deploy_to
 
     // Forjj predefined settings (instance/organization) are set at create time only.
     // I do not recommend to update them, manually by hand in the `forjj-jenkins.yaml`.
@@ -130,12 +110,12 @@ func (p *JenkinsPlugin) DefineDeployCommand() error{
         return fmt.Errorf("%s", err)
     }
 
-    if v, ok := p.templates_def.Run[p.yaml.Deploy.DeployTo] ; !ok {
+    if v, ok := p.templates_def.Run[p.yaml.Deploy.Deployment.To] ; !ok {
         list := make([]string,0,len(p.templates_def.Run))
         for element, _ := range p.templates_def.Run {
             list = append(list, element)
         }
-        return fmt.Errorf("'%s' deploy type is unknown (templates.yaml). Valid are %s", p.yaml.Deploy.DeployTo, list)
+        return fmt.Errorf("'%s' deploy type is unknown (templates.yaml). Valid are %s", p.yaml.Deploy.Deployment.To, list)
     } else {
         p.yaml.Deploy.Command = v
     }
@@ -146,34 +126,22 @@ func (p *JenkinsPlugin) DefineDeployCommand() error{
 
 // At update time: Update jenkins source from req or forjj-jenkins.yaml input.
 func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData)  (status bool) {
-    // ForjjStruct NOT UPDATABLE
 	instance := r.Forj.ForjjInstanceName
 	instance_data := r.Objects.App[instance]
-	if d, found := r.Objects.Deployment[instance_data.DeployTo] ; !found {
-		ret.Errorf("Unable to find deployment '%s'", instance_data.DeployTo)
-		return
-	} else {
-		deploy := DeployStruct{}
-		if _, found := r.Objects.Deployment[instance_data.DeployTo] ; !found {
-			deploy.SetFrom(&d.DeployStruct)
-			ret.StatusAdd("Deployment '%s' added.", instance_data.DeployTo)
-		} else {
-			deploy = p.yaml.Deploy.Deployments[instance_data.DeployTo]
-			deploy.UpdateFrom(&d.DeployStruct)
-			ret.StatusAdd("Deployment '%s' updated.", instance_data.DeployTo)
-		}
-		p.yaml.Deploy.Deployments[instance_data.DeployTo] = deploy
-	}
+	deploy := DeployStruct{}
+	deploy = p.yaml.Deploy.Deployment
+	status = deploy.UpdateFrom(&instance_data.DeployStruct)
+	ret.StatusAdd("Deployment to '%s' updated.", instance_data.To)
+	p.yaml.Deploy.Deployment = deploy
 
     if err := p.DefineDeployCommand() ; err != nil {
         ret.Errorf("Unable to update the deployement command. %s", err)
         return
     }
 
-    p.yaml.Dockerfile.UpdateFrom(&instance_data.DockerfileStruct)
-    p.yaml.JenkinsImage.UpdateFrom(&instance_data.FinalImageStruct, r.Forj.ForjjOrganization)// Org used only if no set anymore.
-	status = true
-    return
+    status = p.yaml.Dockerfile.UpdateFrom(&instance_data.DockerfileStruct) || status
+	// Org used only if no set anymore.
+    return p.yaml.JenkinsImage.UpdateFrom(&instance_data.FinalImageStruct, r.Forj.ForjjOrganization) || status
 }
 
 func (p *JenkinsPlugin)save_yaml(ret *goforjj.PluginData) (status bool) {
