@@ -22,7 +22,13 @@ func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
         g.AddRepo(name, &repo )
     }
 
-    // TODO: Be able to add several repos thanks to the request structure.
+    for name, details := range req.Objects.User {
+        g.AddUser(name, &details )
+    }
+
+    for name, details := range req.Objects.Group {
+        g.AddGroup(name, &details)
+    }
     return nil
 }
 
@@ -34,6 +40,24 @@ func (g *GitHubStruct)AddRepo(name string, repo *RepoInstanceStruct) bool{
         r = RepositoryStruct{}
 		r.set(repo, map[string]string {"origin":upstream}, map[string]string {"master":"origin/master"})
         g.github_source.Repos[name] = r
+        return true // New added
+    }
+    return false
+}
+
+// Add a new repository to be managed by github plugin.
+func (g *GitHubStruct)AddUser(name string, UserDet *UserInstanceStruct) bool {
+    if _, found := g.github_source.Users[name]; ! found {
+        g.github_source.Users[name] = UserDet.Role
+        return true // New added
+    }
+    return false
+}
+
+// Add a new repository to be managed by github plugin.
+func (g *GitHubStruct)AddGroup(name string, GroupDet *GroupInstanceStruct) bool {
+    if _, found := g.github_source.Groups[name]; ! found {
+        g.github_source.Groups[name] = TeamStruct{Role: GroupDet.Role, Users: GroupDet.Users}
         return true // New added
     }
     return false
