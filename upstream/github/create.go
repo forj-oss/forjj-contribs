@@ -17,8 +17,14 @@ func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
     if g.github_source.Repos == nil {
         g.github_source.Repos = make(map[string]RepositoryStruct)
     }
+	if g.github_source.Users == nil {
+		g.github_source.Users = make(map[string]string)
+	}
+	if g.github_source.Groups == nil {
+		g.github_source.Groups = make(map[string]TeamStruct)
+	}
 
-    for name, repo := range req.Objects.Repo {
+	for name, repo := range req.Objects.Repo {
         g.AddRepo(name, &repo )
     }
 
@@ -57,7 +63,7 @@ func (g *GitHubStruct)AddUser(name string, UserDet *UserInstanceStruct) bool {
 // Add a new repository to be managed by github plugin.
 func (g *GitHubStruct)AddGroup(name string, GroupDet *GroupInstanceStruct) bool {
     if _, found := g.github_source.Groups[name]; ! found {
-        g.github_source.Groups[name] = TeamStruct{Role: GroupDet.Role, Users: GroupDet.Users}
+        g.github_source.Groups[name] = TeamStruct{Role: GroupDet.Role, Users: GroupDet.Members}
         return true // New added
     }
     return false
