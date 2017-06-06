@@ -1,5 +1,5 @@
 hash: 44fd447fa628a8dba044dfc103da968a20199bba4197def8585581373da55b5c
-updated: 2017-06-04T13:44:33.877886313Z
+updated: 2017-06-06T08:35:46.475042732Z
 imports:
 - name: github.com/alecthomas/kingpin
   version: 7f0871f2e17818990e4eed73f9b5c2f429501228
@@ -16,7 +16,7 @@ imports:
   subpackages:
   - trace
 - name: github.com/forj-oss/goforjj
-  version: c33967b1cabdebe6cad6d6b3952f96c82f3d9803
+  version: 5529d0c71dd0244ab3dde591485274818fa000c9
 - name: github.com/golang/protobuf
   version: 5a0f697c9ed9d68fef0116532c6e05cfeae00e55
   subpackages:
