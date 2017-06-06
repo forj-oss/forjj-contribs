@@ -8,29 +8,29 @@ package main
 // Groups structure
 
 type DeployStruct struct {
-	ServiceAddr string `json:"deploy-service-addr"`
-	ServicePort string `json:"deploy-service-port"`
-	To string `json:"deploy-to"`
+	ServiceAddr string `json:"deploy-service-addr"` // Exposed service CNAME or IP address of the expected jenkins instance
+	ServicePort string `json:"deploy-service-port"` // Expected jenkins instance port number.
+	To string `json:"deploy-to"` // Deployment name used to deploy jenkins.
 }
 
 type DockerfileStruct struct {
-	FromImage string `json:"dockerfile-from-image"`
-	FromImageVersion string `json:"dockerfile-from-image-version"`
-	Maintainer string `json:"dockerfile-maintainer"`
+	FromImage string `json:"dockerfile-from-image"` // Base Docker image tag name to use in Dockerfile. Must respect [server/repo/]name.
+	FromImageVersion string `json:"dockerfile-from-image-version"` // Base Docker image tag version to use in Dockerfile
+	Maintainer string `json:"dockerfile-maintainer"` // Jenkins image maintainer
 }
 
 type FinalImageStruct struct {
-	Name string `json:"final-image-name"`
-	RegistryRepoName string `json:"final-image-registry-repo-name"`
-	RegistryServer string `json:"final-image-registry-server"`
-	Version string `json:"final-image-version"`
+	Name string `json:"final-image-name"` // Docker image name for your final generated Jenkins Image. Do not set the Server or Repo name. Use final-docker-registry-server and final-docker-repo-name.
+	RegistryRepoName string `json:"final-image-registry-repo-name"` // Docker Repository Name where your image will be pushed. If not set, no push will be done.
+	RegistryServer string `json:"final-image-registry-server"` // Docker registry server name where your image will be pushed. If not set, no push will be done.
+	Version string `json:"final-image-version"` // Docker image tag version for your generated Jenkins Image.
 }
 
 
 // Object Instance structures
 
 type AppInstanceStruct struct {
-	RegistryAuth string `json:"registry-auth"`// List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
+	RegistryAuth string `json:"registry-auth"` // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
 
 	// Groups
 
@@ -47,8 +47,8 @@ type AppInstanceStruct struct {
 // Object Instance structures
 
 type FeaturesInstanceStruct struct {
-	Name string `json:"name"`// name of the jenkins feature
-	Options string `json:"options"`// List of feature option to use
+	Name string `json:"name"` // name of the jenkins feature
+	Options string `json:"options"` // List of feature option to use
 }
 
 
