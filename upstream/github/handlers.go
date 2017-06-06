@@ -60,7 +60,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if content_type_match(r.Header, "application/json") {
-		log.Printf("json data: %s", body)
 		err := json.Unmarshal(body, &req_data)
 		panicIfError(w, err, "Unable to decode '%#v' as json.", string(body))
 	} else {
