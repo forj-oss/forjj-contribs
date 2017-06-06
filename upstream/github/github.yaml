@@ -48,9 +48,10 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
     help: "Manage teams in github"
     identified_by_flag: name
     flags:
-      users:
+      members:
         only-for-actions: ["add"]
         help: "List of users to attach to the new group."
+        of-type: "[]string"
       name:
         help: "group name"
         required: true

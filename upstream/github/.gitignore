@@ -4,3 +4,6 @@ github
 .be-*
 
 .glide
+
+vendor
+.idea

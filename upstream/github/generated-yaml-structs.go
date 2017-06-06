@@ -11,11 +11,11 @@ package main
 // Object Instance structures
 
 type AppInstanceStruct struct {
-	ForjjInfra string `json:"forjj-infra"`// Name of the Infra repository to use in github if requested.
-	ForjjOrganization string `json:"forjj-organization"`// Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
-	Organization string `json:"organization"`// Github Organization name. By default, it uses the FORJJ organization name
-	Server string `json:"server"`// Github Entreprise Server name. By default, public 'github.com' API is used.
-	Token string `json:"token"`// github token to access. This token must authorize organization level access.
+	ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use in github if requested.
+	ForjjOrganization string `json:"forjj-organization"` // Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
+	Organization string `json:"organization"` // Github Organization name. By default, it uses the FORJJ organization name
+	Server string `json:"server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
+	Token string `json:"token"` // github token to access. This token must authorize organization level access.
 }
 
 // Object group groups structure
@@ -26,9 +26,9 @@ type AppInstanceStruct struct {
 // Object Instance structures
 
 type GroupInstanceStruct struct {
-	Name string `json:"name"`// group name
-	Role string `json:"role"`// List of roles to apply to the new group.
-	Users string `json:"users"`// List of users to attach to the new group.
+	Members []string `json:"members"` // List of users to attach to the new group.
+	Name string `json:"name"` // group name
+	Role string `json:"role"` // List of roles to apply to the new group.
 }
 
 // Object repo groups structure
@@ -39,13 +39,13 @@ type GroupInstanceStruct struct {
 // Object Instance structures
 
 type RepoInstanceStruct struct {
-	Flow string `json:"flow"`// Flow activated on this repository
-	ForjjWorkspaceMount string `json:"forjj-workspace-mount"`// Where the workspace dir is located in the github plugin container.
-	Groups string `json:"groups"`// List of groups to attach to the repository, separated by comma.
-	Issue_tracker string `json:"issue_tracker"`// To activate the Issue tracker to the Repository
-	Name string `json:"name"`// Repository name
-	Title string `json:"title"`// Github Repository title
-	Users string `json:"users"`// List of users to attach to the repository, separated by comma.
+	Flow string `json:"flow"` // Flow activated on this repository
+	ForjjWorkspaceMount string `json:"forjj-workspace-mount"` // Where the workspace dir is located in the github plugin container.
+	Groups string `json:"groups"` // List of groups to attach to the repository, separated by comma.
+	Issue_tracker string `json:"issue_tracker"` // To activate the Issue tracker to the Repository
+	Name string `json:"name"` // Repository name
+	Title string `json:"title"` // Github Repository title
+	Users string `json:"users"` // List of users to attach to the repository, separated by comma.
 }
 
 // Object user groups structure
@@ -56,8 +56,8 @@ type RepoInstanceStruct struct {
 // Object Instance structures
 
 type UserInstanceStruct struct {
-	Name string `json:"name"`// 
-	Role string `json:"role"`// 
+	Name string `json:"name"` // 
+	Role string `json:"role"` // 
 }
 
 
@@ -175,9 +175,10 @@ const YamlDesc = "---\n" +
    "    help: \"Manage teams in github\"\n" +
    "    identified_by_flag: name\n" +
    "    flags:\n" +
-   "      users:\n" +
+   "      members:\n" +
    "        only-for-actions: [\"add\"]\n" +
    "        help: \"List of users to attach to the new group.\"\n" +
+   "        of-type: \"[]string\"\n" +
    "      name:\n" +
    "        help: \"group name\"\n" +
    "        required: true\n" +
