@@ -9,8 +9,9 @@ import (
 
 func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
     // Write the github.yaml source file.
-    g.github_source.Urls = make(map[string]string)
-    g.github_source.Urls["github-base-url"] = g.Client.BaseURL.String()
+	if g.github_source.Urls == nil {
+		return fmt.Errorf("Internal Error. Urls was not set.")
+	}
 
     req.InitOrganization(g)
 
@@ -40,11 +41,16 @@ func (g *GitHubStruct)create_yaml_data(req *CreateReq) error {
 
 // Add a new repository to be managed by github plugin.
 func (g *GitHubStruct)AddRepo(name string, repo *RepoInstanceStruct) bool{
-    upstream := "git@" + g.Client.BaseURL.Host + ":" + g.github_source.Organization + "/" + name + ".git"
+	upstream := goforjj.PluginRepoRemoteUrl{
+		Ssh: "git@" + g.Client.BaseURL.Host + ":" + g.github_source.Organization + "/" + name + ".git",
+		Url: g.github_source.Urls["github-url"] + "/" + g.github_source.Organization + "/" + name,
+	}
 
     if r, found := g.github_source.Repos[name] ; ! found {
         r = RepositoryStruct{}
-		r.set(repo, map[string]string {"origin":upstream}, map[string]string {"master":"origin/master"})
+		r.set(repo,
+			map[string]goforjj.PluginRepoRemoteUrl {"origin":upstream},
+			map[string]string {"master":"origin/master"})
         g.github_source.Repos[name] = r
         return true // New added
     }

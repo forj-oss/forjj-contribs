@@ -37,9 +37,10 @@ func (g *GitHubStruct)github_connect(server string, ret *goforjj.PluginData) (* 
         return nil
     }
 
-    log.Printf("Github Base URL used : %s", g.Client.BaseURL)
+    log.Printf("Github API URL used : %s", g.Client.BaseURL)
+	log.Printf("Github URL used : %s", g.github_source.Urls["github-url"])
 
-    if user , _, err := g.Client.Users.Get(g.ctxt, "") ; err != nil {
+	if user , _, err := g.Client.Users.Get(g.ctxt, "") ; err != nil {
         ret.Errorf("Unable to get the owner of the token given. %s", err)
         return nil
     } else {
@@ -59,14 +60,31 @@ func (g *GitHubStruct)github_set_url(server string) (err error) {
 	}
     if ! g.maintain_ctxt {
         if server == ""  || server == "api.github.com" || server == "github.com" {
-            g.github_source.Urls["github-base-url"] = "" // Default public link
-        } else {
+            g.github_source.Urls["github-base-url"] = "https://api.github.com" // Default public API link
+			g.github_source.Urls["github-url"] = "https://github.com" // Default public link
+		} else {
             // To accept GitHub entreprise without ssl, permit server to have url format.
-            if found, _ := regexp.MatchString("^https?://.*", server) ; found {
-                gh_url = server
-            } else {
-                gh_url = "https://" + server
-            }
+			var entr_github_re *regexp.Regexp
+			if re, err := regexp.Compile("^(https?://)(.*)(/api/v3)/$?") ; err != nil {
+				return err
+			} else {
+				entr_github_re = re
+			}
+			res := entr_github_re.FindAllString(server, -1)
+			if res == nil {
+				gh_url = "https://" + server + "/api/v3"
+				g.github_source.Urls["github-url"] = "https://" + server
+			} else {
+				if res[2] == "" {
+					return fmt.Errorf("Unable to determine github URL from '%s'. It must be [https?://]Server[:Port][/api/v3]", server)
+				}
+				if res[1] == "" {
+					gh_url += "https://"
+				}
+				gh_url += res[2]
+				g.github_source.Urls["github-url"] = gh_url
+				gh_url += "/api/v3"
+			}
             g.github_source.Urls["github-base-url"] = gh_url
         }
     } else {
@@ -80,12 +98,12 @@ func (g *GitHubStruct)github_set_url(server string) (err error) {
     g.Client.BaseURL, err = url.Parse(gh_url)
 	if err != nil { return }
 
-	// Adding api/V3 for server given or url without path, ie http?://<server> instead or http?://<server>/<path>?
+/*	// Adding api/V3 for server given or url without path, ie http?://<server> instead or http?://<server>/<path>?
 	if g.Client.BaseURL.Path == "" {
 		log.Printf("Adding /api/v3 to github url given %s", gh_url)
 		g.Client.BaseURL.Path = "/api/v3/"
 		g.github_source.Urls["github-base-url"] = g.Client.BaseURL.String()
-	}
+	}*/
     return
 }
 
@@ -306,10 +324,13 @@ func (g *GitHubStruct)repos_exists(ret *goforjj.PluginData) (err error) {
             }
             repo_data.exist = true
             if repo_data.remotes == nil {
-                repo_data.remotes = make(map[string]string)
+                repo_data.remotes = make(map[string]goforjj.PluginRepoRemoteUrl)
                 repo_data.branchConnect = make(map[string]string)
             }
-            repo_data.remotes["origin"] = *found_repo.SSHURL
+            repo_data.remotes["origin"] = goforjj.PluginRepoRemoteUrl{
+				Ssh: *found_repo.SSHURL,
+				Url: *found_repo.HTMLURL,
+			}
             repo_data.branchConnect["master"] = "origin/master"
         }
         if ret != nil {
@@ -340,11 +361,14 @@ func (g *GitHubStruct)req_repos_exists(req *UpdateReq, ret *goforjj.PluginData) 
         r := goforjj.PluginRepo{
             Name: name,
             Exist: (err == nil),
-            Remotes: make(map[string]string),
+            Remotes: make(map[string]goforjj.PluginRepoRemoteUrl),
             BranchConnect: make(map[string]string),
         }
         if err == nil {
-            r.Remotes["origin"] = *found_repo.SSHURL
+            r.Remotes["origin"] = goforjj.PluginRepoRemoteUrl{
+				Ssh: *found_repo.SSHURL,
+				Url: *found_repo.HTMLURL,
+			}
             r.BranchConnect["master"] = "origin/master"
         }
 
@@ -407,21 +431,30 @@ func (r *RepositoryStruct)ensure_exists(gws *GitHubStruct, ret *goforjj.PluginDa
 
     // TODO: Add github flow driver for repos management
     if repo, found := ret.Repos[r.Name]; found {
-        repo.Remotes["origin"] = *found_repo.SSHURL
+        repo.Remotes["origin"] = goforjj.PluginRepoRemoteUrl{
+			Ssh: *found_repo.SSHURL,
+			Url: *found_repo.HTMLURL,
+		}
         ret.Repos[r.Name] = repo
     } else {
         repo = goforjj.PluginRepo {
             Name: r.Name,
-            Remotes: make(map[string]string),
+            Remotes: make(map[string]goforjj.PluginRepoRemoteUrl),
             Exist: true,
             BranchConnect: make(map[string]string),
         }
 
         // TODO: See how to integrate the flow change here to respond the proper branch connect.
-        repo.Remotes["origin"] = *found_repo.SSHURL
+        repo.Remotes["origin"] = goforjj.PluginRepoRemoteUrl{
+			Ssh: *found_repo.SSHURL,
+			Url: *found_repo.HTMLURL,
+		}
         repo.BranchConnect["master"] = "origin/master"
         if found_repo.Parent != nil {
-            repo.Remotes["upstream"] = *found_repo.Parent.HTMLURL
+            repo.Remotes["upstream"] = goforjj.PluginRepoRemoteUrl{
+				Ssh: *found_repo.Parent.SSHURL,
+				Url: *found_repo.Parent.HTMLURL,
+			}
         }
         ret.Repos[r.Name] = repo
     }

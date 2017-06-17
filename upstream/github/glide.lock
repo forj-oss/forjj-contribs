@@ -1,5 +1,5 @@
 hash: 44fd447fa628a8dba044dfc103da968a20199bba4197def8585581373da55b5c
-updated: 2017-06-06T08:35:46.475042732Z
+updated: 2017-06-17T20:25:51.403659154Z
 imports:
 - name: github.com/alecthomas/kingpin
   version: 7f0871f2e17818990e4eed73f9b5c2f429501228
@@ -16,9 +16,9 @@ imports:
   subpackages:
   - trace
 - name: github.com/forj-oss/goforjj
-  version: 5529d0c71dd0244ab3dde591485274818fa000c9
+  version: 10a61a3908c3fb2894f94aa4eed97392fee5b9d3
 - name: github.com/golang/protobuf
-  version: 5a0f697c9ed9d68fef0116532c6e05cfeae00e55
+  version: e325f446bebc2998605911c0a2650d9920361d4a
   subpackages:
   - proto
 - name: github.com/google/go-github
@@ -46,7 +46,7 @@ imports:
 - name: github.com/pkg/errors
   version: c605e284fe17294bda444b34710735b29d1a9d90
 - name: golang.org/x/net
-  version: e4fa1c5465ad6111f206fc92186b8c83d64adbe1
+  version: 973f3f3bbd50e92b13faa6c53ec16f49b45e851c
   subpackages:
   - context
   - publicsuffix
@@ -55,7 +55,7 @@ imports:
   subpackages:
   - internal
 - name: golang.org/x/sys
-  version: b90f89a1e7a9c1f6b918820b3daa7f08488c8594
+  version: fb4cac33e3196ff7f507ab9b2d2a44b0142f5b5a
   subpackages:
   - unix
 - name: google.golang.org/appengine
