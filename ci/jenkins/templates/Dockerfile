@@ -6,7 +6,7 @@ FROM {{ .Dockerfile.FromImage }}{{ if .Dockerfile.FromImageVersion }}:{{ .Docker
 COPY features.lst /tmp
 
 ENV JENKINS_SLAVE_AGENT_PORT=50000{{ if .Projects }} \
-    SEED_JOBS_REPO={{ .Projects.SeedJobRepo }}{{ end }}
+    SEED_JOBS_REPO={{ .Projects.DslRepo }}/{{ .Projects.DslPath }}{{ end }}
 
 USER root
 
