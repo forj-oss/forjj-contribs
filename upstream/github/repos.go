@@ -5,6 +5,7 @@ import (
 	"strings"
 	"fmt"
 	"strconv"
+	"github.com/forj-oss/goforjj"
 )
 
 type RepositoryStruct  struct { // Used to stored the yaml source file. Not used to respond to the API requester.
@@ -15,12 +16,16 @@ type RepositoryStruct  struct { // Used to stored the yaml source file. Not used
 	Users map[string]string                           // Collection of users role
 	Groups map[string]string                          // Collection of groups role
 	// Following data are used at runtime but not saved. Used to respond to the API.
-	exist bool                      // True if the repo exist.
-	remotes map[string]string       // k: remote name, v: remote url
-	branchConnect map[string]string // k: local branch name, v: remote/branch
+	exist bool                                        // True if the repo exist.
+	remotes map[string]goforjj.PluginRepoRemoteUrl    // k: remote name, v: remote urls
+	branchConnect map[string]string                   // k: local branch name, v: remote/branch
 }
 
-func (r *RepositoryStruct)set(repo *RepoInstanceStruct, remotes, branchConnect map[string]string) *RepositoryStruct {
+func (r *RepositoryStruct)set(
+repo *RepoInstanceStruct,
+remotes map[string]goforjj.PluginRepoRemoteUrl,
+branchConnect map[string]string,
+) *RepositoryStruct {
 	if r == nil {
 		r = new(RepositoryStruct)
 	}
