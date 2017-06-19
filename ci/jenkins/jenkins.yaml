@@ -67,7 +67,7 @@ objects:
     flags:
       seed-job-repo:
         help: "url to the seed job repository. By default, it uses the <YourInfraRepo>. Jobs are defined under job-dsl."
-        default: "{{ .Forjfile.Infra.Get \"remote\" }}"
+        default: "{{ .Forjfile.Infra.GetString \"remote-url\" }}"
       registry-auth:
         help: "List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]"
         secure: true
