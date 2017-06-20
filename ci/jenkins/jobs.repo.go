@@ -77,7 +77,6 @@ func (p *Projects)Generates(instance_name, template_dir, repo_path string, ret *
 			return false, fmt.Errorf("path '%s' is not a directory.", repo_path)
 		}
 	}
-	return true, nil
 
 	tmpl := new(TmplSource)
 	tmpl.Template = "jobs-dsl/job-dsl.tmpl"
