@@ -10,7 +10,6 @@ import (
 	"path"
 	"net/url"
 	"regexp"
-	"fmt"
 )
 
 // return true if instance doesn't exist.
@@ -71,10 +70,18 @@ func (r *JenkinsPlugin)add_projects(req *CreateReq, ret *goforjj.PluginData) (st
 		return true
 	}
 
-	infra_remote := req.Forj.ForjjInfraUpstream
-	ssh_format, _ := regexp.Compile(`^([a-z]+@)?(([a-z.-]+):)(/?\w[\w./-]*)?$`)
+	infra_remote := req.Objects.App[req.Forj.ForjjInstanceName].SeedJobRepo
+	ssh_format, _ := regexp.Compile(`^(https?://)(\w[\w.-]+)((/(\w[\w.-]*)/(\w[\w.-]*))(/\w[\w.-/]*)?)$`)
+	job_path := ""
+	default_jobdsl := false
 	if r := ssh_format.FindStringSubmatch(infra_remote) ; r != nil {
-		infra_remote = fmt.Sprintf("ssh://%s%s/%s", r[1], r[2], r[4])
+		if r[5] == req.Forj.ForjjOrganization && r[6] == req.Forj.ForjjInfra {
+			job_path = "jobs-dsl"
+			default_jobdsl = true
+		} else {
+			infra_remote = r[1] + r[2] + r[4]
+			job_path = r[7]
+		}
 	}
 
 	if v, err := url.Parse(infra_remote) ; err != nil {
@@ -82,11 +89,11 @@ func (r *JenkinsPlugin)add_projects(req *CreateReq, ret *goforjj.PluginData) (st
 		return false
 	} else {
 		if v.Scheme == "" {
-			ret.Errorf("Invalid Remote GIT repository Url '%s'. A scheme must exist.", infra_remote)
+			ret.Errorf("Invalid Remote repository Url '%s'. A scheme must exist.", infra_remote)
 		}
 	}
 	// Initialize JobDSL structure
-	r.yaml.Projects = NewProjects(infra_remote, "jobs-dsl")
+	r.yaml.Projects = NewProjects(req.Forj.ForjjInstanceName, infra_remote, job_path, default_jobdsl)
 
 	// Retrieve list of Repository (projects) to manage
 	for name, prj := range req.Objects.Projects {

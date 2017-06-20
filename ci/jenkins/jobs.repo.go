@@ -11,6 +11,8 @@ import (
 type Projects struct {
 	DslRepo string
 	DslPath string
+	InfraPath string
+	infra_repo bool
 	List map[string]Project
 }
 
@@ -21,10 +23,16 @@ type Project struct {
 	All *Projects
 }
 
-func NewProjects(repo, path string) *Projects {
+func NewProjects(InstanceName, repo, Dslpath string, infra_repo bool) *Projects {
 	p := new(Projects)
-	p.DslPath = path
+	p.DslPath = Dslpath
 	p.DslRepo = repo
+	if infra_repo {
+		p.InfraPath = path.Join("apps", "ci", InstanceName)
+		p.DslPath = "jobs-dsl"
+	}
+
+	p.infra_repo = infra_repo
 	p.List = make(map[string]Project)
 	return p
 }
