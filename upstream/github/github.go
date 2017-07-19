@@ -342,6 +342,7 @@ func (g *GitHubStruct) repos_exists(ret *goforjj.PluginData) (err error) {
 				Exist:         repo_data.exist,
 				Remotes:       repo_data.remotes,
 				BranchConnect: repo_data.branchConnect,
+				Owner:         g.github_source.Organization,
 			}
 		}
 	}
@@ -366,6 +367,7 @@ func (g *GitHubStruct) req_repos_exists(req *UpdateReq, ret *goforjj.PluginData)
 			Exist:         (err == nil),
 			Remotes:       make(map[string]goforjj.PluginRepoRemoteUrl),
 			BranchConnect: make(map[string]string),
+			Owner:         *found_repo.Organization.Name,
 		}
 		if err == nil {
 			r.Remotes["origin"] = goforjj.PluginRepoRemoteUrl{
@@ -438,6 +440,7 @@ func (r *RepositoryStruct) ensure_exists(gws *GitHubStruct, ret *goforjj.PluginD
 			Ssh: *found_repo.SSHURL,
 			Url: *found_repo.HTMLURL,
 		}
+		repo.Owner = *found_repo.Organization.Name
 		ret.Repos[r.Name] = repo
 	} else {
 		repo = goforjj.PluginRepo{
@@ -445,6 +448,7 @@ func (r *RepositoryStruct) ensure_exists(gws *GitHubStruct, ret *goforjj.PluginD
 			Remotes:       make(map[string]goforjj.PluginRepoRemoteUrl),
 			Exist:         true,
 			BranchConnect: make(map[string]string),
+			Owner:         *found_repo.Organization.Name,
 		}
 
 		// TODO: See how to integrate the flow change here to respond the proper branch connect.
