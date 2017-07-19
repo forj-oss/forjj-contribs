@@ -97,10 +97,10 @@ objects:
             default: "https://github.com"
             help: "with remote-type = 'github', Github API Url. By default, it uses public github API."
           repo-owner:
-            default: "{{ $Project = .Current.Name }}{{ .Forjfile.Repos.$Project.Owner }}"
+            default: "{{ $Project := .Current.Name }}{{ (index .Forjfile.Repos $Project).Owner }}"
             help: "with remote-type = 'github', Repository owner. Can be a user or an organization."
           repo:
-            default: ".Current.Name"
+            default: "{{ .Current.Name }}"
             help: "with remote-type = 'github', Repository name."
       git:
         flags:
