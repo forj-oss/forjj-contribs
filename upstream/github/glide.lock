@@ -1,5 +1,5 @@
 hash: 44fd447fa628a8dba044dfc103da968a20199bba4197def8585581373da55b5c
-updated: 2017-06-17T20:25:51.403659154Z
+updated: 2017-07-19T16:06:53.312833041Z
 imports:
 - name: github.com/alecthomas/kingpin
   version: 7f0871f2e17818990e4eed73f9b5c2f429501228
@@ -16,13 +16,13 @@ imports:
   subpackages:
   - trace
 - name: github.com/forj-oss/goforjj
-  version: 10a61a3908c3fb2894f94aa4eed97392fee5b9d3
+  version: 34dcc12d0fefbf7a577809496ca77ec6475c5cc1
 - name: github.com/golang/protobuf
-  version: e325f446bebc2998605911c0a2650d9920361d4a
+  version: 0a4f71a498b7c4812f64969510bcb4eca251e33a
   subpackages:
   - proto
 - name: github.com/google/go-github
-  version: 7a51fb928f52a196d5f31daefb8a489453ef54ff
+  version: d4206f97f4cbd4c357e2b825c886ad7bcacc184c
   subpackages:
   - github
 - name: github.com/google/go-querystring
@@ -46,20 +46,21 @@ imports:
 - name: github.com/pkg/errors
   version: c605e284fe17294bda444b34710735b29d1a9d90
 - name: golang.org/x/net
-  version: 973f3f3bbd50e92b13faa6c53ec16f49b45e851c
+  version: 02ac38e2528ff4adea90f184d71a3faa04b4b1b0
   subpackages:
   - context
+  - context/ctxhttp
   - publicsuffix
 - name: golang.org/x/oauth2
-  version: f047394b6d14284165300fd82dad67edb3a4d7f6
+  version: cce311a261e6fcf29de72ca96827bdb0b7d9c9e6
   subpackages:
   - internal
 - name: golang.org/x/sys
-  version: fb4cac33e3196ff7f507ab9b2d2a44b0142f5b5a
+  version: cd2c276457edda6df7fb04895d3fd6a6add42926
   subpackages:
   - unix
 - name: google.golang.org/appengine
-  version: a2f4131514e563cedfdb6e7d267df9ad48591e93
+  version: ad2570cd3913654e00c5f0183b39d2f998e54046
   subpackages:
   - internal
   - internal/app_identity
@@ -73,5 +74,5 @@ imports:
 - name: gopkg.in/alecthomas/kingpin.v2
   version: 7f0871f2e17818990e4eed73f9b5c2f429501228
 - name: gopkg.in/yaml.v2
-  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+  version: 3b4ad1db5b2a649883ff3782f5f9f6fb52be71af
 testImports: []
