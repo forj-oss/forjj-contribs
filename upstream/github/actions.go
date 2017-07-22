@@ -88,6 +88,8 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
     for k, v := range gws.github_source.Urls {
         ret.Services.Urls[k] = v
     }
+	// Official application API recognized by Forjj
+	ret.Services.Urls["api_url"] = gws.github_source.Urls["github-base-url"]
 
     ret.CommitMessage = fmt.Sprint("Github configuration created.")
     ret.AddFile(path.Join(req.Forj.ForjjInstanceName, github_file))
