@@ -89,12 +89,13 @@ objects:
         help: "Project name"
         required: true
       remote-type:
+        default: "{{ $Project := .Current.Name }}{{ (index .Forjfile.Repos $Project).RemoteType }}"
         help: "Define remote source  type. 'github' is used by default. Support 'git', 'github'."
     groups:
       github:
         flags:
           api-url:
-            default: "https://github.com"
+            default: "{{ $Project := .Current.Name }}{{ (index .Forjfile.Repos $Project).UpstreamAPIUrl }}"
             help: "with remote-type = 'github', Github API Url. By default, it uses public github API."
           repo-owner:
             default: "{{ $Project := .Current.Name }}{{ (index .Forjfile.Repos $Project).Owner }}"
