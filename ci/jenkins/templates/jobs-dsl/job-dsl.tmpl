@@ -1,16 +1,16 @@
 multibranchPipelineJob('{{ .Name }}') {
   branchSources {
-{{ if .Source == github }}\
+{{ if eq .SourceType "github" }}\
       github {
-          apiUri('{{ .APIUri }}')
+          apiUri('{{ .Github.ApiUrl }}')
           includes('*')
-          repoOwner('{{ .RepoOwner }}')
-          repository('{{ .Repository }}')
+          repoOwner('{{ .Github.RepoOwner }}')
+          repository('{{ .Github.Repo }}')
       }
 {{ end }}\
-{{ if .Source == github }}\
+{{ if eq .SourceType "git" }}\
       git {
-          remote('{{ .RemoteUrl }}')
+          remote('{{ .Git.RemoteUrl }}')
           includes('*')
       }
 {{ end }}\

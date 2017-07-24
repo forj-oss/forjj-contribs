@@ -18,9 +18,10 @@ type Projects struct {
 
 type Project struct {
 	Name string
-	Github *GithubStruct
-	Git *GitStruct
-	All *Projects
+	SourceType string
+	Github GithubStruct `yaml:",omitempty"`
+	Git GitStruct       `yaml:",omitempty"`
+	all *Projects
 }
 
 func NewProjects(InstanceName, repo, Dslpath string, infra_repo bool) *Projects {
@@ -40,14 +41,14 @@ func NewProjects(InstanceName, repo, Dslpath string, infra_repo bool) *Projects 
 func (p *Projects)AddGithub(name string, d *GithubStruct) bool {
 	data := new(GithubStruct)
 	data.SetFrom(d)
-	p.List[name] = Project{Name: name, Github: data, All: p}
+	p.List[name] = Project{Name: name, SourceType: "github", Github: *data, all: p}
 	return true
 }
 
 func (p *Projects)AddGit(name string, d *GitStruct) bool {
 	data := new(GitStruct)
 	data.SetFrom(d)
-	p.List[name] = Project{Name: name, Git: data, All: p}
+	p.List[name] = Project{Name: name, SourceType: "git", Git: *data, all: p}
 	return true
 }
 
@@ -83,9 +84,13 @@ func (p *Projects)Generates(instance_name, template_dir, repo_path string, ret *
 	tmpl.Chmod = 0644
 
 	for name, prj := range p.List {
-		tmpl.Generate(prj, template_dir, jobs_dsl_path, name + ".groovy")
+		if err := tmpl.Generate(prj, template_dir, jobs_dsl_path, name + ".groovy") ; err != nil {
+			log.Printf("Unable to generate '%s'. %s",
+				path.Join(jobs_dsl_path, name + ".groovy"), ret.Errorf("%s", err))
+			continue
+		}
 		ret.AddFile(path.Join(instance_name, jobs_dsl_path, name + ".groovy"))
-		log.Printf(ret.StatusAdd("%s generated", path.Join(p.DslRepo, jobs_dsl_path, name + ".groovy")))
+		log.Printf(ret.StatusAdd("Project '%s' (%s) generated", name, path.Join(p.DslPath, name + ".groovy")))
 	}
 	return true, nil
 }
