@@ -74,13 +74,13 @@ func (r *JenkinsPlugin)add_projects(req *CreateReq, ret *goforjj.PluginData) (st
 	ssh_format, _ := regexp.Compile(`^(https?://)(\w[\w.-]+)((/(\w[\w.-]*)/(\w[\w.-]*))(/\w[\w.-/]*)?)$`)
 	job_path := ""
 	default_jobdsl := false
-	if r := ssh_format.FindStringSubmatch(infra_remote) ; r != nil {
-		if r[5] == req.Forj.ForjjOrganization && r[6] == req.Forj.ForjjInfra {
+	if rs := ssh_format.FindStringSubmatch(infra_remote) ; rs != nil {
+		if rs[5] == req.Forj.ForjjOrganization && rs[6] == req.Forj.ForjjInfra {
 			job_path = "jobs-dsl"
 			default_jobdsl = true
 		} else {
-			infra_remote = r[1] + r[2] + r[4]
-			job_path = r[7]
+			infra_remote = rs[1] + rs[2] + rs[4]
+			job_path = rs[7]
 		}
 	}
 
