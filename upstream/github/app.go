@@ -15,13 +15,13 @@ import (
 	"time"
 )
 
-func (a *githubApp) start_server() {
+func (a *GithubApp) start_server() {
 
-	a.server_set()
 	Start := true // Move server to up status
 
 	server_chan := make(chan bool, 1)
 	for {
+		a.server_set()
 		int_sig := make(chan os.Signal, 1)
 		signal.Notify(int_sig, syscall.SIGINT, syscall.SIGTERM)
 
@@ -47,7 +47,7 @@ func (a *githubApp) start_server() {
 		//ln, err := net.Listen("tcp", ":8081")
 		go a.listen_and_serve(ln, server_chan, &Start)
 
-		time.Sleep(2)
+		time.Sleep(2 * time.Millisecond)
 
 		for {
 			_, err = os.Stat(a.socket)
@@ -73,7 +73,7 @@ func (a *githubApp) start_server() {
 	}
 }
 
-func (a *githubApp) listen_and_serve(ln net.Listener, server_chan chan bool, Start *bool) {
+func (a *GithubApp) listen_and_serve(ln net.Listener, server_chan chan bool, Start *bool) {
 	log.Printf("httpd server: Starting service on socket '%s'", a.socket)
 
 	router := NewRouter()
@@ -88,10 +88,13 @@ func (a *githubApp) listen_and_serve(ln net.Listener, server_chan chan bool, Sta
 	server_chan <- *Start
 }
 
-func (a *githubApp) server_set() {
+func (a *GithubApp) server_set() {
 	if _, err := os.Stat(*a.params.socket_path); err != nil {
 		if os.IsNotExist(err) {
-			os.Mkdir(*a.params.socket_path, 0755)
+			if err = os.MkdirAll(*a.params.socket_path, 0755) ; err != nil {
+				kingpin.FatalIfError(err, "Unable to create '%s'\n", *a.params.socket_path)
+			}
+			log.Printf("Path %s created.", *a.params.socket_path)
 		} else {
 			kingpin.FatalIfError(err, "Unable to create '%s'\n", *a.params.socket_path)
 		}

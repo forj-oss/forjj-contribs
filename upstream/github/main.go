@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-var cliApp githubApp
+var cliApp GithubApp
 
 func main() {
 	cliApp.init()

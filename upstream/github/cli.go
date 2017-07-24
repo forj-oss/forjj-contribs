@@ -7,9 +7,10 @@ import (
 	"github.com/forj-oss/goforjj"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/yaml.v2"
+	"log"
 )
 
-type githubApp struct {
+type GithubApp struct {
 	App    *kingpin.Application
 	params Params
 	socket string
@@ -22,11 +23,14 @@ type Params struct {
 	daemon      *bool // Currently not used - Lot of concerns with daemonize in go... Stay in foreground
 }
 
-func (a *githubApp) init() {
+func (a *GithubApp) init() {
 	a.load_plugin_def()
 
 	a.App = kingpin.New("github", "Upstream github plugin for FORJJ. It properly configure github.com or entreprise with organisation/repos")
-	a.App.Version("0.1")
+	version := "0.1"
+	if version != "" {
+		a.App.Version(version)
+	}
 
 	// true to create the Infra
 	daemon := a.App.Command("service", "github REST API service")
@@ -36,9 +40,10 @@ func (a *githubApp) init() {
 	a.params.daemon = daemon.Flag("daemon", "Start process in background like a daemon").Short('d').Bool()
 }
 
-func (a *githubApp) load_plugin_def() {
+func (a *GithubApp) load_plugin_def() {
 	yaml.Unmarshal([]byte(YamlDesc), &a.Yaml)
 	if a.Yaml.Runtime.Service.Socket == "" {
 		a.Yaml.Runtime.Service.Socket = "github.sock"
+		log.Printf("Set default socket file: %s", a.Yaml.Runtime.Service.Socket)
 	}
 }
