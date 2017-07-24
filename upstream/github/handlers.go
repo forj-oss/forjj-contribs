@@ -16,9 +16,9 @@ import (
 // PluginData response object creator
 func newPluginData() *goforjj.PluginData {
 	var r goforjj.PluginData = goforjj.PluginData{
-		Repos:     make(map[string]goforjj.PluginRepo),
-		Options:   make(map[string]goforjj.PluginOption),
-		Services:  goforjj.PluginService{make(map[string]string)},
+		Repos:    make(map[string]goforjj.PluginRepo),
+		Options:  make(map[string]goforjj.PluginOption),
+		Services: goforjj.PluginService{make(map[string]string)},
 	}
 	return &r
 }

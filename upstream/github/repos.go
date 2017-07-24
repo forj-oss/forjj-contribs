@@ -1,37 +1,37 @@
 package main
 
 import (
-	"log"
-	"strings"
 	"fmt"
-	"strconv"
 	"github.com/forj-oss/goforjj"
+	"log"
+	"strconv"
+	"strings"
 )
 
-type RepositoryStruct  struct { // Used to stored the yaml source file. Not used to respond to the API requester.
-	Name string                                       // Name of the Repo
-	Flow string                                       // Flow applied on the repo.
-	Description string                                // Title in github repository
-	IssueTracker bool        `yaml:"issue_tracker"`   // Issue tracker option
-	Users map[string]string                           // Collection of users role
-	Groups map[string]string                          // Collection of groups role
+type RepositoryStruct struct { // Used to stored the yaml source file. Not used to respond to the API requester.
+	Name         string            // Name of the Repo
+	Flow         string            // Flow applied on the repo.
+	Description  string            // Title in github repository
+	IssueTracker bool              `yaml:"issue_tracker"` // Issue tracker option
+	Users        map[string]string // Collection of users role
+	Groups       map[string]string // Collection of groups role
 	// Following data are used at runtime but not saved. Used to respond to the API.
-	exist bool                                        // True if the repo exist.
-	remotes map[string]goforjj.PluginRepoRemoteUrl    // k: remote name, v: remote urls
-	branchConnect map[string]string                   // k: local branch name, v: remote/branch
+	exist         bool                                   // True if the repo exist.
+	remotes       map[string]goforjj.PluginRepoRemoteUrl // k: remote name, v: remote urls
+	branchConnect map[string]string                      // k: local branch name, v: remote/branch
 }
 
-func (r *RepositoryStruct)set(
-repo *RepoInstanceStruct,
-remotes map[string]goforjj.PluginRepoRemoteUrl,
-branchConnect map[string]string,
+func (r *RepositoryStruct) set(
+	repo *RepoInstanceStruct,
+	remotes map[string]goforjj.PluginRepoRemoteUrl,
+	branchConnect map[string]string,
 ) *RepositoryStruct {
 	if r == nil {
 		r = new(RepositoryStruct)
 	}
 	r.Name = repo.Name
 	r.Description = repo.Title
-	if v, err := strconv.ParseBool(repo.Issue_tracker) ; err == nil {
+	if v, err := strconv.ParseBool(repo.Issue_tracker); err == nil {
 		r.IssueTracker = v
 		log.Printf("Issue_tracker '%s' => %t", repo.Issue_tracker, v)
 	} else {
@@ -47,7 +47,7 @@ branchConnect map[string]string,
 	return r
 }
 
-func (r *RepositoryStruct)AddUsers(users string) {
+func (r *RepositoryStruct) AddUsers(users string) {
 	if r.Users == nil {
 		r.Users = make(map[string]string)
 	}
@@ -55,11 +55,11 @@ func (r *RepositoryStruct)AddUsers(users string) {
 		user_role_array := strings.Split(user_role, ":")
 		user := ""
 		role := ""
-		if users_num := len(user_role_array) ; users_num >= 2 {
+		if users_num := len(user_role_array); users_num >= 2 {
 			user = user_role_array[0]
 			role = user_role_array[1]
 		} else {
-			if  users_num == 1 {
+			if users_num == 1 {
 				user = user_role_array[0]
 			}
 		}
@@ -75,7 +75,7 @@ func (r *RepositoryStruct)AddUsers(users string) {
 	}
 }
 
-func (r *RepositoryStruct)AddGroups(groups string) {
+func (r *RepositoryStruct) AddGroups(groups string) {
 	if r.Groups == nil {
 		r.Groups = make(map[string]string)
 	}
@@ -83,11 +83,11 @@ func (r *RepositoryStruct)AddGroups(groups string) {
 		group_role_array := strings.Split(group_role, ":")
 		group := ""
 		role := ""
-		if groups_num := len(group_role_array) ; groups_num >= 2 {
+		if groups_num := len(group_role_array); groups_num >= 2 {
 			group = group_role_array[0]
 			role = group_role_array[1]
 		} else {
-			if  groups_num == 1 {
+			if groups_num == 1 {
 				group = group_role_array[0]
 			}
 		}
@@ -104,7 +104,7 @@ func (r *RepositoryStruct)AddGroups(groups string) {
 
 }
 
-func (r *RepositoryStruct)Update(repo *RepoInstanceStruct) (count int){
+func (r *RepositoryStruct) Update(repo *RepoInstanceStruct) (count int) {
 	if r.Description != repo.Title {
 		r.Description = repo.Title
 		count++
