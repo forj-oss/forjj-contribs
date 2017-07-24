@@ -43,7 +43,7 @@ func (t *FinalImageStruct)UpdateFrom(d *FinalImageStruct, org string) (status bo
 	return SetOnceIfSet(&t.RegistryRepoName, org) ||status
 }
 
-// Set the value if the source is set
+// SetIfSet Set the value if the source is set
 func SetIfSet(s *string, source string) (_ bool) {
     if source == "" {
         return
@@ -55,7 +55,7 @@ func SetIfSet(s *string, source string) (_ bool) {
     return
 }
 
-// Set the value originally empty from source if set.
+// SetOnceIfSet Set the value originally empty from source if set.
 func SetOnceIfSet(s *string, source string) (_ bool){
     if *s != "" || source == "" {
         return

@@ -17,11 +17,11 @@ import (
 
 func (a *JenkinsApp) start_server() {
 
-	a.server_set()
 	Start := true // Move server to up status
 
 	server_chan := make(chan bool, 1)
 	for {
+		a.server_set()
 		int_sig := make(chan os.Signal, 1)
 		signal.Notify(int_sig, syscall.SIGINT, syscall.SIGTERM)
 
@@ -47,7 +47,7 @@ func (a *JenkinsApp) start_server() {
 		//ln, err := net.Listen("tcp", ":8081")
 		go a.listen_and_serve(ln, server_chan, &Start)
 
-		time.Sleep(2)
+		time.Sleep(2 * time.Millisecond)
 
 		for {
 			_, err = os.Stat(a.socket)
@@ -91,7 +91,7 @@ func (a *JenkinsApp) listen_and_serve(ln net.Listener, server_chan chan bool, St
 func (a *JenkinsApp) server_set() {
 	if _, err := os.Stat(*a.params.socket_path); err != nil {
 		if os.IsNotExist(err) {
-			os.Mkdir(*a.params.socket_path, 0755)
+			os.MkdirAll(*a.params.socket_path, 0755)
 		} else {
 			kingpin.FatalIfError(err, "Unable to create '%s'\n", *a.params.socket_path)
 		}

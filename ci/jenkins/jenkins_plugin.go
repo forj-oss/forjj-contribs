@@ -30,6 +30,7 @@ type DeployApp struct {
 type ForjjStruct struct {
     InstanceName string
     OrganizationName string
+	InfraUpstream string
 }
 
 // Used for the jenkins yaml source and generate template data.
@@ -40,6 +41,7 @@ type YamlJenkins struct {
     Features []string
     Dockerfile DockerfileStruct
     JenkinsImage FinalImageStruct
+	Projects *Projects
 }
 
 /*type SettingsStruct struct {
@@ -61,6 +63,7 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
 	instance := r.Forj.ForjjInstanceName
     p.yaml.Forjj.InstanceName = instance
     p.yaml.Forjj.OrganizationName = r.Forj.ForjjOrganization
+	p.yaml.Forjj.InfraUpstream = r.Forj.ForjjInfraUpstream
 
 	if _, found := r.Objects.App[instance] ; !found {
 		ret.Errorf("Request format issue. Unable to find the jenkins instance '%s'", instance)
@@ -102,7 +105,12 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
 	// Initialize Jenkins Image data and set default values
 	p.yaml.JenkinsImage.SetFrom(&jenkins_instance.FinalImageStruct, r.Forj.ForjjOrganization)
 
-    return true
+	if ! p.add_projects(r, ret) {
+		return
+	}
+
+	status = true
+	return
 }
 
 func (p *JenkinsPlugin) DefineDeployCommand() error{
