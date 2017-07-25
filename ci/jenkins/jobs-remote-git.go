@@ -1,6 +1,6 @@
 package main
 
-func (t *GitStruct)SetFrom(d *GitStruct) bool {
+func (t *GitStruct) SetFrom(d *GitStruct) bool {
 	if t == nil {
 		return false
 	}
@@ -8,7 +8,7 @@ func (t *GitStruct)SetFrom(d *GitStruct) bool {
 	return true
 }
 
-func (t *GitStruct)UpdateFrom(d *GitStruct) bool {
+func (t *GitStruct) UpdateFrom(d *GitStruct) bool {
 	if t == nil {
 		return false
 	}
@@ -16,6 +16,6 @@ func (t *GitStruct)UpdateFrom(d *GitStruct) bool {
 	return true
 }
 
-func (t *GitStruct)GetUpstream() string {
+func (t *GitStruct) GetUpstream() string {
 	return t.RemoteUrl
 }

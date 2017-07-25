@@ -6,9 +6,9 @@ package main
 import (
 	"github.com/forj-oss/goforjj"
 	"log"
+	"net/url"
 	"os"
 	"path"
-	"net/url"
 	"regexp"
 )
 
@@ -37,7 +37,7 @@ func (r *CreateReq) check_source_existence(ret *goforjj.PluginData) (p *JenkinsP
 }
 
 // We assume template source file is loaded.
-func (r *JenkinsPlugin)create_jenkins_sources(instance_name string, ret *goforjj.PluginData) (status bool) {
+func (r *JenkinsPlugin) create_jenkins_sources(instance_name string, ret *goforjj.PluginData) (status bool) {
 
 	if err := r.DefineSources(); err != nil {
 		log.Printf(ret.Errorf("%s", err))
@@ -45,16 +45,16 @@ func (r *JenkinsPlugin)create_jenkins_sources(instance_name string, ret *goforjj
 	}
 
 	log.Print("Start copying source files...")
-	if ! r.copy_source_files(instance_name, ret) {
+	if !r.copy_source_files(instance_name, ret) {
 		return
 	}
 
 	log.Print("Start Generating source files...")
-	if ! r.generate_source_files(instance_name, ret) {
+	if !r.generate_source_files(instance_name, ret) {
 		return
 	}
 
-	if ! r.generate_jobsdsl(instance_name, ret) {
+	if !r.generate_jobsdsl(instance_name, ret) {
 		return
 	}
 
@@ -63,7 +63,7 @@ func (r *JenkinsPlugin)create_jenkins_sources(instance_name string, ret *goforjj
 }
 
 // add_projects add project data in the jenkins.yaml file
-func (r *JenkinsPlugin)add_projects(req *CreateReq, ret *goforjj.PluginData) (status bool) {
+func (r *JenkinsPlugin) add_projects(req *CreateReq, ret *goforjj.PluginData) (status bool) {
 	if req.Forj.ForjjInfraUpstream == "" {
 		ret.StatusAdd("Unable to add a new project without a remote GIT repository. Jenkins JobDSL requirement. " +
 			"To enable this feature, add a remote GIT to your infra --infra-upstream or define the JobDSL Repository to clone.")
@@ -74,7 +74,7 @@ func (r *JenkinsPlugin)add_projects(req *CreateReq, ret *goforjj.PluginData) (st
 	ssh_format, _ := regexp.Compile(`^(https?://)(\w[\w.-]+)((/(\w[\w.-]*)/(\w[\w.-]*))(/\w[\w.-/]*)?)$`)
 	job_path := ""
 	default_jobdsl := false
-	if rs := ssh_format.FindStringSubmatch(infra_remote) ; rs != nil {
+	if rs := ssh_format.FindStringSubmatch(infra_remote); rs != nil {
 		if rs[5] == req.Forj.ForjjOrganization && rs[6] == req.Forj.ForjjInfra {
 			job_path = "jobs-dsl"
 			default_jobdsl = true
@@ -84,7 +84,7 @@ func (r *JenkinsPlugin)add_projects(req *CreateReq, ret *goforjj.PluginData) (st
 		}
 	}
 
-	if v, err := url.Parse(infra_remote) ; err != nil {
+	if v, err := url.Parse(infra_remote); err != nil {
 		ret.Errorf("Infra remote URL issue. %s", err)
 		return false
 	} else {
@@ -110,11 +110,11 @@ func (r *JenkinsPlugin)add_projects(req *CreateReq, ret *goforjj.PluginData) (st
 
 // generate_jobsdsl generate any missing job-dsl source file.
 // TODO: Support for different Repository path that Forjj have to checkout appropriately.
-func (p *JenkinsPlugin)generate_jobsdsl(instance_name string, ret *goforjj.PluginData)(status bool) {
+func (p *JenkinsPlugin) generate_jobsdsl(instance_name string, ret *goforjj.PluginData) (status bool) {
 	if p.yaml.Projects == nil {
 		return true // Nothing to do. But it is acceptable as not CORE.
 	}
-	if ok, err := p.yaml.Projects.Generates(instance_name, p.template_dir, p.source_path, ret) ; err != nil {
+	if ok, err := p.yaml.Projects.Generates(instance_name, p.template_dir, p.source_path, ret); err != nil {
 		log.Print(ret.Errorf("%s", err))
 	} else {
 		status = ok

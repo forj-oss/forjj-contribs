@@ -18,10 +18,10 @@ type JenkinsApp struct {
 }
 
 type Params struct {
-	socket_file *string
-	socket_path *string
+	socket_file  *string
+	socket_path  *string
 	template_dir *string
-	daemon      *bool // Currently not used - Lot of concerns with daemonize in go... Stay in foreground
+	daemon       *bool // Currently not used - Lot of concerns with daemonize in go... Stay in foreground
 }
 
 func (a *JenkinsApp) init() {

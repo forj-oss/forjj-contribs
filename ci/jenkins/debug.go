@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/kr/text"
 	"fmt"
+	"github.com/kr/text"
 )
 
-func (r *CreateReq)String() string {
+func (r *CreateReq) String() string {
 	txt := "Forj\n"
 	txt += text.Indent(fmt.Sprintf("debug : %s\n", r.Forj.Debug), "  ")
 	txt += text.Indent(fmt.Sprintf("Infra : %s\n", r.Forj.ForjjInfra), "  ")
