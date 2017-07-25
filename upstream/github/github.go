@@ -435,36 +435,33 @@ func (r *RepositoryStruct) ensure_exists(gws *GitHubStruct, ret *goforjj.PluginD
 	}
 
 	// TODO: Add github flow driver for repos management
-	if repo, found := ret.Repos[r.Name]; found {
-		repo.Remotes["origin"] = goforjj.PluginRepoRemoteUrl{
-			Ssh: *found_repo.SSHURL,
-			Url: *found_repo.HTMLURL,
-		}
-		repo.Owner = *found_repo.Organization.Name
-		ret.Repos[r.Name] = repo
-	} else {
+	repo, found := ret.Repos[r.Name]
+	if !found {
 		repo = goforjj.PluginRepo{
 			Name:          r.Name,
 			Remotes:       make(map[string]goforjj.PluginRepoRemoteUrl),
 			Exist:         true,
 			BranchConnect: make(map[string]string),
-			Owner:         *found_repo.Organization.Name,
 		}
-
-		// TODO: See how to integrate the flow change here to respond the proper branch connect.
-		repo.Remotes["origin"] = goforjj.PluginRepoRemoteUrl{
-			Ssh: *found_repo.SSHURL,
-			Url: *found_repo.HTMLURL,
-		}
-		repo.BranchConnect["master"] = "origin/master"
-		if found_repo.Parent != nil {
-			repo.Remotes["upstream"] = goforjj.PluginRepoRemoteUrl{
-				Ssh: *found_repo.Parent.SSHURL,
-				Url: *found_repo.Parent.HTMLURL,
-			}
-		}
-		ret.Repos[r.Name] = repo
 	}
+
+	// TODO: See how to integrate the flow change here to respond the proper branch connect.
+	repo.BranchConnect["master"] = "origin/master"
+	if found_repo.Parent != nil {
+		repo.Remotes["upstream"] = goforjj.PluginRepoRemoteUrl{
+			Ssh: *found_repo.Parent.SSHURL,
+			Url: *found_repo.Parent.HTMLURL,
+		}
+	}
+
+	repo.Remotes["origin"] = goforjj.PluginRepoRemoteUrl{
+		Ssh: *found_repo.SSHURL,
+		Url: *found_repo.HTMLURL,
+	}
+
+	repo.Owner = gws.github_source.Organization
+
+	ret.Repos[r.Name] = repo
 	return nil
 }
 
