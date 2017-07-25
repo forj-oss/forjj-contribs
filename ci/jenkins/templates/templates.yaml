@@ -6,6 +6,7 @@ features:
   - "feature:seed-job"
   - "feature:basic-security"
   - "feature:tcp-slave-agent-port"
+  - "feature:jenkins-pipeline"
   deploy:
     docker:
     - "feature:yet-another-docker-plugin"
