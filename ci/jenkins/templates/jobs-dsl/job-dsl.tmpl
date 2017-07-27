@@ -1,4 +1,5 @@
 multibranchPipelineJob('{{ .Name }}') {
+  description('Folder for Project {{ .Name }} generated and maintained by Forjj. To update it use forjj update')
   branchSources {
 {{ if eq .SourceType "github" }}\
       github {
