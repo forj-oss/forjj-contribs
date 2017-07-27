@@ -9,6 +9,12 @@ import (
 	"path"
 )
 
+type JenkinsPluginModel struct {
+	Source YamlJenkins
+}
+
+var JP_Model *JenkinsPluginModel
+
 type JenkinsPlugin struct {
 	yaml          YamlJenkins
 	source_path   string
