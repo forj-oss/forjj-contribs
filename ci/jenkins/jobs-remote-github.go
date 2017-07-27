@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func (t *GithubStruct)SetFrom(d *GithubStruct) bool {
+func (t *GithubStruct) SetFrom(d *GithubStruct) bool {
 	if t == nil {
 		return false
 	}
@@ -12,7 +12,7 @@ func (t *GithubStruct)SetFrom(d *GithubStruct) bool {
 	return true
 }
 
-func (t *GithubStruct)UpdateFrom(d *GithubStruct) bool {
+func (t *GithubStruct) UpdateFrom(d *GithubStruct) bool {
 	if t == nil {
 		return false
 	}
@@ -22,6 +22,6 @@ func (t *GithubStruct)UpdateFrom(d *GithubStruct) bool {
 	return true
 }
 
-func (t *GithubStruct)GetUpstream() string {
+func (t *GithubStruct) GetUpstream() string {
 	return fmt.Sprintf("%s/%s/%s", t.ApiUrl, t.RepoOwner, t.Repo)
 }
