@@ -9,6 +9,12 @@ import (
 	"path"
 )
 
+type JenkinsPluginModel struct {
+	Source YamlJenkins
+}
+
+var JP_Model *JenkinsPluginModel
+
 type JenkinsPlugin struct {
 	yaml          YamlJenkins
 	source_path   string
@@ -31,17 +37,6 @@ type ForjjStruct struct {
 	InstanceName     string
 	OrganizationName string
 	InfraUpstream    string
-}
-
-// Used for the jenkins yaml source and generate template data.
-type YamlJenkins struct {
-	Forjj ForjjStruct
-	// Settings SettingsStruct
-	Deploy       DeployApp
-	Features     []string
-	Dockerfile   DockerfileStruct
-	JenkinsImage FinalImageStruct
-	Projects     *Projects
 }
 
 /*type SettingsStruct struct {

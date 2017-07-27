@@ -9,6 +9,7 @@ import (
 	"path"
 	"strings"
 	"text/template"
+	"bytes"
 )
 
 const template_file = "templates.yaml"
@@ -48,6 +49,38 @@ type TmplSource struct {
 	Source   string
 }
 
+// Model creates the Model data used by gotemplates.
+// The model is not updated until call to CleanModel()
+func (p *JenkinsPlugin) Model() *JenkinsPluginModel {
+	if JP_Model != nil {
+		return JP_Model
+	}
+	JP_Model = new(JenkinsPluginModel)
+	JP_Model.Source = p.yaml
+	return JP_Model
+}
+
+func (p *JenkinsPlugin) CleanModel() {
+	JP_Model = nil
+}
+
+func Evaluate(value string, data interface{}) (string, error) {
+	var doc bytes.Buffer
+	tmpl := template.New("jenkins_plugin_data")
+
+
+	if ! strings.Contains(value, "{{") { return value, nil }
+	if _, err := tmpl.Parse(value) ; err != nil {
+		return "", err
+	}
+	if err := tmpl.Execute(&doc, data) ; err != nil {
+		return "", err
+	}
+	ret := doc.String()
+	log.Printf("'%s' were interpreted to '%s'", value, ret)
+	return ret, nil
+}
+
 //Load templates definition file from template dir.
 func (p *JenkinsPlugin) LoadTemplatesDef() error {
 	if d, err := ioutil.ReadFile(p.template_file); err != nil {
@@ -65,14 +98,29 @@ func (p *JenkinsPlugin) DefineSources() error {
 	// load all features
 	p.yaml.Features = make([]string, 0, 5)
 	for _, f := range p.templates_def.Features.Common {
-		p.yaml.Features = append(p.yaml.Features, f)
+		if v, err := Evaluate(f, p.Model()) ; err != nil {
+			return fmt.Errorf("Unable to evaluate '%s'. %s", f, err)
+		} else {
+			if v == "" {
+				log.Printf("INFO! No feature defined with '%s'.", f)
+				continue
+			}
+			f = v
+		}
+		if f != "" {
+			p.yaml.Features = append(p.yaml.Features, f)
+		}
 	}
 
 	if deploy_features, ok := p.templates_def.Features.Deploy[p.yaml.Deploy.Deployment.To]; ok {
 		for _, f := range deploy_features {
-			p.yaml.Features = append(p.yaml.Features, f)
+			if f != "" {
+				p.yaml.Features = append(p.yaml.Features, f)
+			}
 		}
 	}
+
+	p.CleanModel()
 
 	// TODO: Load additionnal features from maintainer source path or file. This will permit adding more features and let the plugin manage generated path from update task.
 

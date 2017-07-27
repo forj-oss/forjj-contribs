@@ -7,6 +7,9 @@ features:
   - "feature:basic-security"
   - "feature:tcp-slave-agent-port"
   - "feature:jenkins-pipeline"
+  - "plugin:git:3.4.1"
+  - "{{ if .Source.ProjectsHasSource \"github\" }}plugin:github-branch-source:2.2.1{{ end }}"
+  - "{{ if .Source.ProjectsHasSource \"bitbucket\" }}plugin:cloudbees-bitbucket-branch-source:2.2.2{{ end }}"
   deploy:
     docker:
     - "feature:yet-another-docker-plugin"
