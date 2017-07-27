@@ -9,7 +9,6 @@ import (
 	"path"
 	"strings"
 	"text/template"
-	"forjj-modules/trace"
 	"bytes"
 )
 
@@ -78,7 +77,7 @@ func Evaluate(value string, data interface{}) (string, error) {
 		return "", err
 	}
 	ret := doc.String()
-	gotrace.Trace("'%s' were interpreted to '%s'", value, ret)
+	log.Printf("'%s' were interpreted to '%s'", value, ret)
 	return ret, nil
 }
 
@@ -103,17 +102,21 @@ func (p *JenkinsPlugin) DefineSources() error {
 			return fmt.Errorf("Unable to evaluate '%s'. %s", f, err)
 		} else {
 			if v == "" {
-				gotrace.Trace("'%s' has been evaluated to '%s'.", f, v)
+				log.Printf("INFO! No feature defined with '%s'.", f)
 				continue
 			}
 			f = v
 		}
-		p.yaml.Features = append(p.yaml.Features, f)
+		if f != "" {
+			p.yaml.Features = append(p.yaml.Features, f)
+		}
 	}
 
 	if deploy_features, ok := p.templates_def.Features.Deploy[p.yaml.Deploy.Deployment.To]; ok {
 		for _, f := range deploy_features {
-			p.yaml.Features = append(p.yaml.Features, f)
+			if f != "" {
+				p.yaml.Features = append(p.yaml.Features, f)
+			}
 		}
 	}
 

@@ -2,4 +2,3 @@
 
 {{ range .Features }}{{ . }}
 {{ end }}\
-plugin:git:3.0.0

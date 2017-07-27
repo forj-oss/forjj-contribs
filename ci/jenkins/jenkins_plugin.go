@@ -39,17 +39,6 @@ type ForjjStruct struct {
 	InfraUpstream    string
 }
 
-// Used for the jenkins yaml source and generate template data.
-type YamlJenkins struct {
-	Forjj ForjjStruct
-	// Settings SettingsStruct
-	Deploy       DeployApp
-	Features     []string
-	Dockerfile   DockerfileStruct
-	JenkinsImage FinalImageStruct
-	Projects     *Projects
-}
-
 /*type SettingsStruct struct {
 }*/
 
