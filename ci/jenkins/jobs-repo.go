@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
 )
 
 type Projects struct {
@@ -84,6 +85,7 @@ func (p *Projects) Generates(instance_name, template_dir, repo_path string, ret 
 	tmpl.Chmod = 0644
 
 	for name, prj := range p.List {
+		name = strings.Replace(name, "-", "_",-1)
 		if err := tmpl.Generate(prj, template_dir, jobs_dsl_path, name+".groovy"); err != nil {
 			log.Printf("Unable to generate '%s'. %s",
 				path.Join(jobs_dsl_path, name+".groovy"), ret.Errorf("%s", err))
