@@ -77,7 +77,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 	ret.StatusAdd("Environment checked. Ready to be created.")
 
 	// Save gws.github_source.
-	if err := gws.save_yaml(path.Join(source_path, github_file)); err != nil {
+	if _, err := gws.save_yaml(path.Join(source_path, github_file)); err != nil {
 		ret.Errorf("%s", err)
 		return
 	}
@@ -147,29 +147,29 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 
 	ret.StatusAdd("Environment checked. Ready to be updated.")
 
-	Updated := gws.update_yaml_data(req, ret)
+	gws.update_yaml_data(req, ret)
 
 	// Returns the collection of all managed repository with their existence flag.
 	gws.repos_exists(ret)
 
-	if !Updated {
-		log.Printf(ret.StatusAdd("No update detected."))
-		return
-	}
-
 	// Save gws.github_source.
-	if err := gws.save_yaml(path.Join(source_path, github_file)); err != nil {
+	if Updated, err := gws.save_yaml(path.Join(source_path, github_file)); err != nil {
 		ret.Errorf("%s", err)
 		return
-	}
-	log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(instance, github_file)))
+	} else {
+		if !Updated {
+			log.Printf(ret.StatusAdd("No update detected."))
+			return
+		} else {
+			log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(instance, github_file)))
+			for k, v := range gws.github_source.Urls {
+				ret.Services.Urls[k] = v
+			}
 
-	for k, v := range gws.github_source.Urls {
-		ret.Services.Urls[k] = v
+			ret.CommitMessage = fmt.Sprint("Github configuration updated.")
+			ret.AddFile(path.Join(instance, github_file))
+		}
 	}
-
-	ret.CommitMessage = fmt.Sprint("Github configuration updated.")
-	ret.AddFile(path.Join(instance, github_file))
 
 	return
 }
