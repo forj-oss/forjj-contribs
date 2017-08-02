@@ -37,6 +37,7 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         only-for-actions: ["add", "change"]
         help: "Name of the Infra repository to use in github if requested."
       token:
+        cli-exported-to-actions: ["create", "update", "maintain"]
         only-for-actions: ["add", "change"]
         help: "github token to access. This token must authorize organization level access."
         required: true
