@@ -26,7 +26,7 @@ fi
 
 MOUNT="-v $GOPATH:/go -w /go/src/$BUILD_ENV_PROJECT_REL"
 
-if [ -t 1 ]
+if [[ -t 1 ]] && [[ -t 0 ]]
 then
    TTY="-t"
 fi
