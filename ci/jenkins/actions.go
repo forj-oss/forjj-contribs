@@ -60,6 +60,7 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 
 	status := p.update_from(req, ret)
 	status = p.update_jenkins_sources(req.Forj.ForjjInstanceName, ret) || status
+	status = p.add_projects(r, ret) || status
 	status = p.save_yaml(ret) || status
 
 	if ! status {
