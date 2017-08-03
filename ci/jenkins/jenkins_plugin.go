@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"path"
+	"crypto/md5"
+	"bytes"
 )
 
 type JenkinsPluginModel struct {
@@ -156,10 +158,16 @@ func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData) (stat
 func (p *JenkinsPlugin) save_yaml(ret *goforjj.PluginData) (status bool) {
 	file := path.Join(p.source_path, jenkins_file)
 
+	orig_md5 , _:= md5sum(file)
 	d, err := yaml.Marshal(&p.yaml)
 	if err != nil {
 		ret.Errorf("Unable to encode forjj-jenkins configuration data in yaml. %s", err)
 		return
+	}
+	final_md5 := md5.New().Sum(d)
+
+	if bytes.Equal(orig_md5, final_md5) {
+		return false
 	}
 
 	if err := ioutil.WriteFile(file, d, 0644); err != nil {
