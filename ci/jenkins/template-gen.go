@@ -5,11 +5,13 @@ func (t *DeployStruct) SetFrom(d *DeployStruct) (status bool) {
 		return false
 	}
 	status = SetIfSet(&t.ServiceAddr, d.ServiceAddr)
+	status = SetOnceIfSet(&t.To, d.To) || status
 	return SetIfSet(&t.ServicePort, d.ServicePort) || status
 }
 
 func (t *DeployStruct) UpdateFrom(d *DeployStruct) (status bool) {
 	status = SetIfSet(&t.ServiceAddr, d.ServiceAddr)
+	status = SetOnceIfSet(&t.To, d.To) || status
 	return SetIfSet(&t.ServicePort, d.ServicePort) || status
 }
 
