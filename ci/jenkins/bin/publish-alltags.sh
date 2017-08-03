@@ -26,6 +26,11 @@ then
    echo "VERSION or releases.lst files not found. Please move to the repo root dir and call back this script."
    exit 1
 fi
+if [ "$(git rev-parse --abbrev-ref HEAD)" != master ]
+then
+   echo "You must be on master branch."
+   exit 1
+fi
 
 case "$1" in
   release-it )
