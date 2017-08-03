@@ -118,6 +118,9 @@ func (r *RepositoryStruct) IsValid(repo_name string) (err error) {
 	return
 }
 
+// TODO: Accept Name empty or different. Rename use case. https://github.com/forj-oss/forjj-contribs/issues/59
+
+// IsValid verify if a repo given is valid or should be rejected following rules.
 func (r *RepoInstanceStruct) IsValid(repo_name string, ret *goforjj.PluginData) (valid bool) {
 	if r.Name == "" {
 		ret.Errorf("Invalid repository '%s'. Name is empty.", repo_name)

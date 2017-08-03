@@ -3,11 +3,16 @@
 package main
 
 import (
+	"fmt"
 	"github.com/forj-oss/goforjj"
 	"log"
 )
 
-func (g *GitHubStruct) update_yaml_data(req *UpdateReq, ret *goforjj.PluginData) bool {
+func (g *GitHubStruct) update_yaml_data(req *UpdateReq, ret *goforjj.PluginData) (bool, error) {
+	if g.github_source.Urls == nil {
+		return false, fmt.Errorf("Internal Error. Urls was not set.")
+	}
+
 	if g.github_source.Repos == nil {
 		g.github_source.Repos = make(map[string]RepositoryStruct)
 	}
@@ -46,10 +51,15 @@ func (g *GitHubStruct) update_yaml_data(req *UpdateReq, ret *goforjj.PluginData)
 		g.AddUser(name, &details)
 	}
 
+	log.Printf("Github manage %d user(s) at Organization level.", len(g.github_source.Users))
+
 	for name, details := range req.Objects.Group {
 		g.AddGroup(name, &details)
 	}
-	return true
+
+	log.Printf("Github manage %d group(s) at Organization level.", len(g.github_source.Groups))
+
+	return true, nil
 }
 
 // Add a new repository to be managed by github plugin.

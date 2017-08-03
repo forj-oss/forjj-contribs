@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func (g *GitHubStruct) create_yaml_data(req *CreateReq) error {
+func (g *GitHubStruct) create_yaml_data(req *CreateReq, ret *goforjj.PluginData) error {
 	// Write the github.yaml source file.
 	if g.github_source.Urls == nil {
 		return fmt.Errorf("Internal Error. Urls was not set.")
@@ -21,19 +21,28 @@ func (g *GitHubStruct) create_yaml_data(req *CreateReq) error {
 	g.github_source.Groups = make(map[string]TeamStruct)
 
 	// Add all repos
-	for _, repo := range req.Objects.Repo {
+	for name, repo := range req.Objects.Repo {
+		if !repo.IsValid(name, ret) {
+			ret.StatusAdd("Warning!!! Invalid repository '%s' requested. Ignored.")
+			continue
+		}
 		g.SetRepo(&repo)
 	}
 
-	log.Printf("Github manage %d repository(ies)", len(g.github_source.Repos))
+	log.Printf("Github manage %d repository(ies).", len(g.github_source.Repos))
 
 	for name, details := range req.Objects.User {
 		g.AddUser(name, &details)
 	}
 
+	log.Printf("Github manage %d user(s) at Organization level.", len(g.github_source.Users))
+
 	for name, details := range req.Objects.Group {
 		g.AddGroup(name, &details)
 	}
+
+	log.Printf("Github manage %d group(s) at Organization level.", len(g.github_source.Groups))
+
 	return nil
 }
 

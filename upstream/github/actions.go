@@ -47,8 +47,8 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 	}
 
 	// Build gws.github_source yaml structure.
-	if err := gws.create_yaml_data(req); err != nil {
-		ret.Errorf("%s", err)
+	if err := gws.create_yaml_data(req, ret); err != nil {
+		ret.Errorf("Unable to create. %s", err)
 		return
 	}
 
@@ -147,7 +147,10 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 
 	ret.StatusAdd("Environment checked. Ready to be updated.")
 
-	gws.update_yaml_data(req, ret)
+	if _, err := gws.update_yaml_data(req, ret); err != nil {
+		ret.Errorf("Unable to update. %s", err)
+		return
+	}
 
 	// Returns the collection of all managed repository with their existence flag.
 	gws.repos_exists(ret)
