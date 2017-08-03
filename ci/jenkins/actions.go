@@ -34,7 +34,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 	return
 }
 
-// Do updating plugin task
+// DoUpdate is the update plugin task
 // req_data contains the request data posted by forjj. Structure generated from 'jenkins.yaml'.
 // ret_data contains the response structure to return back to forjj.
 // forjj-jenkins.yaml is loaded by default.
@@ -51,6 +51,12 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 	if !p.load_yaml(ret) {
 		return
 	}
+
+	// TODO: Use the GithubStruct.UpdateFrom(...)
+	instance := req.Forj.ForjjInstanceName
+	p.yaml.Forjj.InstanceName = instance
+	p.yaml.Forjj.OrganizationName = req.Forj.ForjjOrganization
+	p.yaml.Forjj.InfraUpstream = req.Forj.ForjjInfraUpstream
 
 	status := p.update_from(req, ret)
 	status = p.update_jenkins_sources(req.Forj.ForjjInstanceName, ret) || status
