@@ -5,9 +5,10 @@ import (
 	"github.com/forj-oss/goforjj"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"log"
 )
 
-func (g *GitHubStruct) create_yaml_data(req *CreateReq) error {
+func (g *GitHubStruct) create_yaml_data(req *CreateReq, ret *goforjj.PluginData) error {
 	// Write the github.yaml source file.
 	if g.github_source.Urls == nil {
 		return fmt.Errorf("Internal Error. Urls was not set.")
@@ -15,49 +16,45 @@ func (g *GitHubStruct) create_yaml_data(req *CreateReq) error {
 
 	req.InitOrganization(g)
 
-	if g.github_source.Repos == nil {
-		g.github_source.Repos = make(map[string]RepositoryStruct)
-	}
-	if g.github_source.Users == nil {
-		g.github_source.Users = make(map[string]string)
-	}
-	if g.github_source.Groups == nil {
-		g.github_source.Groups = make(map[string]TeamStruct)
+	g.github_source.Repos = make(map[string]RepositoryStruct)
+	g.github_source.Users = make(map[string]string)
+	g.github_source.Groups = make(map[string]TeamStruct)
+
+	// Add all repos
+	for name, repo := range req.Objects.Repo {
+		if !repo.IsValid(name, ret) {
+			ret.StatusAdd("Warning!!! Invalid repository '%s' requested. Ignored.")
+			continue
+		}
+		g.SetRepo(&repo)
 	}
 
-	for name, repo := range req.Objects.Repo {
-		g.AddRepo(name, &repo)
-	}
+	log.Printf("Github manage %d repository(ies).", len(g.github_source.Repos))
 
 	for name, details := range req.Objects.User {
 		g.AddUser(name, &details)
 	}
 
+	log.Printf("Github manage %d user(s) at Organization level.", len(g.github_source.Users))
+
 	for name, details := range req.Objects.Group {
 		g.AddGroup(name, &details)
 	}
+
+	log.Printf("Github manage %d group(s) at Organization level.", len(g.github_source.Groups))
+
 	return nil
 }
 
-// Add a new repository to be managed by github plugin.
-func (g *GitHubStruct) AddRepo(name string, repo *RepoInstanceStruct) bool {
-	upstream := goforjj.PluginRepoRemoteUrl{
+func (g *GitHubStruct) DefineRepoUrls(name string) (upstream goforjj.PluginRepoRemoteUrl) {
+	upstream = goforjj.PluginRepoRemoteUrl{
 		Ssh: "git@" + g.Client.BaseURL.Host + ":" + g.github_source.Organization + "/" + name + ".git",
 		Url: g.github_source.Urls["github-url"] + "/" + g.github_source.Organization + "/" + name,
 	}
-
-	if r, found := g.github_source.Repos[name]; !found {
-		r = RepositoryStruct{}
-		r.set(repo,
-			map[string]goforjj.PluginRepoRemoteUrl{"origin": upstream},
-			map[string]string{"master": "origin/master"})
-		g.github_source.Repos[name] = r
-		return true // New added
-	}
-	return false
+	return
 }
 
-// Add a new repository to be managed by github plugin.
+// AddUser Add a new repository to be managed by github plugin.
 func (g *GitHubStruct) AddUser(name string, UserDet *UserInstanceStruct) bool {
 	if _, found := g.github_source.Users[name]; !found {
 		g.github_source.Users[name] = UserDet.Role
@@ -66,7 +63,7 @@ func (g *GitHubStruct) AddUser(name string, UserDet *UserInstanceStruct) bool {
 	return false
 }
 
-// Add a new repository to be managed by github plugin.
+// AddGroup Add a new repository to be managed by github plugin.
 func (g *GitHubStruct) AddGroup(name string, GroupDet *GroupInstanceStruct) bool {
 	if _, found := g.github_source.Groups[name]; !found {
 		g.github_source.Groups[name] = TeamStruct{Role: GroupDet.Role, Users: GroupDet.Members}
@@ -75,17 +72,26 @@ func (g *GitHubStruct) AddGroup(name string, GroupDet *GroupInstanceStruct) bool
 	return false
 }
 
-func (g *GitHubStruct) save_yaml(file string) error {
+func (g *GitHubStruct) save_yaml(file string) (Updated bool, _ error) {
 
 	d, err := yaml.Marshal(&g.github_source)
 	if err != nil {
-		return fmt.Errorf("Unable to encode github data in yaml. %s", err)
+		return false, fmt.Errorf("Unable to encode github data in yaml. %s", err)
 	}
 
-	if err := ioutil.WriteFile(file, d, 0644); err != nil {
-		return fmt.Errorf("Unable to save '%s'. %s", file, err)
+	if d_before, err := ioutil.ReadFile(file); err != nil {
+		Updated = true
+	} else {
+		Updated = (string(d) != string(d_before))
 	}
-	return nil
+
+	if !Updated {
+		return
+	}
+	if err := ioutil.WriteFile(file, d, 0644); err != nil {
+		return false, fmt.Errorf("Unable to save '%s'. %s", file, err)
+	}
+	return
 }
 
 func (g *GitHubStruct) load_yaml(file string) error {

@@ -10,8 +10,9 @@ import (
 
 type RepositoryStruct struct { // Used to stored the yaml source file. Not used to respond to the API requester.
 	Name         string            // Name of the Repo
-	Flow         string            // Flow applied on the repo.
-	Description  string            // Title in github repository
+	Flow         string            `yaml:",omitempty"`    // Flow applied on the repo.
+	Description  string            `yaml:",omitempty"`    // Title in github repository
+	Disabled     bool              `yaml:",omitempty"`    // disable the repository (became private with no team/collaborators)
 	IssueTracker bool              `yaml:"issue_tracker"` // Issue tracker option
 	Users        map[string]string // Collection of users role
 	Groups       map[string]string // Collection of groups role
@@ -104,44 +105,32 @@ func (r *RepositoryStruct) AddGroups(groups string) {
 
 }
 
-func (r *RepositoryStruct) Update(repo *RepoInstanceStruct) (count int) {
-	if r.Description != repo.Title {
-		r.Description = repo.Title
-		count++
+func (r *RepositoryStruct) IsValid(repo_name string) (err error) {
+	if r.Name == "" {
+		err = fmt.Errorf("Invalid repository '%s'. Name is empty.", repo_name)
+		return
 	}
-
-	if r.Flow != repo.Flow {
-		r.Flow = repo.Flow
-		count++
+	if r.Name != repo_name {
+		err = fmt.Errorf("Invalid repository '%s'. Name must be equal to '%s'. But the repo name is set to '%s'.",
+			repo_name, repo_name, r.Name)
+		return
 	}
-
-	// TODO: Be able to update the users/group list and their rights.
-
 	return
 }
 
-// DoUpdateIn GitHubStruct with data from request.
-//
-func (r *RepoInstanceStruct) DoUpdateIn(g *GitHubStruct) (Updated bool, err, mess string) {
-	if r.Name != "" {
-		// Add repo request type
-		if g.AddRepo(r.Name, r) {
-			Updated = true
-			mess = fmt.Sprintf("New Repository '%s' added.", r.Name)
-		} else {
-			err = fmt.Sprintf("Repository '%s' already exist.", r.Name)
-		}
-	}
+// TODO: Accept Name empty or different. Rename use case. https://github.com/forj-oss/forjj-contribs/issues/59
 
-	if r.Name != "" {
-		// Change repo request type
-		repo := g.github_source.Repos[r.Name]
-		if repo.Update(r) > 0 {
-			Updated = true
-			mess = fmt.Sprintf("Repository '%s' updated.", r.Name)
-		} else {
-			err = fmt.Sprintf("Repository '%s' doesn't exist. You must add it first.", r.Name)
-		}
+// IsValid verify if a repo given is valid or should be rejected following rules.
+func (r *RepoInstanceStruct) IsValid(repo_name string, ret *goforjj.PluginData) (valid bool) {
+	if r.Name == "" {
+		ret.Errorf("Invalid repository '%s'. Name is empty.", repo_name)
+		return
 	}
+	if r.Name != repo_name {
+		ret.Errorf("Invalid repository '%s'. Name must be equal to '%s'. But the repo name is set to '%s'.",
+			repo_name, repo_name, r.Name)
+		return
+	}
+	valid = true
 	return
 }
