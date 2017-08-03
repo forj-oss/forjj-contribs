@@ -11,8 +11,9 @@ import (
 func (r *MaintainReq) check_source_existence(ret *goforjj.PluginData) (status bool) {
 	log.Print("Checking Jenkins source code path existence.")
 
-	if _, err := os.Stat(r.Forj.ForjjSourceMount); err != nil {
-		ret.Errorf("Unable to maintain jenkins instances. '%s' is inexistent or innacessible. %s", r.Forj.ForjjSourceMount, err)
+	src_path := path.Join(r.Forj.ForjjSourceMount, r.Forj.ForjjInstanceName)
+	if _, err := os.Stat(path.Join(src_path, jenkins_file)); err == nil {
+		log.Printf(ret.Errorf("Unable to create the jenkins source code for instance name '%s' which already exist.\nUse update to update it (or update %s), and maintain to update jenkins according to his configuration. %s.", src_path, src_path, err))
 		return
 	}
 

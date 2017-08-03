@@ -60,12 +60,12 @@ fi
 if [ "$SERVICE_ADDR" = "" ]
 then
    echo "SERVICE_ADDR not defined by any deployment environment. Set 'localhost'"
-   SERVICE_ADDR="localhost"
+   SERVICE_ADDR="{{.Deploy.Deployment.ServiceAddr}}"
 fi
 if [ "$SERVICE_PORT" = "" ]
 then
    echo "SERVICE_PORT not defined by any deployment environment. Set '8080'"
-   SERVICE_PORT=8080
+   SERVICE_PORT={{.Deploy.Deployment.ServicePort}}
 fi
 
 TAG_NAME={{ .JenkinsImage.RegistryServer }}/$LOGNAME/$IMAGE_NAME:$IMAGE_VERSION
