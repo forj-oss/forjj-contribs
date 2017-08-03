@@ -52,16 +52,12 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 		return
 	}
 
-	if !p.update_from(req, ret) {
+	status := p.update_from(req, ret)
+	status = p.update_jenkins_sources(req.Forj.ForjjInstanceName, ret) || status
+	status = p.save_yaml(ret) || status
+
+	if ! status {
 		log.Print(ret.StatusAdd("No update detected. Jenkins source files hasn't been updated."))
-		return
-	}
-
-	if !p.update_jenkins_sources(req.Forj.ForjjInstanceName, ret) {
-		return
-	}
-
-	if !p.save_yaml(ret) {
 		return
 	}
 	return
