@@ -21,6 +21,12 @@ then
    exit 1
 fi
 
+if [ "$(git rev-parse --abbrev-ref HEAD)" != master ]
+then
+   echo "You must be on master branch."
+   exit 1
+fi
+
 case "$1" in
   release-it )
     VERSION=$(eval "echo $(awk '$1 ~ /version:/ { print $2 }' github.yaml)")
