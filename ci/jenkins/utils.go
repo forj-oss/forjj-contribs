@@ -8,30 +8,49 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
+	"crypto/md5"
 )
 
-func Copy(src, dst string) (int64, error) {
-	src_file, err := os.Open(src)
+func Copy(src, dst string) (written int64, err error, md5sum []byte) {
+	var src_file *os.File
+
+	src_file, err = os.Open(src)
 	if err != nil {
-		return 0, err
+		return
 	}
 	defer src_file.Close()
 
 	src_file_stat, err := src_file.Stat()
 	if err != nil {
-		return 0, err
+		return
 	}
 
 	if !src_file_stat.Mode().IsRegular() {
-		return 0, fmt.Errorf("%s is not a regular file", src)
+		err = fmt.Errorf("%s is not a regular file", src)
+		return
 	}
 
 	dst_file, err := os.Create(dst)
 	if err != nil {
-		return 0, err
+		return
 	}
 	defer dst_file.Close()
-	return io.Copy(dst_file, src_file)
+
+	md5_file := md5.New()
+	tee_file := io.TeeReader(src_file, md5_file)
+	written, err = io.Copy(dst_file, tee_file)
+	md5sum = md5_file.Sum(nil)
+	return
+}
+
+func md5sum(src string) ([]byte, error) {
+	src_file, err := os.Open(src)
+	if err != nil {
+		return nil, err
+	}
+	defer src_file.Close()
+	md5_file := md5.New()
+	return md5_file.Sum(nil), nil
 }
 
 // Simple function to call a shell command and display to stdout

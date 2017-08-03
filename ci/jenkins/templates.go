@@ -10,6 +10,8 @@ import (
 	"strings"
 	"text/template"
 	"bytes"
+	"io"
+	"crypto/md5"
 )
 
 const template_file = "templates.yaml"
@@ -151,7 +153,7 @@ func (p *JenkinsPlugin) DefineSources() error {
 	return nil
 }
 
-func (ts *TmplSource) Generate(tmpl_data interface{}, template_dir, dest_path, dest_name string) error {
+func (ts *TmplSource) Generate(tmpl_data interface{}, template_dir, dest_path, dest_name string) (updated bool, _ error) {
 	src := path.Join(template_dir, ts.Template)
 	dest := path.Join(dest_path, dest_name)
 	parent := path.Dir(dest)
@@ -159,32 +161,44 @@ func (ts *TmplSource) Generate(tmpl_data interface{}, template_dir, dest_path, d
 	if parent != "." {
 		if _, err := os.Stat(parent); err != nil {
 			os.MkdirAll(parent, 0755)
+			updated = true
 		}
 	}
 
 	var data string
 	if b, err := ioutil.ReadFile(src); err != nil {
-		return fmt.Errorf("Load issue. %s", err)
+		return false, fmt.Errorf("Load issue. %s", err)
 	} else {
 		data = strings.Replace(string(b), "}}\\\n", "}}", -1)
 	}
 
 	t, err := template.New(src).Funcs(template.FuncMap{}).Parse(data)
 	if err != nil {
-		return fmt.Errorf("Template issue. %s", err)
+		return false, fmt.Errorf("Template issue. %s", err)
 	}
 
+	orig_md5, _ := md5sum(dest)
+	final_md5_file := md5.New()
+
 	if out, err := os.Create(dest); err != nil {
-		return fmt.Errorf("Unable to create %s. %s.", dest, err)
+		return false, fmt.Errorf("Unable to create %s. %s.", dest, err)
 	} else {
-		if err := t.Execute(out, tmpl_data); err != nil {
-			return fmt.Errorf("Unable to interpret %s. %s.", dest, err)
+		multi_write_file := io.MultiWriter(out, final_md5_file)
+		if err := t.Execute(multi_write_file, tmpl_data); err != nil {
+			return false, fmt.Errorf("Unable to interpret %s. %s.", dest, err)
 		}
 		out.Close()
 	}
-
-	if err := set_rights(dest, ts.Chmod); err != nil {
-		return fmt.Errorf("%s", err)
+	if orig_md5 != nil {
+		updated = updated || bytes.Equal(orig_md5, final_md5_file.Sum(nil))
+	} else {
+		updated = true
 	}
-	return nil
+
+	if u, err := set_rights(dest, ts.Chmod); err != nil {
+		return false, fmt.Errorf("%s", err)
+	} else {
+		updated = updated || u
+	}
+	return
 }
