@@ -189,8 +189,9 @@ func (ts *TmplSource) Generate(tmpl_data interface{}, template_dir, dest_path, d
 		}
 		out.Close()
 	}
+	final_md5 := final_md5_file.Sum(nil)
 	if orig_md5 != nil {
-		updated = updated || bytes.Equal(orig_md5, final_md5_file.Sum(nil))
+		updated = updated || !bytes.Equal(orig_md5, final_md5)
 	} else {
 		updated = true
 	}

@@ -36,7 +36,7 @@ func (p *JenkinsPlugin) copy_source_files(instance_name string, ret *goforjj.Plu
 			return
 		} else {
 			if dest_md5 != nil {
-				updated = bytes.Equal(dest_md5, m5)
+				updated = !bytes.Equal(dest_md5, m5)
 			} else {
 				updated = true
 			}
