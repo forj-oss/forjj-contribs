@@ -58,7 +58,7 @@ func (r *JenkinsPlugin) create_jenkins_sources(instance_name string, ret *goforj
 		return
 	}
 
-	ret.CommitMessage = "Creating initial jenkins source files."
+	ret.CommitMessage = "Creating initial jenkins source files as defined by the Forjfile."
 	return true
 }
 

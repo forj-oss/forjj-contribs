@@ -50,6 +50,7 @@ func md5sum(src string) ([]byte, error) {
 	}
 	defer src_file.Close()
 	md5_file := md5.New()
+	io.Copy(md5_file, src_file)
 	return md5_file.Sum(nil), nil
 }
 

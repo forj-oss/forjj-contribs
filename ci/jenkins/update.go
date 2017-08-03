@@ -49,7 +49,7 @@ func (r *JenkinsPlugin) update_jenkins_sources(instance_name string, ret *goforj
 	status = r.generate_jobsdsl(instance_name, ret)  || status
 
 	if status {
-		ret.CommitMessage = "Creating initial jenkins source files."
+		ret.CommitMessage = "Updating jenkins source files requested by Forjfile."
 	} else {
 		ret.StatusAdd("No update detected.")
 	}
