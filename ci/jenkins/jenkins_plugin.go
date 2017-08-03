@@ -131,8 +131,9 @@ func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData) (stat
 	instance_data := r.Objects.App[instance]
 	deploy := DeployStruct{}
 	deploy = p.yaml.Deploy.Deployment
-	status = deploy.UpdateFrom(&instance_data.DeployStruct)
-	ret.StatusAdd("Deployment to '%s' updated.", instance_data.To)
+	if status = deploy.UpdateFrom(&instance_data.DeployStruct) ; status {
+		ret.StatusAdd("Deployment to '%s' updated.", instance_data.To)
+	}
 	p.yaml.Deploy.Deployment = deploy
 
 	if err := p.DefineDeployCommand(); err != nil {
@@ -140,9 +141,16 @@ func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData) (stat
 		return
 	}
 
-	status = p.yaml.Dockerfile.UpdateFrom(&instance_data.DockerfileStruct) || status
+	if p.yaml.Dockerfile.UpdateFrom(&instance_data.DockerfileStruct) {
+		ret.StatusAdd("Dockerfile updated.")
+		status = true
+	}
 	// Org used only if no set anymore.
-	return p.yaml.JenkinsImage.UpdateFrom(&instance_data.FinalImageStruct, r.Forj.ForjjOrganization) || status
+	if p.yaml.JenkinsImage.UpdateFrom(&instance_data.FinalImageStruct, r.Forj.ForjjOrganization) {
+		ret.StatusAdd("Jenkins master docker image data updated.")
+		status = true
+	}
+	return
 }
 
 func (p *JenkinsPlugin) save_yaml(ret *goforjj.PluginData) (status bool) {
