@@ -6,10 +6,10 @@ package main
 import (
 	"github.com/forj-oss/goforjj"
 	"log"
-	"net/url"
+
 	"os"
 	"path"
-	"regexp"
+
 )
 
 // return true if instance doesn't exist.
@@ -63,49 +63,11 @@ func (r *JenkinsPlugin) create_jenkins_sources(instance_name string, ret *goforj
 }
 
 // add_projects add project data in the jenkins.yaml file
-func (r *JenkinsPlugin) add_projects(req *CreateReq, ret *goforjj.PluginData) (status bool) {
-	if req.Forj.ForjjInfraUpstream == "" {
-		ret.StatusAdd("Unable to add a new project without a remote GIT repository. Jenkins JobDSL requirement. " +
-			"To enable this feature, add a remote GIT to your infra --infra-upstream or define the JobDSL Repository to clone.")
-		return true
-	}
-
-	infra_remote := req.Objects.App[req.Forj.ForjjInstanceName].SeedJobRepo
-	ssh_format, _ := regexp.Compile(`^(https?://)(\w[\w.-]+)((/(\w[\w.-]*)/(\w[\w.-]*))(/\w[\w.-/]*)?)$`)
-	job_path := ""
-	default_jobdsl := false
-	if rs := ssh_format.FindStringSubmatch(infra_remote); rs != nil {
-		if rs[5] == req.Forj.ForjjOrganization && rs[6] == req.Forj.ForjjInfra {
-			job_path = "jobs-dsl"
-			default_jobdsl = true
-		} else {
-			infra_remote = rs[1] + rs[2] + rs[4]
-			job_path = rs[7]
-		}
-	}
-
-	if v, err := url.Parse(infra_remote); err != nil {
-		ret.Errorf("Infra remote URL issue. %s", err)
-		return false
-	} else {
-		if v.Scheme == "" {
-			ret.Errorf("Invalid Remote repository Url '%s'. A scheme must exist.", infra_remote)
-		}
-	}
-	// Initialize JobDSL structure
-	r.yaml.Projects = NewProjects(req.Forj.ForjjInstanceName, infra_remote, job_path, default_jobdsl)
-
-	// Retrieve list of Repository (projects) to manage
-	for name, prj := range req.Objects.Projects {
-		switch prj.RemoteType {
-		case "github":
-			r.yaml.Projects.AddGithub(name, &prj.GithubStruct)
-		case "git":
-			r.yaml.Projects.AddGit(name, &prj.GitStruct)
-		}
-	}
-	status = true
-	return
+func (jp *JenkinsPlugin) add_projects(req *CreateReq, ret *goforjj.PluginData) bool {
+	projects := ProjectInfo{}
+	projects.set_project_info(req.Forj.ForjCommonStruct)
+	projects.set_infra_remote(req.Objects.App[req.Forj.ForjjInstanceName].SeedJobRepo)
+	return projects.set_projects_to(req.Objects.Projects, jp, ret)
 }
 
 // generate_jobsdsl generate any missing job-dsl source file.
