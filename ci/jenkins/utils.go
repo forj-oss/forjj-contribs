@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
 	"github.com/forj-oss/forjj-modules/trace"
 	"io"
@@ -8,7 +9,6 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
-	"crypto/md5"
 )
 
 func Copy(src, dst string) (written int64, err error, md5sum []byte) {

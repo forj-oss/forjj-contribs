@@ -73,7 +73,7 @@ func (p *Projects) Generates(instance_name, template_dir, repo_path string, ret 
 
 	jobs_dsl_path := path.Join(repo_path, p.DslPath)
 	if f, err := os.Stat(jobs_dsl_path); err != nil {
-		if err := os.MkdirAll(jobs_dsl_path, 0755) ; err != nil {
+		if err := os.MkdirAll(jobs_dsl_path, 0755); err != nil {
 			return false, err
 		}
 	} else {
@@ -87,7 +87,7 @@ func (p *Projects) Generates(instance_name, template_dir, repo_path string, ret 
 	tmpl.Chmod = 0644
 
 	for name, prj := range p.List {
-		name = strings.Replace(name, "-", "_",-1)
+		name = strings.Replace(name, "-", "_", -1)
 		if u, err := tmpl.Generate(prj, template_dir, jobs_dsl_path, name+".groovy"); err != nil {
 			log.Printf("Unable to generate '%s'. %s",
 				path.Join(jobs_dsl_path, name+".groovy"), ret.Errorf("%s", err))

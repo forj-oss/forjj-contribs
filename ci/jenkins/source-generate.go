@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/forj-oss/goforjj"
 	"log"
 	"os"
 	"path"
-	"bytes"
 )
 
 // This file describes how we generate source from templates.
@@ -21,14 +21,14 @@ func (p *JenkinsPlugin) copy_source_files(instance_name string, ret *goforjj.Plu
 		if parent != "." {
 			if _, err := os.Stat(parent); err != nil {
 				log.Printf("Creating '%s'.", parent)
-				if err = os.MkdirAll(parent, 0755) ; err != nil {
+				if err = os.MkdirAll(parent, 0755); err != nil {
 					log.Printf(ret.Errorf("Unable to copy '%s' to '%s'. %s.", src, dest, err))
 					return
 				}
 			}
 		}
 		var dest_md5 []byte
-		if m5, err := md5sum(dest) ; err == nil {
+		if m5, err := md5sum(dest); err == nil {
 			dest_md5 = m5
 		}
 		if _, err, m5 := Copy(src, dest); err != nil {
@@ -70,7 +70,7 @@ func set_rights(file string, rights os.FileMode) (updated bool, _ error) {
 
 	var rightsb os.FileMode
 	stat_found := false
-	if r, err := os.Stat(file) ; err == nil {
+	if r, err := os.Stat(file); err == nil {
 		rightsb = r.Mode()
 		stat_found = true
 	}

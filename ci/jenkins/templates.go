@@ -1,17 +1,17 @@
 package main
 
 import (
+	"bytes"
+	"crypto/md5"
 	"fmt"
 	"gopkg.in/yaml.v2"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"strings"
 	"text/template"
-	"bytes"
-	"io"
-	"crypto/md5"
 )
 
 const template_file = "templates.yaml"
@@ -70,12 +70,13 @@ func Evaluate(value string, data interface{}) (string, error) {
 	var doc bytes.Buffer
 	tmpl := template.New("jenkins_plugin_data")
 
-
-	if ! strings.Contains(value, "{{") { return value, nil }
-	if _, err := tmpl.Parse(value) ; err != nil {
+	if !strings.Contains(value, "{{") {
+		return value, nil
+	}
+	if _, err := tmpl.Parse(value); err != nil {
 		return "", err
 	}
-	if err := tmpl.Execute(&doc, data) ; err != nil {
+	if err := tmpl.Execute(&doc, data); err != nil {
 		return "", err
 	}
 	ret := doc.String()
@@ -100,7 +101,7 @@ func (p *JenkinsPlugin) DefineSources() error {
 	// load all features
 	p.yaml.Features = make([]string, 0, 5)
 	for _, f := range p.templates_def.Features.Common {
-		if v, err := Evaluate(f, p.Model()) ; err != nil {
+		if v, err := Evaluate(f, p.Model()); err != nil {
 			return fmt.Errorf("Unable to evaluate '%s'. %s", f, err)
 		} else {
 			if v == "" {

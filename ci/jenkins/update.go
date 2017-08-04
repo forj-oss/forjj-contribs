@@ -46,7 +46,7 @@ func (r *JenkinsPlugin) update_jenkins_sources(instance_name string, ret *goforj
 	log.Print("Start Generating source files...")
 	status = r.generate_source_files(instance_name, ret) || status
 
-	status = r.generate_jobsdsl(instance_name, ret)  || status
+	status = r.generate_jobsdsl(instance_name, ret) || status
 
 	if status {
 		ret.CommitMessage = "Updating jenkins source files requested by Forjfile."
