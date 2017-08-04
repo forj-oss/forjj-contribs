@@ -80,14 +80,18 @@ type ProjectsInstanceStruct struct {
 // Create request structure
 // ************************
 
+type ForjCommonStruct struct {
+	Debug              string `json:"debug"`
+	ForjjInfra         string `json:"forjj-infra"`
+	ForjjInfraUpstream string `json:"forjj-infra-upstream"`
+	ForjjInstanceName  string `json:"forjj-instance-name"`
+	ForjjOrganization  string `json:"forjj-organization"`
+	ForjjSourceMount   string `json:"forjj-source-mount"`
+}
+
 type CreateReq struct {
 	Forj struct {
-		Debug              string `json:"debug"`
-		ForjjInfra         string `json:"forjj-infra"`
-		ForjjInfraUpstream string `json:"forjj-infra-upstream"`
-		ForjjInstanceName  string `json:"forjj-instance-name"`
-		ForjjOrganization  string `json:"forjj-organization"`
-		ForjjSourceMount   string `json:"forjj-source-mount"`
+		ForjCommonStruct
 	}
 	Objects CreateArgReq
 }
@@ -104,12 +108,7 @@ type CreateArgReq struct {
 
 type UpdateReq struct {
 	Forj struct {
-		Debug              string `json:"debug"`
-		ForjjInfra         string `json:"forjj-infra"`
-		ForjjInfraUpstream string `json:"forjj-infra-upstream"`
-		ForjjInstanceName  string `json:"forjj-instance-name"`
-		ForjjOrganization  string `json:"forjj-organization"`
-		ForjjSourceMount   string `json:"forjj-source-mount"`
+		ForjCommonStruct
 	}
 	Objects UpdateArgReq
 }
@@ -126,13 +125,8 @@ type UpdateArgReq struct {
 
 type MaintainReq struct {
 	Forj struct {
-		Debug              string `json:"debug"`
-		ForjjInfra         string `json:"forjj-infra"`
-		ForjjInfraUpstream string `json:"forjj-infra-upstream"`
-		ForjjInstanceName  string `json:"forjj-instance-name"`
-		ForjjOrganization  string `json:"forjj-organization"`
-		ForjjSourceMount   string `json:"forjj-source-mount"`
-		DeployTo           string `json:"deploy-to"`
+		ForjCommonStruct
+		DeployTo string `json:"deploy-to"`
 	}
 	Objects MaintainArgReq
 }
@@ -215,7 +209,7 @@ const YamlDesc = "---\n" +
 	"    flags:\n" +
 	"      seed-job-repo:\n" +
 	"        help: \"url to the seed job repository. By default, it uses the <YourInfraRepo>. Jobs are defined under job-dsl.\"\n" +
-	"        default: \"{{ .Forjj.InfraUpstream }}\"\n" +
+	"        default: \"{{ .Forjfile.Infra.RemoteUrl }}\"\n" +
 	"      registry-auth:\n" +
 	"        help: \"List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]\"\n" +
 	"        secure: true\n" +
@@ -237,16 +231,19 @@ const YamlDesc = "---\n" +
 	"        help: \"Project name\"\n" +
 	"        required: true\n" +
 	"      remote-type:\n" +
+	"        default: \"{{ $Project := .Current.Name }}{{ (index .Forjfile.Repos $Project).RemoteType }}\"\n" +
 	"        help: \"Define remote source  type. 'github' is used by default. Support 'git', 'github'.\"\n" +
 	"    groups:\n" +
 	"      github:\n" +
 	"        flags:\n" +
 	"          api-url:\n" +
-	"            default: \"https://github.com\"\n" +
+	"            default: \"{{ $Project := .Current.Name }}{{ (index .Forjfile.Repos $Project).UpstreamAPIUrl }}\"\n" +
 	"            help: \"with remote-type = 'github', Github API Url. By default, it uses public github API.\"\n" +
 	"          repo-owner:\n" +
+	"            default: \"{{ $Project := .Current.Name }}{{ (index .Forjfile.Repos $Project).Owner }}\"\n" +
 	"            help: \"with remote-type = 'github', Repository owner. Can be a user or an organization.\"\n" +
 	"          repo:\n" +
+	"            default: \"{{ .Current.Name }}\"\n" +
 	"            help: \"with remote-type = 'github', Repository name.\"\n" +
 	"      git:\n" +
 	"        flags:\n" +

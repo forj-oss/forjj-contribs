@@ -59,8 +59,8 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 	p.yaml.Forjj.InfraUpstream = req.Forj.ForjjInfraUpstream
 
 	status := p.update_from(req, ret)
-	status = p.update_jenkins_sources(req.Forj.ForjjInstanceName, ret) || status
 	status = p.update_projects(req, ret) || status
+	status = p.update_jenkins_sources(req.Forj.ForjjInstanceName, ret) || status
 	status = p.save_yaml(ret) || status
 
 	if ! status {
