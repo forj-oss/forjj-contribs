@@ -13,7 +13,7 @@ func (r *MaintainReq) check_source_existence(ret *goforjj.PluginData) (status bo
 
 	src_path := path.Join(r.Forj.ForjjSourceMount, r.Forj.ForjjInstanceName)
 	if _, err := os.Stat(path.Join(src_path, jenkins_file)); err != nil {
-		log.Printf(ret.Errorf("Unable to maintain instance name '%s' without source code.\n" +
+		log.Printf(ret.Errorf("Unable to maintain instance name '%s' without source code.\n"+
 			"Use update to update it, commit, push and retry. %s.", src_path, err))
 		return
 	}

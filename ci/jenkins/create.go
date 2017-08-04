@@ -9,7 +9,6 @@ import (
 
 	"os"
 	"path"
-
 )
 
 // return true if instance doesn't exist.

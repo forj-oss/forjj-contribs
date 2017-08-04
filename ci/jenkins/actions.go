@@ -3,8 +3,8 @@ package main
 
 import (
 	"github.com/forj-oss/goforjj"
-	"net/http"
 	"log"
+	"net/http"
 )
 
 // Do creating plugin task
@@ -63,7 +63,7 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 	status = p.update_jenkins_sources(req.Forj.ForjjInstanceName, ret) || status
 	status = p.save_yaml(ret) || status
 
-	if ! status {
+	if !status {
 		log.Print(ret.StatusAdd("No update detected. Jenkins source files hasn't been updated."))
 		return
 	}

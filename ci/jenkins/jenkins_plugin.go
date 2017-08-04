@@ -1,14 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"crypto/md5"
 	"fmt"
 	"github.com/forj-oss/goforjj"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"path"
-	"crypto/md5"
-	"bytes"
 )
 
 type JenkinsPluginModel struct {
@@ -133,7 +133,7 @@ func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData) (stat
 	instance_data := r.Objects.App[instance]
 	deploy := DeployStruct{}
 	deploy = p.yaml.Deploy.Deployment
-	if status = deploy.UpdateFrom(&instance_data.DeployStruct) ; status {
+	if status = deploy.UpdateFrom(&instance_data.DeployStruct); status {
 		ret.StatusAdd("Deployment to '%s' updated.", instance_data.To)
 	}
 	p.yaml.Deploy.Deployment = deploy
@@ -158,7 +158,7 @@ func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData) (stat
 func (p *JenkinsPlugin) save_yaml(ret *goforjj.PluginData) (status bool) {
 	file := path.Join(p.source_path, jenkins_file)
 
-	orig_md5 , _:= md5sum(file)
+	orig_md5, _ := md5sum(file)
 	d, err := yaml.Marshal(&p.yaml)
 	if err != nil {
 		ret.Errorf("Unable to encode forjj-jenkins configuration data in yaml. %s", err)
