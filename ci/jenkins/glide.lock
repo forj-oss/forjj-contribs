@@ -1,5 +1,5 @@
 hash: de942f54e45751f5d69b88f97ebc9ed53fb0b1a290375da4ebcde4b543390d00
-updated: 2017-08-04T14:27:10.893439234Z
+updated: 2017-09-07T14:36:34.411666616Z
 imports:
 - name: github.com/alecthomas/kingpin
   version: a328427ab7d619fe3c8d16a0da66899d03d5afae
@@ -11,13 +11,13 @@ imports:
 - name: github.com/alecthomas/units
   version: 2efee857e7cfd4f3d0138cc3cbb1b4966962b93a
 - name: github.com/fatih/color
-  version: 62e9147c64a1ed519147b62a56a14e83e2be02c1
+  version: 1535ebc2637cc042c938f07fa26c6356ab8f8504
 - name: github.com/forj-oss/forjj-modules
-  version: fb012e1b086e6544bc134c2ee1f1743ba779087b
+  version: 8b8218d066b0366c84393e205fefcb04ee74f291
   subpackages:
   - trace
 - name: github.com/forj-oss/goforjj
-  version: 1d4d1bcd4224a8c180db00dd9953e9569eb3680a
+  version: a8af9d8014c96f86c22378d51d17e9a4251a96f0
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
@@ -37,7 +37,7 @@ imports:
 - name: github.com/pkg/errors
   version: c605e284fe17294bda444b34710735b29d1a9d90
 - name: golang.org/x/net
-  version: f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f
+  version: 66aacef3dd8a676686c7ae3716979581e8b03c47
   subpackages:
   - publicsuffix
 - name: golang.org/x/sys
@@ -48,5 +48,5 @@ imports:
 - name: gopkg.in/alecthomas/kingpin.v2
   version: 1087e65c9441605df944fb12c33f0fe7072d18ca
 - name: gopkg.in/yaml.v2
-  version: 25c4ec802a7d637f88d584ab26798e94ad14c13b
+  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 testImports: []

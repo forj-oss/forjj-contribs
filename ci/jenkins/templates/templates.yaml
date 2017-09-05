@@ -32,10 +32,18 @@ sources:
       template: ".gitignore"
     build options sample:
       source  : "build_opts.sh.sample"
+    open ssl install script:
+      source  : "bin/install_openssl.sh"
     jenkins features:
       template: "features.lst"
     jenkins credentials:
       source  : "jenkins_credentials.sh.sample"
+    ssl certificate:
+      template: "certificate.pem"
+      if: "{{ .Source.Deploy.Ssl.Certificate }}"
+    ssl CA certificate:
+      template: "ca_certificate.pem"
+      if: "{{ .Source.Deploy.Ssl.CaCertificate }}"
   deploy:
     docker:
       start up script:
@@ -53,10 +61,18 @@ sources:
       marathon json payload:
         template: "bin/marathon.json"
 run_deploy:
-  docker: "bin/build.sh && bin/start.sh"
-  ucp: "make deploy" # not tested
-  mesos: "curl -X POST -d @bin/marathon.json {{ .Mesos.MarathonUrl }}/..." # Not tested
-  dcos: "curl -X POST -d @bin/marathon.json {{ .Mesos.MarathonUrl }}/... -H 'token: {{ .Mesos.Token }}" # Not tested
+  docker:
+    run: "bin/build.sh && bin/start.sh"
+    environment:
+      CERTIFICATE_KEY:
+        value: "{{ .Source.Deploy.Ssl.GetKey }}"
+        if: "{{ .Source.Deploy.Ssl.GetKey }}"
+  ucp:
+    run: "make deploy" # not tested
+  mesos:
+    run: "curl -X POST -d @bin/marathon.json {{ .Source.Mesos.MarathonUrl }}/..." # Not tested
+  dcos:
+    run: "curl -X POST -d @bin/marathon.json {{ .Source.Mesos.MarathonUrl }}/... -H 'token: {{ .Source.Mesos.Token }}" # Not tested
 # If the end user define a variant not listed in the following, the instance information will be kept in the workspace instead of forjj-jenkins.yaml source file
 # Following variants will be stored in the infra repository and considered as 'public permanent managed resource'
 # A local variant, is typically a local docker instance which will never be kept in source code as spawned on the Dev workstation.

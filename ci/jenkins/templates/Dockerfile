@@ -11,6 +11,10 @@ ENV JENKINS_SLAVE_AGENT_PORT=50000{{ if .Projects }} \
 
 USER root
 
+COPY bin/install_openssl.sh /tmp
+
+RUN /tmp/install_openssl.sh
+
 ARG JENKINS_INSTALL_INITS_URL=https://github.com/forj-oss/jenkins-install-inits/raw/master/
 
 RUN /usr/local/bin/jenkins-install.sh /tmp/features.lst

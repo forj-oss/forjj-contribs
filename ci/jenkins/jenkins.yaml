@@ -64,6 +64,16 @@ objects:
           service-port:
             default: 8080
             help: "Expected jenkins instance port number."
+      ssl:
+        flags:
+          private-key:
+            help: SSL private key to use to use the ssh certificate in jenkins.
+            secure: true
+            cli-exported-to-actions: ["maintain"]
+          certificate:
+            help: SSL Certificate file to certify your jenkins instance.
+          ca-certificate:
+            help: CA root certificate which certify your jenkins instance.
     flags:
       seed-job-repo:
         help: "url to the seed job repository. By default, it uses the <YourInfraRepo>. Jobs are defined under job-dsl."
@@ -72,6 +82,7 @@ objects:
         help: "List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]"
         secure: true
         envar: "REGISTRY_AUTH"
+        cli-exported-to-actions: ["maintain"]
   features:
     default-actions: ["add", "change", "remove"]
     identified_by_flag: name

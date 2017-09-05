@@ -80,7 +80,7 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
 	}
 
 	// loop on list of jenkins instances defined by a collection of */jenkins.yaml
-	if !req.InstantiateAll(ret) {
+	if !req.Instantiate(req, ret) {
 		return
 	}
 	return

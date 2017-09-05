@@ -23,9 +23,10 @@ func (r *MaintainReq) check_source_existence(ret *goforjj.PluginData) (status bo
 	return
 }
 
-// Looping on all instances
-// Need to define where to deploy (dev/itg/pro/local/other)
-func (r *MaintainReq) InstantiateAll(ret *goforjj.PluginData) (_ bool) {
+// TODO: Need to define where to deploy (dev/itg/pro/local/other) - Is it still needed?
+
+// Instantiate Instance given by the request.
+func (r *MaintainReq) Instantiate(req *MaintainReq, ret *goforjj.PluginData) (_ bool) {
 	instance := r.Forj.ForjjInstanceName
 	mount := r.Forj.ForjjSourceMount
 	auths := NewDockerAuths(r.Objects.App[instance].RegistryAuth)
@@ -33,6 +34,9 @@ func (r *MaintainReq) InstantiateAll(ret *goforjj.PluginData) (_ bool) {
 	src := path.Join(mount, instance)
 	if _, err := os.Stat(path.Join(src, jenkins_file)); err == nil {
 		p := new_plugin(src)
+		if ! p.GetMaintainData(instance, req, ret) {
+			return false
+		}
 		ret.StatusAdd("Maintaining '%s'", instance)
 		if err := os.Chdir(src); err != nil {
 			ret.Errorf("Unable to enter in '%s'. %s", src, err)

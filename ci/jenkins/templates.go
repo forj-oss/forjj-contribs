@@ -22,7 +22,7 @@ type YamlTemplates struct {
 	Defaults DefaultsStruct
 	Features TmplFeatures
 	Sources  TmplSources
-	Run      map[string]string `yaml:"run_deploy"`
+	Run      map[string]RunStruct `yaml:"run_deploy"`
 	Variants map[string]string
 }
 
@@ -49,6 +49,18 @@ type TmplSource struct {
 	Chmod    os.FileMode
 	Template string
 	Source   string
+	If       string `yaml:"if"` // If `If` is empty, the file will be ignored. otherwise the file will copied/generated
+								// as usual.
+}
+
+type EnvStruct struct {
+	Value string
+	If string
+}
+
+type RunStruct struct {
+	RunCommand string `yaml:"run"`
+	Env map[string]EnvStruct `yaml:"environment"`
 }
 
 // Model creates the Model data used by gotemplates.

@@ -18,11 +18,11 @@ type JenkinsPluginModel struct {
 var JP_Model *JenkinsPluginModel
 
 type JenkinsPlugin struct {
-	yaml          YamlJenkins
+	yaml          YamlJenkins // jenkins.yaml generated source file
 	source_path   string
 	template_dir  string
 	template_file string
-	templates_def YamlTemplates // See templates.go
+	templates_def YamlTemplates // See templates.go. templates.yaml structure.
 	sources       map[string]TmplSource
 	templates     map[string]TmplSource
 }
@@ -33,6 +33,13 @@ type DeployApp struct {
 	// There are default deployment task and name. This can be changed at maintain time
 	// to reflect the maintain deployment task to execute.
 	Command string // Default Command used
+	Ssl YamlSSLStruct
+}
+
+type YamlSSLStruct struct {
+	CaCertificate string `json:"ca-certificate"` // CA root certificate which certify your jenkins instance.
+	Certificate   string `json:"certificate"`    // SSL Certificate file to certify your jenkins instance.
+	key           string                         // key for the SSL certificate.
 }
 
 type ForjjStruct struct {
@@ -41,9 +48,6 @@ type ForjjStruct struct {
 	InfraUpstream    string
 }
 
-/*type SettingsStruct struct {
-}*/
-
 const jenkins_file = "forjj-jenkins.yaml"
 
 func new_plugin(src string) (p *JenkinsPlugin) {
@@ -51,6 +55,20 @@ func new_plugin(src string) (p *JenkinsPlugin) {
 
 	p.source_path = src
 	return
+}
+
+func (p *JenkinsPlugin) GetMaintainData(instance string, req *MaintainReq, ret *goforjj.PluginData) (_ bool) {
+	if v, found := req.Objects.App[instance] ; ! found {
+		ret.Errorf("Request issue. App instance '%s' is missing in list of object.")
+		return
+	} else {
+		if p.yaml.Deploy.Ssl.Certificate == "" && v.SslPrivateKey != "" {
+			ret.Errorf("A private key is given, but there is no Certificate data.")
+			return
+		}
+		p.yaml.Deploy.Ssl.SetKey(v.SslPrivateKey)
+	}
+	return true
 }
 
 // At create time: create jenkins source from req
@@ -81,6 +99,9 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
 		ret.StatusAdd("Default to '8080' deployment service port.")
 
 	}
+
+	// Set SSL data
+	p.yaml.Deploy.Ssl.SetFrom(&jenkins_instance.SslStruct)
 
 	// Forjj predefined settings (instance/organization) are set at create time only.
 	// I do not recommend to update them, manually by hand in the `forjj-jenkins.yaml`.
@@ -115,12 +136,12 @@ func (p *JenkinsPlugin) DefineDeployCommand() error {
 
 	if v, ok := p.templates_def.Run[p.yaml.Deploy.Deployment.To]; !ok {
 		list := make([]string, 0, len(p.templates_def.Run))
-		for element, _ := range p.templates_def.Run {
+		for element := range p.templates_def.Run {
 			list = append(list, element)
 		}
 		return fmt.Errorf("'%s' deploy type is unknown (templates.yaml). Valid are %s", p.yaml.Deploy.Deployment.To, list)
 	} else {
-		p.yaml.Deploy.Command = v
+		p.yaml.Deploy.Command = v.RunCommand
 	}
 	return nil
 }
@@ -131,12 +152,18 @@ func (p *JenkinsPlugin) DefineDeployCommand() error {
 func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData) (status bool) {
 	instance := r.Forj.ForjjInstanceName
 	instance_data := r.Objects.App[instance]
-	deploy := DeployStruct{}
-	deploy = p.yaml.Deploy.Deployment
+
+	var deploy DeployStruct = p.yaml.Deploy.Deployment
 	if status = deploy.UpdateFrom(&instance_data.DeployStruct); status {
 		ret.StatusAdd("Deployment to '%s' updated.", instance_data.To)
 	}
 	p.yaml.Deploy.Deployment = deploy
+
+	var Ssl YamlSSLStruct = p.yaml.Deploy.Ssl
+	if status = Ssl.UpdateFrom(&instance_data.SslStruct); status {
+		ret.StatusAdd("Deployment to '%s' updated.", instance_data.To)
+	}
+	p.yaml.Deploy.Ssl = Ssl
 
 	if err := p.DefineDeployCommand(); err != nil {
 		ret.Errorf("Unable to update the deployement command. %s", err)
