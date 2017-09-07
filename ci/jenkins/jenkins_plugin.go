@@ -32,7 +32,6 @@ type DeployApp struct {
 	// Those 2 different parameters are defined at create time and can be updated with change.
 	// There are default deployment task and name. This can be changed at maintain time
 	// to reflect the maintain deployment task to execute.
-	Command string // Default Command used
 	Ssl YamlSSLStruct
 }
 
@@ -134,15 +133,14 @@ func (p *JenkinsPlugin) DefineDeployCommand() error {
 		return fmt.Errorf("%s", err)
 	}
 
-	if v, ok := p.templates_def.Run[p.yaml.Deploy.Deployment.To]; !ok {
+	if _, ok := p.templates_def.Run[p.yaml.Deploy.Deployment.To]; !ok {
 		list := make([]string, 0, len(p.templates_def.Run))
 		for element := range p.templates_def.Run {
 			list = append(list, element)
 		}
 		return fmt.Errorf("'%s' deploy type is unknown (templates.yaml). Valid are %s", p.yaml.Deploy.Deployment.To, list)
-	} else {
-		p.yaml.Deploy.Command = v.RunCommand
 	}
+
 	return nil
 }
 

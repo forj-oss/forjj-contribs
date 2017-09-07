@@ -56,8 +56,14 @@ func (p *JenkinsPlugin) InstantiateInstance(instance string, auths *DockerAuths,
 		return
 	}
 
+	run, found := p.templates_def.Run[p.yaml.Deploy.Deployment.To]
+	if ! found {
+		ret.Errorf("Deployment '%s' command not found.")
+		return
+	}
+
 	// start a command as described by the source code.
-	if p.yaml.Deploy.Command == "" {
+	if run.RunCommand == "" {
 		log.Printf(ret.Errorf("Unable to instantiate to %s. Deploy Command is empty.", p.yaml.Deploy.Deployment.To))
 		return
 	}
@@ -69,14 +75,34 @@ func (p *JenkinsPlugin) InstantiateInstance(instance string, auths *DockerAuths,
 		}
 	}
 
-	log.Printf(ret.StatusAdd("Running '%s'", p.yaml.Deploy.Command))
+	log.Printf(ret.StatusAdd("Running '%s'", run.RunCommand))
 
 	var env []string
 	if v := os.Getenv("DOOD_SRC"); v != "" {
 		env = append(os.Environ(), "SRC="+path.Join(v, instance))
 	}
 
-	s, err := run_cmd("/bin/sh", env, "-c", p.yaml.Deploy.Command)
+	model := p.Model()
+	for key, env_to_set := range run.Env {
+		if env_to_set.If != "" {
+			// check if If evaluation return something or not. if not, the environment key won't be created.
+			if v, err := Evaluate(env_to_set.If, model) ; err != nil {
+				ret.Errorf("Deployment '%s'. Error in evaluating '%s'. %s", p.yaml.Deploy.Deployment.To, key, err)
+			} else {
+				if v == "" {
+					continue
+				}
+			}
+		}
+		if v, err := Evaluate(env_to_set.Value, model) ; err != nil {
+			ret.Errorf("Deployment '%s'. Error in evaluating '%s'. %s", p.yaml.Deploy.Deployment.To, key, err)
+		} else {
+			env = append(os.Environ(), key + "=" + v)
+			log.Printf("Env added : '%s' = '%s'", key, v)
+		}
+	}
+
+	s, err := run_cmd("/bin/sh", env, "-c", run.RunCommand)
 	log.Printf(ret.StatusAdd(string(s)))
 	if err != nil {
 		cur_dir, _ := os.Getwd()

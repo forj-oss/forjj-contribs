@@ -55,17 +55,6 @@ func (t *FinalImageStruct) UpdateFrom(d *FinalImageStruct, org string) (status b
 	return SetOnceIfSet(&t.RegistryRepoName, org) || status
 }
 
-func (t *DeployApp) SetFrom(source *DeployApp) (status bool) {
-	if t == nil {
-		return
-	}
-
-	status = SetIfSet(&t.Command, source.Command)
-	status = SetIfSet(&t.Ssl.Certificate, source.Ssl.Certificate) || status
-	status = SetIfSet(&t.Ssl.CaCertificate, source.Ssl.CaCertificate) || status
-	return
-}
-
 func (t *YamlSSLStruct) GetKey() string {
 	return t.key
 }
