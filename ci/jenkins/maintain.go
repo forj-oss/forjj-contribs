@@ -34,6 +34,16 @@ func (r *MaintainReq) Instantiate(req *MaintainReq, ret *goforjj.PluginData) (_ 
 	src := path.Join(mount, instance)
 	if _, err := os.Stat(path.Join(src, jenkins_file)); err == nil {
 		p := new_plugin(src)
+		if !p.load_yaml(ret) {
+			return
+		}
+
+		// Load templates.yml to get the list of deployment commands.
+		if err := p.LoadTemplatesDef(); err != nil {
+			ret.Errorf("%s", err)
+			return
+		}
+
 		if ! p.GetMaintainData(instance, req, ret) {
 			return false
 		}
@@ -52,13 +62,9 @@ func (r *MaintainReq) Instantiate(req *MaintainReq, ret *goforjj.PluginData) (_ 
 }
 
 func (p *JenkinsPlugin) InstantiateInstance(instance string, auths *DockerAuths, ret *goforjj.PluginData) (status bool) {
-	if !p.load_yaml(ret) {
-		return
-	}
-
 	run, found := p.templates_def.Run[p.yaml.Deploy.Deployment.To]
 	if ! found {
-		ret.Errorf("Deployment '%s' command not found.")
+		ret.Errorf("Deployment '%s' command not found.", p.yaml.Deploy.Deployment.To)
 		return
 	}
 

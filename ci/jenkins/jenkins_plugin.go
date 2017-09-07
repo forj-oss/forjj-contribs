@@ -53,6 +53,7 @@ func new_plugin(src string) (p *JenkinsPlugin) {
 	p = new(JenkinsPlugin)
 
 	p.source_path = src
+	p.template_dir = *cliApp.params.template_dir
 	return
 }
 

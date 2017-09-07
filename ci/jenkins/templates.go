@@ -98,11 +98,16 @@ func Evaluate(value string, data interface{}) (string, error) {
 
 //Load templates definition file from template dir.
 func (p *JenkinsPlugin) LoadTemplatesDef() error {
-	if d, err := ioutil.ReadFile(p.template_file); err != nil {
-		return fmt.Errorf("Unable to load '%s'. %s.", p.template_file, err)
+	templatef := path.Join(p.template_dir, template_file)
+	if _, err := os.Stat(templatef); err != nil {
+		return fmt.Errorf("Unable to find templates definition file '%s'. %s.", templatef, err)
+	}
+
+	if d, err := ioutil.ReadFile(templatef); err != nil {
+		return fmt.Errorf("Unable to load '%s'. %s.", templatef, err)
 	} else {
 		if err := yaml.Unmarshal(d, &p.templates_def); err != nil {
-			return fmt.Errorf("Unable to load yaml file format '%s'. %s.", p.template_file, err)
+			return fmt.Errorf("Unable to load yaml file format '%s'. %s.", templatef, err)
 		}
 	}
 	return nil
@@ -135,33 +140,51 @@ func (p *JenkinsPlugin) DefineSources() error {
 		}
 	}
 
-	p.CleanModel()
-
 	// TODO: Load additionnal features from maintainer source path or file. This will permit adding more features and let the plugin manage generated path from update task.
 
 	// Load all sources
 	p.sources = make(map[string]TmplSource)
 	p.templates = make(map[string]TmplSource)
 
-	for file, f := range p.templates_def.Sources.Common {
+	choose_file := func (file string, f TmplSource) error {
+		if file == "" {
+			return nil
+		}
+		if f.If != "" {
+			if v, err := Evaluate(f.If, p.Model()); err != nil {
+				return fmt.Errorf("Unable to evaluate the '%s' condition '%s'. %s", file, f.If, err)
+			} else {
+				if v == "" || strings.ToLower(v) == "false" {
+					log.Printf("Condition '%s' negative (false or empty). '%s' ignored.", f.If, file)
+					return nil
+				}
+			}
+		}
 		if f.Template == "" {
 			p.sources[file] = f
-			log.Printf("%#v", p.sources[file])
+			log.Printf("SRC : selected: %s", file)
 		} else {
 			p.templates[file] = f
+			log.Printf("TMPL: selected: %s", file)
+		}
+		return nil
+	}
+
+	for file, f := range p.templates_def.Sources.Common {
+		if err := choose_file(file, f) ; err != nil {
+			return err
 		}
 	}
 
 	if deploy_sources, ok := p.templates_def.Sources.Deploy[p.yaml.Deploy.Deployment.To]; ok {
 		for file, f := range deploy_sources {
-			if f.Template == "" {
-				p.sources[file] = f
-			} else {
-				p.templates[file] = f
+			if err := choose_file(file, f) ; err != nil {
+				return err
 			}
 		}
 	}
-	log.Printf("Files: \n%#v\n\n%#v\n", p.sources, p.templates)
+
+	p.CleanModel()
 
 	return nil
 }

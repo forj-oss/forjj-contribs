@@ -1,4 +1,5 @@
 # This file describes collections of jenkins features and a list of files to generate.
+# Template evaluation Context is defined by .Source = YamlJenkins struct (yaml_jenkins.go)
 ---
 features:
   common:
@@ -32,17 +33,15 @@ sources:
       template: ".gitignore"
     build options sample:
       source  : "build_opts.sh.sample"
-    open ssl install script:
-      source  : "bin/install_openssl.sh"
     jenkins features:
       template: "features.lst"
     jenkins credentials:
       source  : "jenkins_credentials.sh.sample"
     ssl certificate:
-      template: "certificate.pem"
+      template: "certificate.crt"
       if: "{{ .Source.Deploy.Ssl.Certificate }}"
     ssl CA certificate:
-      template: "ca_certificate.pem"
+      template: "ca_certificate.crt"
       if: "{{ .Source.Deploy.Ssl.CaCertificate }}"
   deploy:
     docker:

@@ -55,7 +55,7 @@ func (t *FinalImageStruct) UpdateFrom(d *FinalImageStruct, org string) (status b
 	return SetOnceIfSet(&t.RegistryRepoName, org) || status
 }
 
-func (t *YamlSSLStruct) GetKey() string {
+func (t YamlSSLStruct) GetKey() string {
 	return t.key
 }
 
