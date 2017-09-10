@@ -44,7 +44,7 @@ func (r *MaintainReq) Instantiate(req *MaintainReq, ret *goforjj.PluginData) (_ 
 			return
 		}
 
-		if ! p.GetMaintainData(instance, req, ret) {
+		if !p.GetMaintainData(instance, req, ret) {
 			return false
 		}
 		ret.StatusAdd("Maintaining '%s'", instance)
@@ -63,7 +63,7 @@ func (r *MaintainReq) Instantiate(req *MaintainReq, ret *goforjj.PluginData) (_ 
 
 func (p *JenkinsPlugin) InstantiateInstance(instance string, auths *DockerAuths, ret *goforjj.PluginData) (status bool) {
 	run, found := p.templates_def.Run[p.yaml.Deploy.Deployment.To]
-	if ! found {
+	if !found {
 		ret.Errorf("Deployment '%s' command not found.", p.yaml.Deploy.Deployment.To)
 		return
 	}
@@ -83,16 +83,17 @@ func (p *JenkinsPlugin) InstantiateInstance(instance string, auths *DockerAuths,
 
 	log.Printf(ret.StatusAdd("Running '%s'", run.RunCommand))
 
-	var env []string
+	env := os.Environ()
 	if v := os.Getenv("DOOD_SRC"); v != "" {
-		env = append(os.Environ(), "SRC="+path.Join(v, instance))
+		env = append(env, "SRC="+path.Join(v, instance)+"/")
+		log.Printf("DOOD_SRC detected. Env added : 'SRC' = '%s'", path.Join(v, instance)+"/")
 	}
 
 	model := p.Model()
 	for key, env_to_set := range run.Env {
 		if env_to_set.If != "" {
 			// check if If evaluation return something or not. if not, the environment key won't be created.
-			if v, err := Evaluate(env_to_set.If, model) ; err != nil {
+			if v, err := Evaluate(env_to_set.If, model); err != nil {
 				ret.Errorf("Deployment '%s'. Error in evaluating '%s'. %s", p.yaml.Deploy.Deployment.To, key, err)
 			} else {
 				if v == "" {
@@ -100,10 +101,10 @@ func (p *JenkinsPlugin) InstantiateInstance(instance string, auths *DockerAuths,
 				}
 			}
 		}
-		if v, err := Evaluate(env_to_set.Value, model) ; err != nil {
+		if v, err := Evaluate(env_to_set.Value, model); err != nil {
 			ret.Errorf("Deployment '%s'. Error in evaluating '%s'. %s", p.yaml.Deploy.Deployment.To, key, err)
 		} else {
-			env = append(os.Environ(), key + "=" + v)
+			env = append(env, key+"="+v)
 			log.Printf("Env added : '%s' = '%s'", key, v)
 		}
 	}
