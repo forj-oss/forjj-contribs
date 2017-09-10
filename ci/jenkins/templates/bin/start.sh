@@ -88,7 +88,7 @@ then
 fi
 
 {{ if .Deploy.Ssl.Certificate }}\
-if [[ "$CERTIFICATE_KEY" != "" ]]
+if [[ "$CERTIFICATE_KEY" = "" ]]
 then
    echo "Unable to set jenkins certificate without his key. Aborted."
    exit 1
@@ -96,7 +96,7 @@ fi
 echo "$CERTIFICATE_KEY" > certificate.key
 
 JENKINS_OPTS='JENKINS_OPTS=--httpPort=-1 --httpsPort=443 --httpsCertificate=/tmp/certificate.crt --httpsPrivateKey=/tmp/certificate.key'
-JENKINS_MOUNT="-v certificate.crt:/tmp/certificate.crt -v certificate.key:/tmp/certificate.key"
+JENKINS_MOUNT="-v ${SRC}certificate.crt:/tmp/certificate.crt -v ${SRC}certificate.key:/tmp/certificate.key"
 
 sudo docker run -d -p 443:$SERVICE_PORT -e "$JENKINS_OPTS" $JENKINS_MOUNT --name {{ .JenkinsImage.Name }}-dood $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
 
