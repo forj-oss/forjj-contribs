@@ -40,9 +40,6 @@ sources:
     ssl certificate:
       template: "certificate.crt"
       if: "{{ .Source.Deploy.Ssl.Certificate }}"
-    ssl CA certificate:
-      template: "ca_certificate.crt"
-      if: "{{ .Source.Deploy.Ssl.CaCertificate }}"
   deploy:
     docker:
       start up script:

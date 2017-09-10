@@ -1,2 +1,0 @@
-{{/* Context is defined by Struct YamlJenkins defined yaml_jenkins.go */}}\
-{{ .Deploy.Ssl.CaCertificate}}

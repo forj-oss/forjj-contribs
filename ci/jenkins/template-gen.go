@@ -20,7 +20,6 @@ func (t *YamlSSLStruct) UpdateFrom(d *SslStruct) bool {
 }
 
 func (t *YamlSSLStruct) SetFrom(d *SslStruct) (status bool) {
-	status = SetIfSet(&t.CaCertificate, d.CaCertificate)
 	status = SetIfSet(&t.Certificate, d.Certificate) || status
 	return
 }
