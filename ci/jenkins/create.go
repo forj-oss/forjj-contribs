@@ -22,15 +22,6 @@ func (r *CreateReq) check_source_existence(ret *goforjj.PluginData) (p *JenkinsP
 
 	p = new_plugin(src)
 
-	p.template_dir = *cliApp.params.template_dir
-	templatef := path.Join(p.template_dir, template_file)
-	if _, err := os.Stat(templatef); err != nil {
-		log.Printf(ret.Errorf("Unable to find templates definition file '%s'. %s.", templatef, err))
-		return
-	}
-
-	p.template_file = templatef
-
 	log.Printf(ret.StatusAdd("environment checked."))
 	return
 }

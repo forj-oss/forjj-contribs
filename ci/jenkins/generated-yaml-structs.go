@@ -26,6 +26,11 @@ type FinalImageStruct struct {
 	Version          string `json:"final-image-version"`            // Docker image tag version for your generated Jenkins Image.
 }
 
+type SslStruct struct {
+	Certificate string `json:"ssl-certificate"` // SSL Certificate file to certify your jenkins instance.
+	PrivateKey  string `json:"ssl-private-key"` // SSL private key to use to use the ssh certificate in jenkins.
+}
+
 // Object Instance structures
 
 type AppInstanceStruct struct {
@@ -37,6 +42,7 @@ type AppInstanceStruct struct {
 	DeployStruct
 	DockerfileStruct
 	FinalImageStruct
+	SslStruct
 }
 
 // Object features groups structure
@@ -136,7 +142,8 @@ type MaintainArgReq struct {
 }
 
 type AppMaintainStruct struct {
-	RegistryAuth string `json:"registry-auth"` // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
+	RegistryAuth  string `json:"registry-auth"`   // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
+	SslPrivateKey string `json:"ssl-private-key"` // SSL private key to use to use the ssh certificate in jenkins.
 }
 
 // YamlDesc has been created from your 'jenkins.yaml' file.
@@ -206,6 +213,14 @@ const YamlDesc = "---\n" +
 	"          service-port:\n" +
 	"            default: 8080\n" +
 	"            help: \"Expected jenkins instance port number.\"\n" +
+	"      ssl:\n" +
+	"        flags:\n" +
+	"          private-key:\n" +
+	"            help: SSL private key to use to use the ssh certificate in jenkins.\n" +
+	"            secure: true\n" +
+	"            cli-exported-to-actions: [\"maintain\"]\n" +
+	"          certificate:\n" +
+	"            help: SSL Certificate file to certify your jenkins instance.\n" +
 	"    flags:\n" +
 	"      seed-job-repo:\n" +
 	"        help: \"url to the seed job repository. By default, it uses the <YourInfraRepo>. Jobs are defined under job-dsl.\"\n" +
@@ -214,6 +229,7 @@ const YamlDesc = "---\n" +
 	"        help: \"List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]\"\n" +
 	"        secure: true\n" +
 	"        envar: \"REGISTRY_AUTH\"\n" +
+	"        cli-exported-to-actions: [\"maintain\"]\n" +
 	"  features:\n" +
 	"    default-actions: [\"add\", \"change\", \"remove\"]\n" +
 	"    identified_by_flag: name\n" +
