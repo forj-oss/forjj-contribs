@@ -20,28 +20,44 @@ func (g *GitHubStruct) create_yaml_data(req *CreateReq, ret *goforjj.PluginData)
 	g.github_source.Users = make(map[string]string)
 	g.github_source.Groups = make(map[string]TeamStruct)
 
+	g.github_source.NoRepos = (g.app.Repos_disabled == "true")
+	if g.github_source.NoRepos {
+		log.Print("Repositories_disabled is true. forjj_github won't manage repositories except the infra repository.")
+	}
+
 	// Add all repos
 	for name, repo := range req.Objects.Repo {
+		is_infra := (name == g.app.ForjjInfra)
+		if g.github_source.NoRepos && ! is_infra {
+			continue
+		}
 		if !repo.IsValid(name, ret) {
 			ret.StatusAdd("Warning!!! Invalid repository '%s' requested. Ignored.")
 			continue
 		}
-		g.SetRepo(&repo)
+		g.SetRepo(&repo, is_infra)
 	}
 
-	log.Printf("Github manage %d repository(ies).", len(g.github_source.Repos))
+	log.Printf("forjj-github manages %d repository(ies).", len(g.github_source.Repos))
 
-	for name, details := range req.Objects.User {
-		g.AddUser(name, &details)
+	g.github_source.NoTeams = (g.app.Teams_disabled == "true")
+	if g.github_source.NoTeams {
+		log.Print("Users_disabled is true. forjj_github won't manage Organization teams (Users/groups).")
+	} else {
+		for name, details := range req.Objects.User {
+			g.AddUser(name, &details)
+		}
 	}
 
-	log.Printf("Github manage %d user(s) at Organization level.", len(g.github_source.Users))
+	log.Printf("forjj-github manages %d user(s) at Organization level.", len(g.github_source.Users))
 
-	for name, details := range req.Objects.Group {
-		g.AddGroup(name, &details)
+	if !g.github_source.NoTeams {
+		for name, details := range req.Objects.Group {
+			g.AddGroup(name, &details)
+		}
 	}
 
-	log.Printf("Github manage %d group(s) at Organization level.", len(g.github_source.Groups))
+	log.Printf("forjj-github manages %d group(s) at Organization level.", len(g.github_source.Groups))
 
 	return nil
 }

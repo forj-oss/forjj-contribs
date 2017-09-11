@@ -40,9 +40,16 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 		return
 	}
 
-	log.Printf("Checking github connection : %#v", gws)
+	if a, found := req.Objects.App[instance] ; !found {
+		ret.Errorf("Internal issue. Forjj has not given the Application information for '%s'. Aborted.")
+		return
+	} else {
+		gws.app = &a
+	}
 
-	if gws.github_connect(req.Objects.App[instance].Server, ret) == nil {
+	log.Print("Checking github connection.")
+
+	if gws.github_connect(gws.app.Server, ret) == nil {
 		return
 	}
 
@@ -55,7 +62,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 	// A create won't be possible if repo requested already exist. The Update is the only possible option.
 	// The list of repository found are listed and returned in the answer.
 	if err := gws.repos_exists(ret); err != nil {
-		ret.Errorf("%s\nUnable to create the github configuration when github already has repositories created. Use 'update' instead.", err)
+		ret.Errorf("%s\nUnable to 'create' your forge when github already has an infra repository created. Clone it and use 'update' instead.", err)
 		return 419
 	}
 
@@ -108,8 +115,16 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 
 	var gws GitHubStruct
 
-	gws.source_mount = req.Forj.ForjjSourceMount
-	gws.token = req.Objects.App[instance].Token
+	if a, found := req.Objects.App[instance]; !found {
+		ret.Errorf("Invalid request. Missing Objects/App/%s", instance)
+		return
+	} else {
+		gws = GitHubStruct{
+			source_mount:    req.Forj.ForjjSourceMount,
+			token:           a.Token,
+			app:             &a,
+		}
+	}
 
 	source_path := path.Join(gws.source_mount, instance)
 
@@ -184,15 +199,18 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 // By default, if httpCode is not set (ie equal to 0), the function caller will set it to 422 in case of errors (error_message != "") or 200
 func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *goforjj.PluginData) (httpCode int) {
 	instance := req.Forj.ForjjInstanceName
-	if _, found := req.Objects.App[instance]; !found {
+
+	var gws GitHubStruct
+	if a, found := req.Objects.App[instance]; !found {
 		ret.Errorf("Invalid request. Missing Objects/App/%s", instance)
 		return
-	}
-	gws := GitHubStruct{
-		source_mount:    req.Forj.ForjjSourceMount,
-		workspace_mount: req.Forj.ForjjWorkspaceMount,
-		token:           req.Objects.App[instance].Token,
-		maintain_ctxt:   true,
+	} else {
+		gws = GitHubStruct{
+			source_mount:    req.Forj.ForjjSourceMount,
+			workspace_mount: req.Forj.ForjjWorkspaceMount,
+			token:           a.Token,
+			maintain_ctxt:   true,
+		}
 	}
 	check := make(map[string]bool)
 	check["token"] = true
@@ -223,6 +241,9 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
 
 	// loop on list of repos, and ensure they exist with minimal config and rights
 	for name, repo_data := range gws.github_source.Repos {
+		if !repo_data.Infra && gws.github_source.NoRepos {
+			log.Printf(ret.StatusAdd("Repo ignored: %s", name))
+		}
 		if err := repo_data.ensure_exists(&gws, ret); err != nil {
 			return
 		}
