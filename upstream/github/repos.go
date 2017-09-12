@@ -17,7 +17,7 @@ type RepositoryStruct struct { // Used to stored the yaml source file. Not used 
 	Users        map[string]string // Collection of users role
 	Groups       map[string]string // Collection of groups role
 	// Following data are used at runtime but not saved. Used to respond to the API.
-	Infra        bool                                    // true if the repos is the infra one.
+	Infra        bool              `yaml:",omitempty"`   // true if the repos is the infra one.
 	exist         bool                                   // True if the repo exist.
 	remotes       map[string]goforjj.PluginRepoRemoteUrl // k: remote name, v: remote urls
 	branchConnect map[string]string                      // k: local branch name, v: remote/branch
