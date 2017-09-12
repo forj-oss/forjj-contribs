@@ -95,12 +95,11 @@ then
 fi
 echo "$CERTIFICATE_KEY" > certificate.key
 
-JENKINS_OPTS='JENKINS_OPTS=--httpPort=-1 --httpsPort=443 --httpsCertificate=/tmp/certificate.crt --httpsPrivateKey=/tmp/certificate.key'
+JENKINS_OPTS='JENKINS_OPTS=--httpPort=-1 --httpsPort=8443 --httpsCertificate=/tmp/certificate.crt --httpsPrivateKey=/tmp/certificate.key'
 JENKINS_MOUNT="-v ${SRC}certificate.crt:/tmp/certificate.crt -v ${SRC}certificate.key:/tmp/certificate.key"
 
-sudo docker run -d -p 443:$SERVICE_PORT -e "$JENKINS_OPTS" $JENKINS_MOUNT --name {{ .JenkinsImage.Name }}-dood $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
+sudo docker run -d -p 8443:$SERVICE_PORT -e "$JENKINS_OPTS" $JENKINS_MOUNT --name {{ .JenkinsImage.Name }}-dood $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
 
-rm -f certificate.key
 {{ else }}
 sudo docker run -d -p 8080:$SERVICE_PORT --name {{ .JenkinsImage.Name }}-dood $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
 {{ end }}\
