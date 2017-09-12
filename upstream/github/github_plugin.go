@@ -22,10 +22,10 @@ type GitHubStruct struct {
 type GitHubSourceStruct struct {
 	goforjj.PluginService `,inline`                   // github base Url
 	Repos                 map[string]RepositoryStruct // Collection of repositories managed in github
-	NoRepos               bool                        // True to not manage repositories
+	NoRepos               bool    `yaml:",omitempty"` // True to not manage repositories
 	Organization          string                      // Organization name
 	OrgDisplayName        string                      // Organization's display name.
-	NoTeams               bool                        // True to not manage organization users
+	NoTeams               bool    `yaml:",omitempty"` // True to not manage organization users
 	Users                 map[string]string           // Collection of users role at organization level
 	Groups                map[string]TeamStruct       // Collection of Team role at organization level
 }
