@@ -239,6 +239,9 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
 	}
 	log.Printf(ret.StatusAdd("Organization maintained."))
 
+	if gws.github_source.NoRepos {
+		log.Printf(ret.StatusAdd("Repositories maintained limited to your infra repository"))
+	}
 	// loop on list of repos, and ensure they exist with minimal config and rights
 	for name, repo_data := range gws.github_source.Repos {
 		if !repo_data.Infra && gws.github_source.NoRepos {
