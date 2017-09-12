@@ -110,4 +110,4 @@ then
     sudo docker logs {{ .JenkinsImage.Name }}-dood
     return 1
 fi
-echo "Jenkins has been started and should be accessible at http://$SERVICE_ADDR:$SERVICE_PORT"
+echo "Jenkins has been started and should be accessible at http{{ if .Deploy.Ssl.Certificate }}s{{ end }}://$SERVICE_ADDR:$SERVICE_PORT"
