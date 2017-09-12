@@ -22,39 +22,55 @@ func (g *GitHubStruct) update_yaml_data(req *UpdateReq, ret *goforjj.PluginData)
 	g.github_source.Users = make(map[string]string)
 	g.github_source.Groups = make(map[string]TeamStruct)
 
-	// Updating all Forjfile repos
-	for name, repo := range req.Objects.Repo {
-		if !repo.IsValid(name, ret) {
-			continue
+	if g.app.Repos_disabled == "true" {
+		log.Print("Repos_disabled is true. forjj_github won't manage repositories except the infra one.")
+		g.github_source.NoRepos = true
+	} else {
+		// Updating all from Forjfile repos
+		g.github_source.NoRepos = false
+		for name, repo := range req.Objects.Repo {
+			if !repo.IsValid(name, ret) {
+				continue
+			}
+
+			g.SetRepo(&repo, (name == g.app.ForjjInfra))
 		}
 
-		g.SetRepo(&repo)
-	}
-
-	// Disabling missing one
-	for name, repo := range g.github_source.Repos {
-		if err := repo.IsValid(name); err != nil {
-			delete(g.github_source.Repos, name)
-			ret.StatusAdd("Warning!!! Invalid repository '%s' found in github.yaml. Removed.")
-			continue
-		}
-		if _, found := req.Objects.Repo[name]; !found && !repo.Disabled {
-			repo.Disabled = true
-			g.github_source.Repos[name] = repo
-			ret.StatusAdd("Disabling repository '%s'", name)
+		// Disabling missing one
+		for name, repo := range g.github_source.Repos {
+			if err := repo.IsValid(name); err != nil {
+				delete(g.github_source.Repos, name)
+				ret.StatusAdd("Warning!!! Invalid repository '%s' found in github.yaml. Removed.")
+				continue
+			}
+			if _, found := req.Objects.Repo[name]; !found && !repo.Disabled {
+				repo.Disabled = true
+				g.github_source.Repos[name] = repo
+				ret.StatusAdd("Disabling repository '%s'", name)
+			}
 		}
 	}
 
 	log.Printf("Github manage %d repository(ies)", len(g.github_source.Repos))
 
-	for name, details := range req.Objects.User {
-		g.AddUser(name, &details)
+	if g.app.Teams_disabled == "true" {
+		log.Print("Teams_disabled is true. forjj_github won't manage Organization Users.")
+		g.github_source.NoTeams = true
+	} else {
+		g.github_source.NoTeams = false
+		for name, details := range req.Objects.User {
+			g.AddUser(name, &details)
+		}
 	}
 
 	log.Printf("Github manage %d user(s) at Organization level.", len(g.github_source.Users))
 
-	for name, details := range req.Objects.Group {
-		g.AddGroup(name, &details)
+	if g.github_source.NoTeams {
+		log.Print("Teams_disabled is true. forjj_github won't manage Organization Groups.")
+	} else {
+		for name, details := range req.Objects.Group {
+			g.AddGroup(name, &details)
+		}
 	}
 
 	log.Printf("Github manage %d group(s) at Organization level.", len(g.github_source.Groups))
@@ -62,15 +78,16 @@ func (g *GitHubStruct) update_yaml_data(req *UpdateReq, ret *goforjj.PluginData)
 	return true, nil
 }
 
-// Add a new repository to be managed by github plugin.
-func (g *GitHubStruct) SetRepo(repo *RepoInstanceStruct) {
+// SetRepo Add a new repository to be managed by github plugin.
+func (g *GitHubStruct) SetRepo(repo *RepoInstanceStruct, is_infra bool) {
 	upstream := g.DefineRepoUrls(repo.Name)
 
 	// found or not, I need to set it.
 	r := RepositoryStruct{}
 	r.set(repo,
 		map[string]goforjj.PluginRepoRemoteUrl{"origin": upstream},
-		map[string]string{"master": "origin/master"})
+		map[string]string{"master": "origin/master"},
+		is_infra)
 	g.github_source.Repos[repo.Name] = r
 }
 

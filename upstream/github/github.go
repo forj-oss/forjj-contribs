@@ -176,6 +176,10 @@ func (g *GitHubStruct) ensure_organization_exists(ret *goforjj.PluginData) (s bo
 
 // setOrganizationTeams maintain the list of teams as defined by the github.yaml file.
 func (g *GitHubStruct) setOrganizationTeams(ret *goforjj.PluginData) (_ bool) {
+	if g.github_source.NoTeams {
+		log.Printf(ret.StatusAdd("Users/Groups maintain ignored."))
+		return true
+	}
 	// Load teams list already defined in github.
 	github_teams, resp, err := g.Client.Organizations.ListTeams(g.ctxt, g.github_source.Organization, nil)
 	if err != nil && resp == nil {
@@ -322,8 +326,8 @@ func (g *GitHubStruct) repos_exists(ret *goforjj.PluginData) (err error) {
 	// loop on list of repos, and ensure they exist with minimal config and rights
 	for name, repo_data := range g.github_source.Repos {
 		if found_repo, _, e := c.Get(g.ctxt, g.github_source.Organization, name); e == nil {
-			if err == nil {
-				err = fmt.Errorf("At least '%s' already exist in github server.", name)
+			if err == nil && name == g.app.ForjjInfra { // Infra repository.
+				err = fmt.Errorf("Infra repository '%s' already exist in github server.", name)
 			}
 			repo_data.exist = true
 			if repo_data.remotes == nil {
@@ -336,14 +340,12 @@ func (g *GitHubStruct) repos_exists(ret *goforjj.PluginData) (err error) {
 			}
 			repo_data.branchConnect["master"] = "origin/master"
 		}
-		if ret != nil {
-			ret.Repos[name] = goforjj.PluginRepo{
-				Name:          repo_data.Name,
-				Exist:         repo_data.exist,
-				Remotes:       repo_data.remotes,
-				BranchConnect: repo_data.branchConnect,
-				Owner:         g.github_source.Organization,
-			}
+		ret.Repos[name] = goforjj.PluginRepo{
+			Name:          repo_data.Name,
+			Exist:         repo_data.exist,
+			Remotes:       repo_data.remotes,
+			BranchConnect: repo_data.branchConnect,
+			Owner:         g.github_source.Organization,
 		}
 	}
 	return
