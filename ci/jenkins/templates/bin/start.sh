@@ -87,9 +87,9 @@ then
     fi
 fi
 
-if [[ "$ADMIN_PASSWD" != "" ]]
+if [[ "$ADMIN_PWD" != "" ]]
 then
-   ADMIN="-e SIMPLE_ADMIN_PWD=$ADMIN_PASSWD"
+   ADMIN="-e SIMPLE_ADMIN_PWD=$ADMIN_PWD"
 fi
 
 {{ if .Deploy.Ssl.Certificate }}\
