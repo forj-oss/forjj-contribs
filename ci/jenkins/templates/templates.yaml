@@ -63,6 +63,9 @@ run_deploy:
       CERTIFICATE_KEY:
         value: "{{ .Source.Deploy.Ssl.GetKey }}"
         if: "{{ .Source.Deploy.Ssl.GetKey }}"
+      ADMIN_PWD:
+        value: "{{ .Source.GetAdminPwd }}"
+        if: "{{ .Source.GetAdminPwd }}"
   ucp:
     run: "make deploy" # not tested
   mesos:
