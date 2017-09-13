@@ -9,6 +9,7 @@ type YamlJenkins struct {
 	Dockerfile   DockerfileStruct
 	JenkinsImage FinalImageStruct
 	Projects     *Projects
+	admin_pwd    string
 }
 
 func (y *YamlJenkins) ProjectsHasSource(name string) (_ bool) {
@@ -21,4 +22,12 @@ func (y *YamlJenkins) ProjectsHasSource(name string) (_ bool) {
 		}
 	}
 	return
+}
+
+func (y YamlJenkins) GetAdminPwd() string {
+	return y.admin_pwd
+}
+
+func (y *YamlJenkins) SetAdminPwd(pwd string) {
+	y.admin_pwd = pwd
 }

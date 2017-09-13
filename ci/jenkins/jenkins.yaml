@@ -81,6 +81,10 @@ objects:
         secure: true
         envar: "REGISTRY_AUTH"
         cli-exported-to-actions: ["maintain"]
+      admin-pwd:
+        help: "To replace the default simple security admin password"
+        secure: true
+        cli-exported-to-actions: ["maintain"]
   features:
     default-actions: ["add", "change", "remove"]
     identified_by_flag: name

@@ -87,6 +87,10 @@ then
     fi
 fi
 
+{{ if .GetAdminPwd }}\
+ADMIN_PWD="-e SIMPLE_ADMIN_PWD={{ .GetAdminPwd }}"
+{{ end }}\
+
 {{ if .Deploy.Ssl.Certificate }}\
 if [[ "$CERTIFICATE_KEY" = "" ]]
 then
