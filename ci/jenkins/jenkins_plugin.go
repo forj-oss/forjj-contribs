@@ -38,7 +38,7 @@ type DeployApp struct {
 type YamlSSLStruct struct {
 	CaCertificate string `json:"ca-certificate"` // CA root certificate which certify your jenkins instance.
 	Certificate   string `json:"certificate"`    // SSL Certificate file to certify your jenkins instance.
-	key           string                         // key for the SSL certificate.
+	key           string // key for the SSL certificate.
 }
 
 type ForjjStruct struct {
@@ -58,7 +58,7 @@ func new_plugin(src string) (p *JenkinsPlugin) {
 }
 
 func (p *JenkinsPlugin) GetMaintainData(instance string, req *MaintainReq, ret *goforjj.PluginData) (_ bool) {
-	if v, found := req.Objects.App[instance] ; ! found {
+	if v, found := req.Objects.App[instance]; !found {
 		ret.Errorf("Request issue. App instance '%s' is missing in list of object.")
 		return
 	} else {
@@ -67,6 +67,10 @@ func (p *JenkinsPlugin) GetMaintainData(instance string, req *MaintainReq, ret *
 			return
 		}
 		p.yaml.Deploy.Ssl.SetKey(v.SslPrivateKey)
+
+		if v.AdminPwd != "" {
+			p.yaml.SetAdminPwd(v.AdminPwd)
+		}
 	}
 	return true
 }

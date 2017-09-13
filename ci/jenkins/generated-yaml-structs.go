@@ -34,6 +34,7 @@ type SslStruct struct {
 // Object Instance structures
 
 type AppInstanceStruct struct {
+	AdminPwd     string `json:"admin-pwd"`     // To replace the default simple security admin password
 	RegistryAuth string `json:"registry-auth"` // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
 	SeedJobRepo  string `json:"seed-job-repo"` // url to the seed job repository. By default, it uses the <YourInfraRepo>. Jobs are defined under job-dsl.
 
@@ -142,6 +143,7 @@ type MaintainArgReq struct {
 }
 
 type AppMaintainStruct struct {
+	AdminPwd      string `json:"admin-pwd"`       // To replace the default simple security admin password
 	RegistryAuth  string `json:"registry-auth"`   // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
 	SslPrivateKey string `json:"ssl-private-key"` // SSL private key to use to use the ssh certificate in jenkins.
 }
@@ -229,6 +231,10 @@ const YamlDesc = "---\n" +
 	"        help: \"List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]\"\n" +
 	"        secure: true\n" +
 	"        envar: \"REGISTRY_AUTH\"\n" +
+	"        cli-exported-to-actions: [\"maintain\"]\n" +
+	"      admin-pwd:\n" +
+	"        help: \"To replace the default simple security admin password\"\n" +
+	"        secure: true\n" +
 	"        cli-exported-to-actions: [\"maintain\"]\n" +
 	"  features:\n" +
 	"    default-actions: [\"add\", \"change\", \"remove\"]\n" +
