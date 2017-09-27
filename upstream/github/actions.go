@@ -177,7 +177,6 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 	} else {
 		if !Updated {
 			log.Printf(ret.StatusAdd("No update detected."))
-			return
 		} else {
 			log.Printf(ret.StatusAdd("Configuration saved in '%s'.", path.Join(instance, github_file)))
 			for k, v := range gws.github_source.Urls {
@@ -188,6 +187,14 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 			ret.AddFile(path.Join(instance, github_file))
 		}
 	}
+
+	// Building final Post answer
+	// We assume ssh is used and forjj can push with appropriate credential.
+	for k, v := range gws.github_source.Urls {
+		ret.Services.Urls[k] = v
+	}
+	// Official application API recognized by Forjj
+	ret.Services.Urls["api_url"] = gws.github_source.Urls["github-base-url"]
 
 	return
 }
