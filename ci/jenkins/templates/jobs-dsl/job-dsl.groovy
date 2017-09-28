@@ -7,7 +7,7 @@ multibranchPipelineJob('{{ .Project.Name }}') {
           apiUri('{{ .Project.Github.ApiUrl }}')
 {{   end }}\
           repoOwner('{{ .Project.Github.RepoOwner }}')
-{{   if .Source.GithubUser.UserName }}\
+{{   if .Source.GithubUser.Name }}\
           scanCredentialsId('github-user')
 {{   end }}\
           repository('{{ .Project.Github.Repo }}')
