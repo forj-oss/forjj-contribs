@@ -9,7 +9,7 @@ features:
   - "feature:tcp-slave-agent-port"
   - "feature:jenkins-pipeline"
   - "plugin:git:3.4.1"
-  - "{{ if .Source.ProjectsHasSource \"github\" }}plugin:github-branch-source:2.2.1{{ end }}"
+  - "{{ if .Source.ProjectsHasSource \"github\" }}feature:multibranch-github-pipeline{{ end }}"
   - "{{ if .Source.ProjectsHasSource \"bitbucket\" }}plugin:cloudbees-bitbucket-branch-source:2.2.2{{ end }}"
   deploy:
     docker:
@@ -66,6 +66,8 @@ run_deploy:
       ADMIN_PWD:
         value: "{{ .Source.GetAdminPwd }}"
         if: "{{ .Source.GetAdminPwd }}"
+      GITHUB_USER_PASS:
+        value: "{{ .Source.GithubUser.GetPassword }}"
   ucp:
     run: "make deploy" # not tested
   mesos:

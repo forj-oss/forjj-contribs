@@ -10,6 +10,7 @@ type YamlJenkins struct {
 	JenkinsImage FinalImageStruct
 	Projects     *Projects
 	admin_pwd    string
+	GithubUser   UserPasswordCreds
 }
 
 func (y *YamlJenkins) ProjectsHasSource(name string) (_ bool) {

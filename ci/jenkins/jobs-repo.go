@@ -25,6 +25,11 @@ type Project struct {
 	all        *Projects
 }
 
+type ProjectModel struct {
+	Project Project
+	Source  YamlJenkins
+}
+
 func NewProjects(InstanceName, repo, Dslpath string, infra_repo bool) *Projects {
 	p := new(Projects)
 	p.DslPath = Dslpath
@@ -57,12 +62,22 @@ func (p *Project) Remove() bool {
 	return true
 }
 
+func (p *Project) Model(jp *JenkinsPlugin) (ret *ProjectModel) {
+	ret = new(ProjectModel)
+	ret.Project = *p
+	ret.Source = jp.yaml
+	return
+}
+
 func (p *Project) Add() error {
 	return nil
 }
 
 // Generates Jobs-dsl files in the given checked-out GIT repository.
-func (p *Projects) Generates(instance_name, template_dir, repo_path string, ret *goforjj.PluginData) (updated bool, _ error) {
+func (p *Projects) Generates(jp *JenkinsPlugin, instance_name string, ret *goforjj.PluginData) (updated bool, _ error) {
+	template_dir := jp.template_dir
+	repo_path := jp.source_path
+
 	if f, err := os.Stat(repo_path); err != nil {
 		return false, err
 	} else {
@@ -83,12 +98,12 @@ func (p *Projects) Generates(instance_name, template_dir, repo_path string, ret 
 	}
 
 	tmpl := new(TmplSource)
-	tmpl.Template = "jobs-dsl/job-dsl.tmpl"
+	tmpl.Template = "jobs-dsl/job-dsl.groovy"
 	tmpl.Chmod = 0644
 
 	for name, prj := range p.List {
 		name = strings.Replace(name, "-", "_", -1)
-		if u, err := tmpl.Generate(prj, template_dir, jobs_dsl_path, name+".groovy"); err != nil {
+		if u, err := tmpl.Generate(prj.Model(jp), template_dir, jobs_dsl_path, name+".groovy"); err != nil {
 			log.Printf("Unable to generate '%s'. %s",
 				path.Join(jobs_dsl_path, name+".groovy"), ret.Errorf("%s", err))
 			continue
