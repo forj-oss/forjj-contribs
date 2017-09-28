@@ -8,7 +8,8 @@ COPY features.lst /tmp
 
 ENV JENKINS_SLAVE_AGENT_PORT=50000{{ if .Projects }} \
     SEED_JOBS_REPO={{ .Projects.DslRepo }} \
-    BUILD_DSL_SCRIPTS={{if .Projects.InfraPath }}{{ .Projects.InfraPath }}{{ end }}/{{ .Projects.DslPath }}/*.groovy{{ end }}
+    BUILD_DSL_SCRIPTS={{if .Projects.InfraPath }}{{ .Projects.InfraPath }}{{ end }}/{{ .Projects.DslPath }}/*.groovy{{ end }}{{ if .GithubUser.Name }} \
+    GITHUB_USER={{ .GithubUser.Name }}{{ end }}
 
 USER root
 

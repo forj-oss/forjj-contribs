@@ -74,6 +74,19 @@ func SetIfSet(s *string, source string) (_ bool) {
 	return
 }
 
+// SetIfSet Set the value if the source is set
+func SetOrClean(s *string, source string) (_ bool) {
+	if source == "" {
+		*s = ""
+		return
+	}
+	if *s != source {
+		*s = source
+		return true
+	}
+	return
+}
+
 // SetOnceIfSet Set the value originally empty from source if set.
 func SetOnceIfSet(s *string, source string) (_ bool) {
 	if *s != "" || source == "" {

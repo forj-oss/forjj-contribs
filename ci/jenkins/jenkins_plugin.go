@@ -71,6 +71,11 @@ func (p *JenkinsPlugin) GetMaintainData(instance string, req *MaintainReq, ret *
 		if v.AdminPwd != "" {
 			p.yaml.SetAdminPwd(v.AdminPwd)
 		}
+
+		if err := p.yaml.GithubUser.setPassword(v.GithubUserPassword); err != nil {
+			ret.Errorf("%s", err)
+			return
+		}
 	}
 	return true
 }
@@ -129,6 +134,11 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
 		return
 	}
 
+	if p.yaml.GithubUser.SetFrom(&jenkins_instance.GithubUserStruct) {
+		ret.StatusAdd("github-user defined")
+		log.Printf("github-user defined with '%s'", p.yaml.GithubUser.Name)
+	}
+
 	status = true
 	return
 }
@@ -182,6 +192,12 @@ func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData) (stat
 		ret.StatusAdd("Jenkins master docker image data updated.")
 		status = true
 	}
+
+	if p.yaml.GithubUser.UpdateFrom(&instance_data.GithubUserStruct) {
+		ret.StatusAdd("Jenkins github-user credential updated.")
+		status = true
+	}
+
 	return
 }
 

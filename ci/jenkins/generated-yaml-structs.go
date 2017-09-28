@@ -15,7 +15,7 @@ type DeployStruct struct {
 
 type DockerfileStruct struct {
 	FromImage        string `json:"dockerfile-from-image"`         // Base Docker image tag name to use in Dockerfile. Must respect [server/repo/]name.
-	FromImageVersion string `json:"dockerfile-from-image-version"` // Base Docker image tag version to use in Dockerfile
+	FromImageVersion string `json:"dockerfile-from-image-version"` // Base Docker image tag version to use in Dockerfile. By default, it uses 'latest'.
 	Maintainer       string `json:"dockerfile-maintainer"`         // Jenkins image maintainer
 }
 
@@ -24,6 +24,11 @@ type FinalImageStruct struct {
 	RegistryRepoName string `json:"final-image-registry-repo-name"` // Docker Repository Name where your image will be pushed. If not set, no push will be done.
 	RegistryServer   string `json:"final-image-registry-server"`    // Docker registry server name where your image will be pushed. If not set, no push will be done.
 	Version          string `json:"final-image-version"`            // Docker image tag version for your generated Jenkins Image.
+}
+
+type GithubUserStruct struct {
+	Password string `json:"github-user-password"` // github user password. Recommended. Stored as github-user credential in jenkins.
+	Username string `json:"github-user-username"` // github user name. Recommended. Stored as github-user credential in jenkins.
 }
 
 type SslStruct struct {
@@ -43,6 +48,7 @@ type AppInstanceStruct struct {
 	DeployStruct
 	DockerfileStruct
 	FinalImageStruct
+	GithubUserStruct
 	SslStruct
 }
 
@@ -143,9 +149,10 @@ type MaintainArgReq struct {
 }
 
 type AppMaintainStruct struct {
-	AdminPwd      string `json:"admin-pwd"`       // To replace the default simple security admin password
-	RegistryAuth  string `json:"registry-auth"`   // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
-	SslPrivateKey string `json:"ssl-private-key"` // SSL private key to use to use the ssh certificate in jenkins.
+	AdminPwd           string `json:"admin-pwd"`            // To replace the default simple security admin password
+	RegistryAuth       string `json:"registry-auth"`        // List of Docker registry servers authentication separated by coma. One registry server auth string is build as <server>:<token>[:<email>]
+	GithubUserPassword string `json:"github-user-password"` // github user password. Recommended. Stored as github-user credential in jenkins.
+	SslPrivateKey      string `json:"ssl-private-key"`      // SSL private key to use to use the ssh certificate in jenkins.
 }
 
 // YamlDesc has been created from your 'jenkins.yaml' file.
@@ -190,7 +197,7 @@ const YamlDesc = "---\n" +
 	"            help: \"Base Docker image tag name to use in Dockerfile. Must respect [server/repo/]name.\"\n" +
 	"            default: forjdevops/jenkins-dood\n" +
 	"          from-image-version:\n" +
-	"            help: \"Base Docker image tag version to use in Dockerfile\"\n" +
+	"            help: \"Base Docker image tag version to use in Dockerfile. By default, it uses 'latest'.\"\n" +
 	"          maintainer:\n" +
 	"            help: \"Jenkins image maintainer\"\n" +
 	"      final-image:\n" +
@@ -223,6 +230,15 @@ const YamlDesc = "---\n" +
 	"            cli-exported-to-actions: [\"maintain\"]\n" +
 	"          certificate:\n" +
 	"            help: SSL Certificate file to certify your jenkins instance.\n" +
+	"      github-user:\n" +
+	"        flags:\n" +
+	"          username:\n" +
+	"            help: github user name. Recommended. Stored as github-user credential in jenkins.\n" +
+	"          password:\n" +
+	"            help: github user password. Recommended. Stored as github-user credential in jenkins.\n" +
+	"            secure: true\n" +
+	"            envar: \"USER_PASS\"\n" +
+	"            cli-exported-to-actions: [\"maintain\"]\n" +
 	"    flags:\n" +
 	"      seed-job-repo:\n" +
 	"        help: \"url to the seed job repository. By default, it uses the <YourInfraRepo>. Jobs are defined under job-dsl.\"\n" +

@@ -66,7 +66,7 @@ func (p *JenkinsPlugin) generate_jobsdsl(instance_name string, ret *goforjj.Plug
 	if p.yaml.Projects == nil {
 		return true // Nothing to do. But it is acceptable as not CORE.
 	}
-	if ok, err := p.yaml.Projects.Generates(instance_name, p.template_dir, p.source_path, ret); err != nil {
+	if ok, err := p.yaml.Projects.Generates(p, instance_name, ret); err != nil {
 		log.Print(ret.Errorf("%s", err))
 	} else {
 		status = ok
