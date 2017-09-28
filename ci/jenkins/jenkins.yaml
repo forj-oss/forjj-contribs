@@ -72,7 +72,7 @@ objects:
             cli-exported-to-actions: ["maintain"]
           certificate:
             help: SSL Certificate file to certify your jenkins instance.
-      github-cred:
+      github-user:
         flags:
           username:
             help: github user name. Recommended. Stored as github-user credential in jenkins.

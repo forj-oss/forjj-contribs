@@ -10,7 +10,7 @@ type YamlJenkins struct {
 	JenkinsImage FinalImageStruct
 	Projects     *Projects
 	admin_pwd    string
-	GithubUser   UserPasswordCreds
+	GithubUser   UserPasswordCreds `yaml:"github-user,omitempty"`
 }
 
 func (y *YamlJenkins) ProjectsHasSource(name string) (_ bool) {

@@ -3,30 +3,30 @@ package main
 import "fmt"
 
 type UserPasswordCreds struct {
-	UserName string `yaml:"user_name,omitempty"`
+	Name     string `yaml:"name,omitempty"`
 	password string
 }
 
-func (t *UserPasswordCreds) SetFrom(d *GithubCredStruct) (status bool) {
-	status = SetIfSet(&t.UserName, d.Username)
+func (t *UserPasswordCreds) SetFrom(d *GithubUserStruct) (status bool) {
+	status = SetIfSet(&t.Name, d.Username)
 	return
 }
 
-func (t *UserPasswordCreds) UpdateFrom(d *GithubCredStruct) (status bool) {
-	status = SetOrClean(&t.UserName, d.Username)
+func (t *UserPasswordCreds) UpdateFrom(d *GithubUserStruct) (status bool) {
+	status = SetOrClean(&t.Name, d.Username)
 	return
 }
 
 func (t *UserPasswordCreds) setPassword(password string) (_ error) {
-	if t.UserName == "" && password == "" {
+	if t.Name == "" && password == "" {
 		return
 	}
-	if t.UserName == "" {
+	if t.Name == "" {
 		return fmt.Errorf("You set the github user password, but the github user name is missing. " +
 			"Please, update your Forjfile.")
 	}
 	if password == "" {
-		return fmt.Errorf("Password for '%s' is missing. Please set the github password and retry.", t.UserName)
+		return fmt.Errorf("Password for '%s' is missing. Please set the github password and retry.", t.Name)
 	}
 	t.password = password
 	return
