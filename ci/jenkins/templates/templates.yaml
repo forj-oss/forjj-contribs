@@ -9,6 +9,8 @@ features:
   - "feature:tcp-slave-agent-port"
   - "feature:jenkins-pipeline"
   - "plugin:git:3.4.1"
+  - "plugin:managed-scripts"
+  - "plugin:config-file-provider"
   - "{{ if .Source.ProjectsHasSource \"github\" }}feature:multibranch-github-pipeline{{ end }}"
   - "{{ if .Source.ProjectsHasSource \"bitbucket\" }}plugin:cloudbees-bitbucket-branch-source:2.2.2{{ end }}"
   deploy:
