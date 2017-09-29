@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/forj-oss/goforjj"
 	"net/url"
 	"regexp"
@@ -20,11 +21,12 @@ func (pi *ProjectInfo) set_infra_remote(infra_remote string) {
 }
 
 func (pi *ProjectInfo) set_projects_to(projects map[string]ProjectsInstanceStruct, r *JenkinsPlugin,
-	ret *goforjj.PluginData) (status bool) {
+	ret *goforjj.PluginData, status *bool) (_ error) {
 	if pi.ForjjInfraUpstream == "" {
 		ret.StatusAdd("Unable to add a new project without a remote GIT repository. Jenkins JobDSL requirement. " +
 			"To enable this feature, add a remote GIT to your infra --infra-upstream or define the JobDSL Repository to clone.")
-		return true
+		IsUpdated(status)
+		return
 	}
 
 	ssh_format, _ := regexp.Compile(`^(https?://)(\w[\w.-]+)((/(\w[\w.-]*)/(\w[\w.-]*))(/\w[\w.-/]*)?)$`)
@@ -42,10 +44,12 @@ func (pi *ProjectInfo) set_projects_to(projects map[string]ProjectsInstanceStruc
 
 	if v, err := url.Parse(pi.infra_remote); err != nil {
 		ret.Errorf("Infra remote URL issue. %s", err)
-		return false
+		return err
 	} else {
 		if v.Scheme == "" {
-			ret.Errorf("Invalid Remote repository Url '%s'. A scheme must exist.", pi.infra_remote)
+			err = fmt.Errorf("Invalid Remote repository Url '%s'. A scheme must exist.", pi.infra_remote)
+			ret.Errorf("%s", err)
+			return err
 		}
 	}
 	// Initialize JobDSL structure
@@ -60,6 +64,6 @@ func (pi *ProjectInfo) set_projects_to(projects map[string]ProjectsInstanceStruc
 			r.yaml.Projects.AddGit(name, &prj.GitStruct)
 		}
 	}
-	status = true
+	IsUpdated(status)
 	return
 }

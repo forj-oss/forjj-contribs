@@ -74,26 +74,26 @@ func (p *Project) Add() error {
 }
 
 // Generates Jobs-dsl files in the given checked-out GIT repository.
-func (p *Projects) Generates(jp *JenkinsPlugin, instance_name string, ret *goforjj.PluginData) (updated bool, _ error) {
+func (p *Projects) Generates(jp *JenkinsPlugin, instance_name string, ret *goforjj.PluginData, status *bool) (_ error) {
 	template_dir := jp.template_dir
 	repo_path := jp.source_path
 
 	if f, err := os.Stat(repo_path); err != nil {
-		return false, err
+		return err
 	} else {
 		if !f.IsDir() {
-			return false, fmt.Errorf("Repo cloned path '%s' is not a directory.", repo_path)
+			return fmt.Errorf(ret.Errorf("Repo cloned path '%s' is not a directory.", repo_path))
 		}
 	}
 
 	jobs_dsl_path := path.Join(repo_path, p.DslPath)
 	if f, err := os.Stat(jobs_dsl_path); err != nil {
 		if err := os.MkdirAll(jobs_dsl_path, 0755); err != nil {
-			return false, err
+			return err
 		}
 	} else {
 		if !f.IsDir() {
-			return false, fmt.Errorf("path '%s' is not a directory.", repo_path)
+			return fmt.Errorf(ret.Errorf("path '%s' is not a directory.", repo_path))
 		}
 	}
 
@@ -106,14 +106,12 @@ func (p *Projects) Generates(jp *JenkinsPlugin, instance_name string, ret *gofor
 		if u, err := tmpl.Generate(prj.Model(jp), template_dir, jobs_dsl_path, name+".groovy"); err != nil {
 			log.Printf("Unable to generate '%s'. %s",
 				path.Join(jobs_dsl_path, name+".groovy"), ret.Errorf("%s", err))
-			continue
-		} else {
-			updated = u
-		}
-		if updated {
+			return err
+		} else if u {
+			IsUpdated(status)
 			ret.AddFile(path.Join(instance_name, jobs_dsl_path, name+".groovy"))
 			log.Printf(ret.StatusAdd("Project '%s' (%s) generated", name, path.Join(p.DslPath, name+".groovy")))
 		}
 	}
-	return
+	return nil
 }
