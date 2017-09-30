@@ -112,6 +112,7 @@ type MaintainReq struct {
 		Debug string `json:"debug"`
 		ForjjInstanceName string `json:"forjj-instance-name"`
 		ForjjSourceMount string `json:"forjj-source-mount"`
+		Force string `json:"force"`
 		ForjjWorkspaceMount string `json:"forjj-workspace-mount"`
 	}
 	Objects MaintainArgReq
@@ -149,6 +150,8 @@ const YamlDesc = "---\n" +
    "  maintain:\n" +
    "    forjj-workspace-mount:\n" +
    "      help: \"Where the workspace dir is located in the github plugin container.\"\n" +
+   "    force:\n" +
+   "      help: Set 'true' to force removal of teams/users when forjj creates a new forge.\n" +
    "objects: # All objects will be delivered by forjj except workspace/infra under objects/<type>/<instance>/<action>/key=value\n" +
    "  # Define infra object special flag for github\n" +
    "  app: # already defined by Forjj\n" +

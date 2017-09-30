@@ -20,6 +20,8 @@ task_flags: # All task flags will be delivered by forjj to the plugin under forj
   maintain:
     forjj-workspace-mount:
       help: "Where the workspace dir is located in the github plugin container."
+    force:
+      help: Set 'true' to force removal of teams/users when forjj creates a new forge.
 objects: # All objects will be delivered by forjj except workspace/infra under objects/<type>/<instance>/<action>/key=value
   # Define infra object special flag for github
   app: # already defined by Forjj

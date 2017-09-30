@@ -241,6 +241,9 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
 	if !gws.ensure_organization_exists(ret) {
 		return
 	}
+
+	gws.IsNewForge(req.Forj.Force)
+
 	if !gws.setOrganizationTeams(ret) {
 		return
 	}

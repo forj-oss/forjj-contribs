@@ -17,6 +17,8 @@ type GitHubStruct struct {
 	github_source   GitHubSourceStruct // github source structure (yaml)
 	app             *AppInstanceStruct // Application information given by Forjj
 	maintain_ctxt   bool
+	new_forge       bool
+	force           bool
 }
 
 type GitHubSourceStruct struct {

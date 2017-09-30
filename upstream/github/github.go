@@ -194,12 +194,21 @@ func (g *GitHubStruct) setOrganizationTeams(ret *goforjj.PluginData) (_ bool) {
 			// TODO: Support more teams options to maintain
 			if _, found := g.github_source.Groups[*github_team.Name]; !found {
 				// Remove team
+				if g.new_forge && ! g.force {
+					ret.Errorf("Unable to remove teams on a new Forge if you do not forcelly request it.")
+					return
+				}
 				log.Printf(ret.StatusAdd("Removing uncontrolled team '%s'.", *github_team.Name))
 				resp, err = g.Client.Organizations.DeleteTeam(g.ctxt, *github_team.ID)
 				if err != nil && resp == nil {
 					log.Printf(ret.Errorf("Unable to remove team '%s' from '%s' organization. %s",
 						*github_team.Name, g.github_source.Organization, err))
 					return
+				} else if resp.StatusCode != 204 {
+					log.Printf(ret.Errorf("Unable to remove team '%s' from '%s' organization. HTTP status : %s",
+						*github_team.Name, g.github_source.Organization, resp.Status))
+					return
+
 				}
 			} else {
 				teams[*github_team.Name] = github_team
@@ -350,6 +359,28 @@ func (g *GitHubStruct) repos_exists(ret *goforjj.PluginData) (err error) {
 	}
 	return
 }
+
+func (g *GitHubStruct) IsNewForge(force string) {
+	c := g.Client.Repositories
+
+	// loop on list of repos, and ensure they exist with minimal config and rights
+	for name := range g.github_source.Repos {
+		if name != g.app.ForjjInfra {
+			continue
+		}
+		if _, _, e := c.Get(g.ctxt, g.github_source.Organization, name); e == nil {
+			// Infra repository.
+			g.new_forge = true
+			return
+		}
+	}
+
+	// Get Force status from forjj
+	if force == "true" {
+		g.force = true
+	}
+}
+
 
 // Populate ret.Repos with req.repos status and information
 func (g *GitHubStruct) req_repos_exists(req *UpdateReq, ret *goforjj.PluginData) (err error) {
