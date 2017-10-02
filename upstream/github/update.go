@@ -22,7 +22,7 @@ func (g *GitHubStruct) update_yaml_data(req *UpdateReq, ret *goforjj.PluginData)
 	g.github_source.Users = make(map[string]string)
 	g.github_source.Groups = make(map[string]TeamStruct)
 
-	if g.app.Repos_disabled == "true" {
+	if g.app.ReposDisabled == "true" {
 		log.Print("Repos_disabled is true. forjj_github won't manage repositories except the infra one.")
 		g.github_source.NoRepos = true
 	} else {
@@ -53,7 +53,7 @@ func (g *GitHubStruct) update_yaml_data(req *UpdateReq, ret *goforjj.PluginData)
 
 	log.Printf("Github manage %d repository(ies)", len(g.github_source.Repos))
 
-	if g.app.Teams_disabled == "true" {
+	if g.app.TeamsDisabled == "true" {
 		log.Print("Teams_disabled is true. forjj_github won't manage Organization Users.")
 		g.github_source.NoTeams = true
 	} else {

@@ -45,9 +45,9 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         required: true
         secure: true
         envar: "TOKEN"
-      teams_disabled:
+      teams-disabled:
         help: "true if the plugin should not manage github users and groups"
-      repos_disabled:
+      repos-disabled:
         help: "true if the plugin should not manage github repositories except the infra repository."
   # Define github group exposure to forjj
   group: # New object type in forjj
