@@ -67,11 +67,16 @@ type UserInstanceStruct struct {
 // Create request structure
 // ************************
 
-type CreateReq struct {
-	Forj struct {
+type ForjCommonStruct struct {
 		Debug string `json:"debug"`
 		ForjjInstanceName string `json:"forjj-instance-name"`
 		ForjjSourceMount string `json:"forjj-source-mount"`
+}
+
+type CreateReq struct {
+	Forj struct {
+		ForjCommonStruct
+		Force string `json:"force"`
 	}
 	Objects CreateArgReq
 }
@@ -89,9 +94,7 @@ type CreateArgReq struct {
 
 type UpdateReq struct {
 	Forj struct {
-		Debug string `json:"debug"`
-		ForjjInstanceName string `json:"forjj-instance-name"`
-		ForjjSourceMount string `json:"forjj-source-mount"`
+		ForjCommonStruct
 	}
 	Objects UpdateArgReq
 }
@@ -109,9 +112,8 @@ type UpdateArgReq struct {
 
 type MaintainReq struct {
 	Forj struct {
-		Debug string `json:"debug"`
-		ForjjInstanceName string `json:"forjj-instance-name"`
-		ForjjSourceMount string `json:"forjj-source-mount"`
+		ForjCommonStruct
+		Force string `json:"force"`
 		ForjjWorkspaceMount string `json:"forjj-workspace-mount"`
 	}
 	Objects MaintainArgReq
@@ -138,7 +140,7 @@ const YamlDesc = "---\n" +
    "  service:\n" +
    "    parameters: [ \"service\", \"start\" ]\n" +
    "created_flag_file: \"{{ .InstanceName }}/{{.Name}}.yaml\"\n" +
-   "task_flags: # All task flags will be delivered by forjj to the plugin under forj/\n" +
+   "task_flags: # Additional forjj task flags delivered by forjj to the plugin in req.Forj. Those flags are provided only through CLI.\n" +
    "  common:\n" +
    "    debug:\n" +
    "      help: \"To activate github debug information\"\n" +
@@ -146,9 +148,14 @@ const YamlDesc = "---\n" +
    "      help: \"Where the source dir is located for github plugin container.\"\n" +
    "    forjj-instance-name:\n" +
    "       help: \"Name of the jenkins instance given by forjj.\"\n" +
+   "  create:\n" +
+   "    force:\n" +
+   "      help: Set 'true' to force removal of teams/users when forjj creates a new forge.\n" +
    "  maintain:\n" +
    "    forjj-workspace-mount:\n" +
    "      help: \"Where the workspace dir is located in the github plugin container.\"\n" +
+   "    force:\n" +
+   "      help: Set 'true' to force removal of teams/users when forjj creates a new forge.\n" +
    "objects: # All objects will be delivered by forjj except workspace/infra under objects/<type>/<instance>/<action>/key=value\n" +
    "  # Define infra object special flag for github\n" +
    "  app: # already defined by Forjj\n" +
@@ -176,7 +183,6 @@ const YamlDesc = "---\n" +
    "        help: \"true if the plugin should not manage github users and groups\"\n" +
    "      repos_disabled:\n" +
    "        help: \"true if the plugin should not manage github repositories except the infra repository.\"\n" +
-   "\n" +
    "  # Define github group exposure to forjj\n" +
    "  group: # New object type in forjj\n" +
    "    # Default is : actions: [\"add\", \"change\", \"remove\", \"list\", \"rename\"]\n" +

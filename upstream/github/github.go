@@ -61,7 +61,7 @@ func (g *GitHubStruct) github_set_url(server string) (err error) {
 	}
 	if !g.maintain_ctxt {
 		if server == "" || server == "api.github.com" || server == "github.com" {
-			g.github_source.Urls["github-base-url"] = "https://api.github.com" // Default public API link
+			g.github_source.Urls["github-base-url"] = "https://api.github.com/" // Default public API link
 			g.github_source.Urls["github-url"] = "https://github.com"          // Default public link
 		} else {
 			// To accept GitHub entreprise without ssl, permit server to have url format.
@@ -194,12 +194,22 @@ func (g *GitHubStruct) setOrganizationTeams(ret *goforjj.PluginData) (_ bool) {
 			// TODO: Support more teams options to maintain
 			if _, found := g.github_source.Groups[*github_team.Name]; !found {
 				// Remove team
+				if g.new_forge && ! g.force {
+					ret.Errorf("Unable to remove teams on a new Forge if you do not forcelly request it. " +
+						"To fix it, use the github force option or update your Forjfile.")
+					return
+				}
 				log.Printf(ret.StatusAdd("Removing uncontrolled team '%s'.", *github_team.Name))
 				resp, err = g.Client.Organizations.DeleteTeam(g.ctxt, *github_team.ID)
 				if err != nil && resp == nil {
 					log.Printf(ret.Errorf("Unable to remove team '%s' from '%s' organization. %s",
 						*github_team.Name, g.github_source.Organization, err))
 					return
+				} else if resp.StatusCode != 204 {
+					log.Printf(ret.Errorf("Unable to remove team '%s' from '%s' organization. HTTP status : %s",
+						*github_team.Name, g.github_source.Organization, resp.Status))
+					return
+
 				}
 			} else {
 				teams[*github_team.Name] = github_team
@@ -350,6 +360,29 @@ func (g *GitHubStruct) repos_exists(ret *goforjj.PluginData) (err error) {
 	}
 	return
 }
+
+func (g *GitHubStruct) IsNewForge(ret *goforjj.PluginData) (_ bool) {
+	c := g.Client.Repositories
+
+	// loop on list of repos, and ensure they exist with minimal config and rights
+	for name, repo := range g.github_source.Repos {
+		if ! repo.Infra {
+			continue
+		}
+		// Infra repository.
+		if _, resp, e := c.Get(g.ctxt, g.github_source.Organization, name); e != nil && resp == nil {
+			ret.Errorf("Unable to identify the infra repository. Unknown issue: %s", e)
+			return
+		} else {
+			g.new_forge = (resp.StatusCode != 200)
+		}
+		return true
+	}
+	ret.Errorf("Unable to identify the infra repository. At least, one repo must be identified with " +
+		"`%s` in %s. You can use Forjj update to fix this.", "Infra: true", "github")
+	return
+}
+
 
 // Populate ret.Repos with req.repos status and information
 func (g *GitHubStruct) req_repos_exists(req *UpdateReq, ret *goforjj.PluginData) (err error) {
