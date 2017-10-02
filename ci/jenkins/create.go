@@ -27,49 +27,46 @@ func (r *CreateReq) check_source_existence(ret *goforjj.PluginData) (p *JenkinsP
 }
 
 // We assume template source file is loaded.
-func (r *JenkinsPlugin) create_jenkins_sources(instance_name string, ret *goforjj.PluginData) (status bool) {
+func (r *JenkinsPlugin) create_jenkins_sources(instance_name string, ret *goforjj.PluginData) (err error) {
 
-	if err := r.DefineSources(); err != nil {
+	if err = r.DefineSources(); err != nil {
 		log.Printf(ret.Errorf("%s", err))
-		return
+		return err
 	}
 
 	log.Print("Start copying source files...")
-	if !r.copy_source_files(instance_name, ret) {
+	if err = r.copy_source_files(instance_name, ret, nil); err != nil {
 		return
 	}
 
 	log.Print("Start Generating source files...")
-	if !r.generate_source_files(instance_name, ret) {
+	if err = r.generate_source_files(instance_name, ret, nil); err != nil {
 		return
 	}
 
-	if !r.generate_jobsdsl(instance_name, ret) {
+	if err = r.generate_jobsdsl(instance_name, ret, nil); err != nil {
 		return
 	}
 
-	ret.CommitMessage = "Creating initial jenkins source files as defined by the Forjfile."
-	return true
+	return
 }
 
 // add_projects add project data in the jenkins.yaml file
-func (jp *JenkinsPlugin) add_projects(req *CreateReq, ret *goforjj.PluginData) bool {
+func (jp *JenkinsPlugin) add_projects(req *CreateReq, ret *goforjj.PluginData) error {
 	projects := ProjectInfo{}
 	projects.set_project_info(req.Forj.ForjCommonStruct)
 	projects.set_infra_remote(req.Objects.App[req.Forj.ForjjInstanceName].SeedJobRepo)
-	return projects.set_projects_to(req.Objects.Projects, jp, ret)
+	return projects.set_projects_to(req.Objects.Projects, jp, ret, nil)
 }
 
 // generate_jobsdsl generate any missing job-dsl source file.
 // TODO: Support for different Repository path that Forjj have to checkout appropriately.
-func (p *JenkinsPlugin) generate_jobsdsl(instance_name string, ret *goforjj.PluginData) (status bool) {
+func (p *JenkinsPlugin) generate_jobsdsl(instance_name string, ret *goforjj.PluginData, status *bool) (err error) {
 	if p.yaml.Projects == nil {
-		return true // Nothing to do. But it is acceptable as not CORE.
+		return
 	}
-	if ok, err := p.yaml.Projects.Generates(p, instance_name, ret); err != nil {
+	if err = p.yaml.Projects.Generates(p, instance_name, ret, status); err != nil {
 		log.Print(ret.Errorf("%s", err))
-	} else {
-		status = ok
 	}
 	return
 }

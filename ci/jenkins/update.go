@@ -26,26 +26,33 @@ func (r *UpdateReq) check_source_existence(ret *goforjj.PluginData) (p *JenkinsP
 	return p, true
 }
 
-func (r *JenkinsPlugin) update_jenkins_sources(instance_name string, ret *goforjj.PluginData) (status bool) {
-	if err := r.DefineSources(); err != nil {
+func (r *JenkinsPlugin) update_jenkins_sources(instance_name string, ret *goforjj.PluginData, updated *bool) (err error) {
+	if err = r.DefineSources(); err != nil {
 		log.Printf(ret.Errorf("%s", err))
 		return
 	}
 
 	log.Print("Start copying source files...")
-	status = r.copy_source_files(instance_name, ret)
+	if err = r.copy_source_files(instance_name, ret, updated); err != nil {
+		return
+	}
 
 	log.Print("Start Generating source files...")
-	status = r.generate_source_files(instance_name, ret) || status
-
-	status = r.generate_jobsdsl(instance_name, ret) || status
-
-	if status {
-		ret.CommitMessage = "Updating jenkins source files requested by Forjfile."
-	} else {
-		ret.StatusAdd("No update detected.")
+	if err = r.generate_source_files(instance_name, ret, updated); err != nil {
+		return
 	}
+
+	if err = r.generate_jobsdsl(instance_name, ret, updated); err != nil {
+		return
+	}
+
 	return
+}
+
+func IsUpdated(updated *bool) {
+	if updated != nil {
+		*updated = true
+	}
 }
 
 // Function which adds maintain options as part of the plugin answer in create/update phase.
@@ -75,9 +82,10 @@ func addMaintainOptionValue(options map[string]goforjj.PluginOption, option, val
 }
 
 // update_projects add project data in the jenkins.yaml file
-func (jp *JenkinsPlugin) update_projects(req *UpdateReq, ret *goforjj.PluginData) bool {
+func (jp *JenkinsPlugin) update_projects(req *UpdateReq, ret *goforjj.PluginData, status *bool) error {
 	projects := ProjectInfo{}
 	projects.set_project_info(req.Forj.ForjCommonStruct)
 	projects.set_infra_remote(req.Objects.App[req.Forj.ForjjInstanceName].SeedJobRepo)
-	return projects.set_projects_to(req.Objects.Projects, jp, ret)
+
+	return projects.set_projects_to(req.Objects.Projects, jp, ret, status)
 }

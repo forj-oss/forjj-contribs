@@ -20,17 +20,18 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 		p = pr
 	}
 
-	if !p.initialize_from(req, ret) {
+	if p.initialize_from(req, ret) != nil {
 		return
 	}
 
-	if !p.create_jenkins_sources(req.Forj.ForjjInstanceName, ret) {
+	if p.create_jenkins_sources(req.Forj.ForjjInstanceName, ret) != nil {
 		return
 	}
 
-	if !p.save_yaml(ret) {
-		return
-	}
+	p.save_yaml(ret, nil)
+
+	ret.CommitMessage = "Creating initial jenkins source files as defined by the Forjfile."
+
 	return
 }
 
@@ -39,7 +40,7 @@ func DoCreate(w http.ResponseWriter, r *http.Request, req *CreateReq, ret *gofor
 // ret_data contains the response structure to return back to forjj.
 // forjj-jenkins.yaml is loaded by default.
 //
-func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *goforjj.PluginData) (httpCode int) {
+func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *goforjj.PluginData) (_ int) {
 	var p *JenkinsPlugin
 
 	if pr, ok := req.check_source_existence(ret); !ok {
@@ -58,14 +59,24 @@ func DoUpdate(w http.ResponseWriter, r *http.Request, req *UpdateReq, ret *gofor
 	p.yaml.Forjj.OrganizationName = req.Forj.ForjjOrganization
 	p.yaml.Forjj.InfraUpstream = req.Forj.ForjjInfraUpstream
 
-	status := p.update_from(req, ret)
-	status = p.update_projects(req, ret) || status
-	status = p.update_jenkins_sources(req.Forj.ForjjInstanceName, ret) || status
-	status = p.save_yaml(ret) || status
-
-	if !status {
-		log.Print(ret.StatusAdd("No update detected. Jenkins source files hasn't been updated."))
+	var updated bool
+	if p.update_from(req, ret, &updated) != nil {
 		return
+	}
+	if p.update_projects(req, ret, &updated) != nil {
+		return
+	}
+	if p.update_jenkins_sources(req.Forj.ForjjInstanceName, ret, &updated) != nil {
+		return
+	}
+	if p.save_yaml(ret, &updated) != nil {
+		return
+	}
+
+	if updated {
+		ret.CommitMessage = "Updating jenkins source files requested by Forjfile."
+	} else {
+		log.Print(ret.StatusAdd("No update detected. Jenkins source files hasn't been updated."))
 	}
 	return
 }
