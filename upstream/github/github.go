@@ -61,7 +61,7 @@ func (g *GitHubStruct) github_set_url(server string) (err error) {
 	}
 	if !g.maintain_ctxt {
 		if server == "" || server == "api.github.com" || server == "github.com" {
-			g.github_source.Urls["github-base-url"] = "https://api.github.com" // Default public API link
+			g.github_source.Urls["github-base-url"] = "https://api.github.com/" // Default public API link
 			g.github_source.Urls["github-url"] = "https://github.com"          // Default public link
 		} else {
 			// To accept GitHub entreprise without ssl, permit server to have url format.
@@ -195,7 +195,8 @@ func (g *GitHubStruct) setOrganizationTeams(ret *goforjj.PluginData) (_ bool) {
 			if _, found := g.github_source.Groups[*github_team.Name]; !found {
 				// Remove team
 				if g.new_forge && ! g.force {
-					ret.Errorf("Unable to remove teams on a new Forge if you do not forcelly request it.")
+					ret.Errorf("Unable to remove teams on a new Forge if you do not forcelly request it. " +
+						"To fix it, use the github force option or update your Forjfile.")
 					return
 				}
 				log.Printf(ret.StatusAdd("Removing uncontrolled team '%s'.", *github_team.Name))
@@ -360,25 +361,26 @@ func (g *GitHubStruct) repos_exists(ret *goforjj.PluginData) (err error) {
 	return
 }
 
-func (g *GitHubStruct) IsNewForge(force string) {
+func (g *GitHubStruct) IsNewForge(ret *goforjj.PluginData) (_ bool) {
 	c := g.Client.Repositories
 
 	// loop on list of repos, and ensure they exist with minimal config and rights
-	for name := range g.github_source.Repos {
-		if name != g.app.ForjjInfra {
+	for name, repo := range g.github_source.Repos {
+		if ! repo.Infra {
 			continue
 		}
-		if _, _, e := c.Get(g.ctxt, g.github_source.Organization, name); e == nil {
-			// Infra repository.
-			g.new_forge = true
+		// Infra repository.
+		if _, resp, e := c.Get(g.ctxt, g.github_source.Organization, name); e != nil && resp == nil {
+			ret.Errorf("Unable to identify the infra repository. Unknown issue: %s", e)
 			return
+		} else {
+			g.new_forge = (resp.StatusCode != 200)
 		}
+		return true
 	}
-
-	// Get Force status from forjj
-	if force == "true" {
-		g.force = true
-	}
+	ret.Errorf("Unable to identify the infra repository. At least, one repo must be identified with " +
+		"`%s` in %s. You can use Forjj update to fix this.", "Infra: true", "github")
+	return
 }
 
 

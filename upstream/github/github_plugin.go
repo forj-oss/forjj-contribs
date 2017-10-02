@@ -15,7 +15,8 @@ type GitHubStruct struct {
 	ctxt            context.Context
 	Client          *github.Client
 	github_source   GitHubSourceStruct // github source structure (yaml)
-	app             *AppInstanceStruct // Application information given by Forjj
+	app             *AppInstanceStruct // Application information given by Forjj at Create/Update phase
+	infra_repo      string
 	maintain_ctxt   bool
 	new_forge       bool
 	force           bool

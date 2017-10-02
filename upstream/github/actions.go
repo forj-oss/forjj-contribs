@@ -217,6 +217,7 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
 			workspace_mount: req.Forj.ForjjWorkspaceMount,
 			token:           a.Token,
 			maintain_ctxt:   true,
+			force:           (req.Forj.Force == "true"),
 		}
 	}
 	check := make(map[string]bool)
@@ -242,7 +243,9 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
 		return
 	}
 
-	gws.IsNewForge(req.Forj.Force)
+	if !gws.IsNewForge(ret) {
+		return
+	}
 
 	if !gws.setOrganizationTeams(ret) {
 		return

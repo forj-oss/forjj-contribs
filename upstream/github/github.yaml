@@ -9,7 +9,7 @@ runtime:
   service:
     parameters: [ "service", "start" ]
 created_flag_file: "{{ .InstanceName }}/{{.Name}}.yaml"
-task_flags: # All task flags will be delivered by forjj to the plugin under forj/
+task_flags: # Additional forjj task flags delivered by forjj to the plugin in req.Forj. Those flags are provided only through CLI.
   common:
     debug:
       help: "To activate github debug information"
@@ -17,6 +17,9 @@ task_flags: # All task flags will be delivered by forjj to the plugin under forj
       help: "Where the source dir is located for github plugin container."
     forjj-instance-name:
        help: "Name of the jenkins instance given by forjj."
+  create:
+    force:
+      help: Set 'true' to force removal of teams/users when forjj creates a new forge.
   maintain:
     forjj-workspace-mount:
       help: "Where the workspace dir is located in the github plugin container."
@@ -49,7 +52,6 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         help: "true if the plugin should not manage github users and groups"
       repos_disabled:
         help: "true if the plugin should not manage github repositories except the infra repository."
-
   # Define github group exposure to forjj
   group: # New object type in forjj
     # Default is : actions: ["add", "change", "remove", "list", "rename"]
