@@ -80,7 +80,8 @@ actions:                             # Collection of actions to describe. common
       <optionName>:                  # This named the option (without --).
         help : "option help"         # Describe the optionName help.
         required: <true/false>       # false by default.
-        default : "my default value" # Define the default value.
+        default : "my default value" # Define the default value. The default value can be interpreted by forjj with go template ie '{{ ... }}'
+                                     # template interpret on few forjj internal data. See Forjj internal data section for details
         secure: <true/false>         # False by default. See details about how secure data are managed between forjj and the plugin.
   create:                            # create options list
     help: "<Plugin cmd description>" # Sentence describing the plugin command tasks.
@@ -91,7 +92,23 @@ actions:                             # Collection of actions to describe. common
     [...]
   maintain:                          # Same data as common/create/... commands
     [...]
-
+objects:
+  <object Name>:                     # Object defined in Forjfile as root
+    default-actions:                 # Can be `add`, `remove`, `change`, `list` or `rename`
+                                     # Except defined on field, all fields can be manipulated by forjj with default actions.
+    flags:                           # Collection of Object fields
+      <optionName>:                  # This named the option (without --).
+        help : "option help"         # Describe the optionName help.
+        required: <true/false>       # false by default.
+        default : "my default value" # Define the default value.
+        secure: <true/false>         # False by default. See details about how secure data are managed between forjj and the plugin.
+        cli-exported-to-actions:     # Can be `create`, `update` or `maintain`.
+                                     # Declare this field as action flag. The field is prefixed by the instance name
+        actions:                     # List of actions where this field can be added. If not defined here, the fields actions list comes from default-actions.
+    groups:                          # Collection of group of object fields
+      <groupName>:                   # The name of group of fields. All field will bre prefixed by `<GroupName>_`
+        flags:                       # Collection of Object fields
+          ...                        # Same list of options as object fields. (ie those in objects/<objectName>/flags/...)
 ```
 
 By convention, an option that is dedicated to the plugin is prefixed by the name of the plugin.
