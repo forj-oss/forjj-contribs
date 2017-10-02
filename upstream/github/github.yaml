@@ -17,9 +17,6 @@ task_flags: # Additional forjj task flags delivered by forjj to the plugin in re
       help: "Where the source dir is located for github plugin container."
     forjj-instance-name:
        help: "Name of the jenkins instance given by forjj."
-  create:
-    force:
-      help: Set 'true' to force removal of teams/users when forjj creates a new forge.
   maintain:
     forjj-workspace-mount:
       help: "Where the workspace dir is located in the github plugin container."
