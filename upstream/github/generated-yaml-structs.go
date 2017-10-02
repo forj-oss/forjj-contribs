@@ -14,9 +14,9 @@ type AppInstanceStruct struct {
 	ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use in github if requested.
 	ForjjOrganization string `json:"forjj-organization"` // Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
 	Organization string `json:"organization"` // Github Organization name. By default, it uses the FORJJ organization name
-	Repos_disabled string `json:"repos_disabled"` // true if the plugin should not manage github repositories except the infra repository.
+	ReposDisabled string `json:"repos-disabled"` // true if the plugin should not manage github repositories except the infra repository.
 	Server string `json:"server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
-	Teams_disabled string `json:"teams_disabled"` // true if the plugin should not manage github users and groups
+	TeamsDisabled string `json:"teams-disabled"` // true if the plugin should not manage github users and groups
 	Token string `json:"token"` // github token to access. This token must authorize organization level access.
 }
 
@@ -76,7 +76,6 @@ type ForjCommonStruct struct {
 type CreateReq struct {
 	Forj struct {
 		ForjCommonStruct
-		Force string `json:"force"`
 	}
 	Objects CreateArgReq
 }
@@ -148,9 +147,6 @@ const YamlDesc = "---\n" +
    "      help: \"Where the source dir is located for github plugin container.\"\n" +
    "    forjj-instance-name:\n" +
    "       help: \"Name of the jenkins instance given by forjj.\"\n" +
-   "  create:\n" +
-   "    force:\n" +
-   "      help: Set 'true' to force removal of teams/users when forjj creates a new forge.\n" +
    "  maintain:\n" +
    "    forjj-workspace-mount:\n" +
    "      help: \"Where the workspace dir is located in the github plugin container.\"\n" +
@@ -179,9 +175,9 @@ const YamlDesc = "---\n" +
    "        required: true\n" +
    "        secure: true\n" +
    "        envar: \"TOKEN\"\n" +
-   "      teams_disabled:\n" +
+   "      teams-disabled:\n" +
    "        help: \"true if the plugin should not manage github users and groups\"\n" +
-   "      repos_disabled:\n" +
+   "      repos-disabled:\n" +
    "        help: \"true if the plugin should not manage github repositories except the infra repository.\"\n" +
    "  # Define github group exposure to forjj\n" +
    "  group: # New object type in forjj\n" +
