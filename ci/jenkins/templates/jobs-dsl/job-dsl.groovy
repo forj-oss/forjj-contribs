@@ -3,7 +3,7 @@ multibranchPipelineJob('{{ .Project.Name }}') {
   branchSources {
 {{ if eq .Project.SourceType "github" }}\
       github {
-{{   if not (eq .Project.Github.ApiUrl "https://api.github.com") }}\
+{{   if not (eq .Project.Github.ApiUrl "https://api.github.com/") }}\
           apiUri('{{ .Project.Github.ApiUrl }}')
 {{   end }}\
           repoOwner('{{ .Project.Github.RepoOwner }}')
