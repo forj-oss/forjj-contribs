@@ -27,21 +27,6 @@ then
    fi
 fi
 
-# A local volume is possible only when we are sure local mount is server dependent.
-# Any docker cluster cannot be used with local mount because, the container can be started any where.
-# This concerns swarm/ucp/mesos at least.
-
-if [ "$DOCKER_CLUSTER_SRC_VOL" != "" ]
-then
-    CREDS="-v $DOCKER_CLUSTER_SRC_VOL/jenkins_credentials.sh:/tmp/jenkins_credentials.sh"
-else
-    # The following works on native docker, Dood and DinD.
-    if [ -f jenkins_credentials.sh ] && [ -r jenkins_credentials.sh ]
-    then
-       CREDS="-v $VOL_PWD/jenkins_credentials.sh:/tmp/jenkins_credentials.sh"
-    fi
-fi
-
 # For production case, expect
 # $LOGNAME set to {{ .Forjj.OrganizationName }}
 if [ -f run_opts.sh ]
@@ -75,18 +60,6 @@ CONTAINER_IMG="$(sudo docker ps -a -f name={{ .JenkinsImage.Name }}-dood --forma
 
 IMAGE_ID="$(sudo docker images --format "{{ "{{ .ID }}" }}" $IMAGE_NAME)"
 
-if [ "$CONTAINER_IMG" != "" ]
-then
-    if [ "$CONTAINER_IMG" != "$TAG_NAME" ] && [ "$CONTAINER_IMG" != "$IMAGE_ID" ]
-    then
-        # TODO: Find a way to stop it safely
-        sudo docker rm -f {{ .JenkinsImage.Name }}-dood
-    else
-        echo "Nothing to re/start. Jenkins is still accessible at http://$SERVICE_ADDR:$SERVICE_PORT"
-        exit 0
-    fi
-fi
-
 if [[ "$ADMIN_PWD" != "" ]]
 then
    ADMIN="-e SIMPLE_ADMIN_PWD=$ADMIN_PWD"
@@ -111,10 +84,41 @@ echo "Certificate set."
 JENKINS_OPTS='JENKINS_OPTS=--httpPort=-1 --httpsPort=8443 --httpsCertificate=/tmp/certificate.crt --httpsPrivateKey=/tmp/certificate.key'
 JENKINS_MOUNT="-v ${SRC}certificate.crt:/tmp/certificate.crt -v ${SRC}.certificate.key:/tmp/certificate.key"
 
-sudo docker run --restart always -d -p $SERVICE_PORT:8443 -e "$JENKINS_OPTS" $JENKINS_MOUNT --name {{ .JenkinsImage.Name }}-dood $GITHUB_USER $ADMIN $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
+{{ end }}\
 
+if [ "$CONTAINER_IMG" != "" ]
+then
+    if [ "$CONTAINER_IMG" != "$TAG_NAME" ] && [ "$CONTAINER_IMG" != "$IMAGE_ID" ]
+    then
+        # TODO: Find a way to stop it safely - Using safe shutdown?
+{{/* # Following code will be executed by default if there is no other event driven system (bot/stackstorm/...) */}}\
+        echo "#!/bin/sh
+sleep 30
+docker rm -f {{ .JenkinsImage.Name }}-dood
+sleep 2
+{{ if .Deploy.Ssl.Certificate }}\
+docker run --restart always $DOCKER_DOOD -d -p $SERVICE_PORT:8443 -e \"$JENKINS_OPTS\" $JENKINS_MOUNT --name {{ .JenkinsImage.Name }}-dood $GITHUB_USER $ADMIN $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
 {{ else }}
-sudo docker run --restart always -d -p $SERVICE_PORT:8080 --name {{ .JenkinsImage.Name }}-dood $GITHUB_USER $ADMIN $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
+docker run --restart always $DOCKER_DOOD -d -p $SERVICE_PORT:8080 --name {{ .JenkinsImage.Name }}-dood $GITHUB_USER $ADMIN $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
+{{ end }}\
+echo 'Service is restarted'
+rm -f \$0" > do_restart.sh
+        chmod +x do_restart.sh
+
+        echo "The image has been updated. It will be restarted in about 30 seconds"
+{{/* # End of this code to be executed by default if there is no other event driven system (bot/stackstorm/...) */}}\
+        sudo docker run --rm -v $VOL_PWD/do_restart.sh:/tmp/do_restart.sh $DOCKER_DOOD alpine /tmp/do_restart
+    else
+        echo "Nothing to re/start. Jenkins is still accessible at http://$SERVICE_ADDR:$SERVICE_PORT"
+    fi
+    exit 0
+fi
+
+# No container found. Start it.
+{{ if .Deploy.Ssl.Certificate }}\
+sudo docker run --restart always $DOCKER_DOOD -d -p $SERVICE_PORT:8443 -e "$JENKINS_OPTS" $JENKINS_MOUNT --name {{ .JenkinsImage.Name }}-dood $GITHUB_USER $ADMIN $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
+{{ else }}
+sudo docker run --restart always $DOCKER_DOOD -d -p $SERVICE_PORT:8080 --name {{ .JenkinsImage.Name }}-dood $GITHUB_USER $ADMIN $CREDS $PROXY $DOCKER_OPTS $TAG_NAME
 {{ end }}\
 
 if [ $? -ne 0 ]
