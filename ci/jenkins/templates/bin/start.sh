@@ -107,7 +107,7 @@ rm -f \$0" > do_restart.sh
 
         echo "The image has been updated. It will be restarted in about 30 seconds"
 {{/* # End of this code to be executed by default if there is no other event driven system (bot/stackstorm/...) */}}\
-        sudo docker run --rm -v $VOL_PWD/do_restart.sh:/tmp/do_restart.sh $DOCKER_DOOD alpine /tmp/do_restart
+        sudo docker run --rm -v $VOL_PWD/do_restart.sh:/tmp/do_restart.sh $DOCKER_DOOD alpine /tmp/do_restart.sh
     else
         echo "Nothing to re/start. Jenkins is still accessible at http://$SERVICE_ADDR:$SERVICE_PORT"
     fi
