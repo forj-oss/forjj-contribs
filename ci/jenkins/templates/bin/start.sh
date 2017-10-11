@@ -63,12 +63,14 @@ IMAGE_ID="$(sudo docker images --format "{{ "{{ .ID }}" }}" $IMAGE_NAME)"
 if [[ "$ADMIN_PWD" != "" ]]
 then
    ADMIN="-e SIMPLE_ADMIN_PWD=$ADMIN_PWD"
+   unset ADMIN_PWD
    echo "Admin password set."
 fi
 
 if [[ "$GITHUB_USER_PASS" != "" ]]
 then
    GITHUB_USER="-e GITHUB_PASS=$GITHUB_USER_PASS"
+   unset GITHUB_USER_PASS
    echo "Github user password set."
 fi
 
@@ -79,6 +81,7 @@ then
    exit 1
 fi
 echo "$CERTIFICATE_KEY" > .certificate.key
+unset CERTIFICATE_KEY
 echo "Certificate set."
 
 JENKINS_OPTS='JENKINS_OPTS=--httpPort=-1 --httpsPort=8443 --httpsCertificate=/tmp/certificate.crt --httpsPrivateKey=/tmp/certificate.key'
