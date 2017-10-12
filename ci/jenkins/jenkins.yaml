@@ -46,7 +46,7 @@ objects:
         flags:
           name:
             help: "Docker image name for your final generated Jenkins Image. Do not set the Server or Repo name. Use final-docker-registry-server and final-docker-repo-name."
-            default: jenkins
+            default: "{{ .Forjfile.ForjSettings.Organization | ToLower }}-jenkins"
           version:
             help: "Docker image tag version for your generated Jenkins Image."
           registry-server:
@@ -54,6 +54,7 @@ objects:
             default: hub.docker.com
           registry-repo-name:
             help: "Docker Repository Name where your image will be pushed. If not set, no push will be done."
+            default: "{{ .Forjfile.ForjSettings.Organization | ToLower }}"
       deploy:
         flags:
           to:

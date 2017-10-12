@@ -130,7 +130,7 @@ func (p *JenkinsPlugin) initialize_from(r *CreateReq, ret *goforjj.PluginData) (
 	log.Printf("p.yaml.Dockerfile : %#v\n", p.yaml.Dockerfile)
 
 	// Initialize Jenkins Image data and set default values
-	p.yaml.JenkinsImage.SetFrom(&jenkins_instance.FinalImageStruct, r.Forj.ForjjOrganization)
+	p.yaml.JenkinsImage.SetFrom(&jenkins_instance.FinalImageStruct)
 
 	if err = p.add_projects(r, ret); err != nil {
 		return
@@ -191,7 +191,7 @@ func (p *JenkinsPlugin) update_from(r *UpdateReq, ret *goforjj.PluginData, statu
 		IsUpdated(status)
 	}
 	// Org used only if no set anymore.
-	if p.yaml.JenkinsImage.UpdateFrom(&instance_data.FinalImageStruct, r.Forj.ForjjOrganization) {
+	if p.yaml.JenkinsImage.UpdateFrom(&instance_data.FinalImageStruct) {
 		ret.StatusAdd("Jenkins master docker image data updated.")
 		IsUpdated(status)
 	}
