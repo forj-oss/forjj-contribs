@@ -86,6 +86,10 @@ echo "Certificate set."
 
 JENKINS_OPTS='JENKINS_OPTS=--httpPort=-1 --httpsPort=8443 --httpsCertificate=/tmp/certificate.crt --httpsPrivateKey=/tmp/certificate.key'
 JENKINS_MOUNT="-v ${SRC}certificate.crt:/tmp/certificate.crt -v ${SRC}.certificate.key:/tmp/certificate.key"
+JENKINS_MOUNT="$JENKINS_MOUNT -v {{ .JenkinsImage.Name }}-home:/var/jenkins_home"
+
+{{ else }}\
+JENKINS_MOUNT="-v {{ .JenkinsImage.Name }}-home:/var/jenkins_home"
 
 {{ end }}\
 
