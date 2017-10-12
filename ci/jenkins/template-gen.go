@@ -37,22 +37,20 @@ func (t *DockerfileStruct) UpdateFrom(d *DockerfileStruct) (status bool) {
 	return SetOrClean(&t.Maintainer, d.Maintainer) || status
 }
 
-func (t *FinalImageStruct) SetFrom(d *FinalImageStruct, org string) (status bool) {
+func (t *FinalImageStruct) SetFrom(d *FinalImageStruct) (status bool) {
 	status = SetIfSet(&t.Name, d.Name)
 	status = SetIfSet(&t.Version, d.Version) || status
 	status = SetIfSet(&t.RegistryServer, d.RegistryServer) || status
 
-	status = SetIfSet(&t.RegistryRepoName, d.RegistryRepoName) || status
-	return SetOnceIfSet(&t.RegistryRepoName, org) || status
+	return SetIfSet(&t.RegistryRepoName, d.RegistryRepoName) || status
 }
 
-func (t *FinalImageStruct) UpdateFrom(d *FinalImageStruct, org string) (status bool) {
+func (t *FinalImageStruct) UpdateFrom(d *FinalImageStruct) (status bool) {
 	status = SetOrClean(&t.Name, d.Name)
 	status = SetOrClean(&t.Version, d.Version) || status
 	status = SetOrClean(&t.RegistryServer, d.RegistryServer) || status
 
-	status = SetOrClean(&t.RegistryRepoName, d.RegistryRepoName) || status
-	return SetOnceIfSet(&t.RegistryRepoName, org) || status
+	return SetOrClean(&t.RegistryRepoName, d.RegistryRepoName) || status
 }
 
 func (t YamlSSLStruct) GetKey() string {
