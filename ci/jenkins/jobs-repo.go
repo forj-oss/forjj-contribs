@@ -14,6 +14,7 @@ type Projects struct {
 	DslPath    string
 	InfraPath  string
 	infra_repo bool
+	infra_name string
 	List       map[string]Project
 }
 
@@ -22,6 +23,7 @@ type Project struct {
 	SourceType string
 	Github     GithubStruct `yaml:",omitempty"`
 	Git        GitStruct    `yaml:",omitempty"`
+	InfraRepo  bool         `yaml:",omitempty"`
 	all        *Projects
 }
 
@@ -44,17 +46,17 @@ func NewProjects(InstanceName, repo, Dslpath string, infra_repo bool) *Projects 
 	return p
 }
 
-func (p *Projects) AddGithub(name string, d *GithubStruct) bool {
+func (p *Projects) AddGithub(name string, d *GithubStruct, isInfra bool) bool {
 	data := new(GithubStruct)
 	data.SetFrom(d)
-	p.List[name] = Project{Name: name, SourceType: "github", Github: *data, all: p}
+	p.List[name] = Project{Name: name, SourceType: "github", Github: *data, all: p, InfraRepo: isInfra}
 	return true
 }
 
-func (p *Projects) AddGit(name string, d *GitStruct) bool {
+func (p *Projects) AddGit(name string, d *GitStruct, isInfra bool) bool {
 	data := new(GitStruct)
 	data.SetFrom(d)
-	p.List[name] = Project{Name: name, SourceType: "git", Git: *data, all: p}
+	p.List[name] = Project{Name: name, SourceType: "git", Git: *data, all: p, InfraRepo: isInfra}
 	return true
 }
 

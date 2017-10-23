@@ -56,7 +56,7 @@ func (jp *JenkinsPlugin) add_projects(req *CreateReq, ret *goforjj.PluginData) e
 	projects := ProjectInfo{}
 	projects.set_project_info(req.Forj.ForjCommonStruct)
 	projects.set_infra_remote(req.Objects.App[req.Forj.ForjjInstanceName].SeedJobRepo)
-	return projects.set_projects_to(req.Objects.Projects, jp, ret, nil)
+	return projects.set_projects_to(req.Objects.Projects, jp, ret, nil, req.Forj.ForjjInfra)
 }
 
 // generate_jobsdsl generate any missing job-dsl source file.
