@@ -87,5 +87,5 @@ func (jp *JenkinsPlugin) update_projects(req *UpdateReq, ret *goforjj.PluginData
 	projects.set_project_info(req.Forj.ForjCommonStruct)
 	projects.set_infra_remote(req.Objects.App[req.Forj.ForjjInstanceName].SeedJobRepo)
 
-	return projects.set_projects_to(req.Objects.Projects, jp, ret, status)
+	return projects.set_projects_to(req.Objects.Projects, jp, ret, status, req.Forj.ForjjInfra)
 }

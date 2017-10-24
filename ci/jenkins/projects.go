@@ -21,7 +21,7 @@ func (pi *ProjectInfo) set_infra_remote(infra_remote string) {
 }
 
 func (pi *ProjectInfo) set_projects_to(projects map[string]ProjectsInstanceStruct, r *JenkinsPlugin,
-	ret *goforjj.PluginData, status *bool) (_ error) {
+	ret *goforjj.PluginData, status *bool, InfraName string) (_ error) {
 	if pi.ForjjInfraUpstream == "" {
 		ret.StatusAdd("Unable to add a new project without a remote GIT repository. Jenkins JobDSL requirement. " +
 			"To enable this feature, add a remote GIT to your infra --infra-upstream or define the JobDSL Repository to clone.")
@@ -59,9 +59,9 @@ func (pi *ProjectInfo) set_projects_to(projects map[string]ProjectsInstanceStruc
 	for name, prj := range projects {
 		switch prj.RemoteType {
 		case "github":
-			r.yaml.Projects.AddGithub(name, &prj.GithubStruct)
+			r.yaml.Projects.AddGithub(name, &prj.GithubStruct, (name == InfraName))
 		case "git":
-			r.yaml.Projects.AddGit(name, &prj.GitStruct)
+			r.yaml.Projects.AddGit(name, &prj.GitStruct, (name == InfraName))
 		}
 	}
 	IsUpdated(status)

@@ -1,0 +1,10 @@
+pipeline {
+    agent any
+    stages {
+        stage('test Forjfile') {
+            steps {
+                sh('forjj validate')
+            }
+        }
+    }
+}
