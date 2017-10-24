@@ -37,6 +37,8 @@ sources:
       source  : "build_opts.sh.sample"
     jenkins features:
       template: "features.lst"
+    Jenkinsfile:
+      source  : Jenkinsfile
     jenkins credentials:
       source  : "jenkins_credentials.sh.sample"
     ssl certificate:
