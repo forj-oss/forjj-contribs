@@ -44,8 +44,13 @@ fi
 
 if [ "$SERVICE_ADDR" = "" ]
 then
+{{ if .Deploy.Deployment.ServiceAddr }}\
    echo "SERVICE_ADDR not defined by any deployment environment. Set to '{{.Deploy.Deployment.ServiceAddr}}'"
    SERVICE_ADDR="{{.Deploy.Deployment.ServiceAddr}}"
+{{ else }}\
+   echo "SERVICE_ADDR not defined by any deployment environment. Set to 'localhost'"
+   SERVICE_ADDR="localhost"
+{{ end }}\
 fi
 if [ "$SERVICE_PORT" = "" ]
 then
