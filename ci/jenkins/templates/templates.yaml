@@ -51,6 +51,9 @@ sources:
         chmod   : 0755
       start up options sample:
         source  : "run_opts.sh.sample"
+      dood install script:
+        source : install_dood.sh
+        chmod: 0755
     ucp:
       Makefile:
         source  : "Makefile"
