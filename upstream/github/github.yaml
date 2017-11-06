@@ -28,7 +28,7 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
     # Default is : actions: ["add", "change", "remove"] No need to define it.
     flags:
       server:
-        help: "Github Entreprise Server name. By default, public 'github.com' API is used."
+        help: "Github Enterprise Server name. By default, public 'github.com' API is used."
       forjj-organization:
         only-for-actions: ["add"]
         help: "Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization"
