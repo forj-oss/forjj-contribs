@@ -5,6 +5,12 @@ FROM {{ .Dockerfile.FromImage }}{{ if .Dockerfile.FromImageVersion }}:{{ .Docker
 # COPY local_plugins/*  $JENKINS_DATA_REF/plugins/
 COPY features.lst /tmp
 
+ARG DOOD_DOCKER_GROUP
+
+COPY install_dood.sh /tmp
+
+RUN /tmp/install_dood.sh $DOOD_DOCKER_GROUP
+
 ENV JENKINS_SLAVE_AGENT_PORT=50000{{ if .Projects }} \
     SEED_JOBS_REPO={{ .Projects.DslRepo }} \
     BUILD_DSL_SCRIPTS={{if .Projects.InfraPath }}{{ .Projects.InfraPath }}{{ end }}/{{ .Projects.DslPath }}/*.groovy{{ end }}{{ if .GithubUser.Name }} \

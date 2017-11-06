@@ -46,6 +46,9 @@ fi
 JENKINS_INSTALL_INITS_URL="https://github.com/$MYFORK/raw/$BRANCH/"
 FEATURES="--build-arg JENKINS_INSTALL_INITS_URL=$JENKINS_INSTALL_INITS_URL"
 
+# Added DOOD docker group
+BUILD_OPTS="$BUILD_OPTS --build-arg DOOD_DOCKER_GROUP=$(stat /var/run/docker.sock -c %g)"
+
 set -x
 sudo -n docker pull {{ .Dockerfile.FromImage }}{{ if .Dockerfile.FromImageVersion }}:{{ .Dockerfile.FromImageVersion }}{{ end }}
 sudo -n docker build -t $TAG_NAME $FEATURES $PROXY $BUILD_OPTS .
