@@ -37,7 +37,7 @@ objects:
           # Information we can define for the Dockerfile.
           from-image:
             help: "Base Docker image tag name to use in Dockerfile. Must respect [server/repo/]name."
-            default: forjdevops/jenkins-dood
+            default: forjdevops/jenkins
           from-image-version:
             help: "Base Docker image tag version to use in Dockerfile. By default, it uses 'latest'."
           maintainer:
