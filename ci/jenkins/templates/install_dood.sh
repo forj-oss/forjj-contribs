@@ -31,7 +31,7 @@ GID=$1
 
 set -e
 
-GROUP=$(grep ":$1:" /etc/group | awk -F: 'printf $1')
+GROUP=$(grep ":$1:" /etc/group | awk -F: '{printf $1}')
 
 if [[ "$GROUP" = "" ]]
 then
