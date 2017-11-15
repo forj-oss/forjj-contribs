@@ -74,6 +74,8 @@ then
    echo "Github user password set."
 fi
 
+JENKINS_MOUNT="-v {{ .JenkinsImage.Name }}-home:/var/jenkins_home -e DOCKER_JENKINS_MOUNT='{{ .JenkinsImage.Name }}-home:/var/jenkins_home'"
+
 {{ if .Deploy.Ssl.Certificate }}\
 if [[ "$CERTIFICATE_KEY" = "" ]]
 then
@@ -85,12 +87,7 @@ unset CERTIFICATE_KEY
 echo "Certificate set."
 
 JENKINS_OPTS='JENKINS_OPTS=--httpPort=-1 --httpsPort=8443 --httpsCertificate=/tmp/certificate.crt --httpsPrivateKey=/tmp/certificate.key'
-JENKINS_MOUNT="-v ${SRC}certificate.crt:/tmp/certificate.crt -v ${SRC}.certificate.key:/tmp/certificate.key"
-JENKINS_MOUNT="$JENKINS_MOUNT -v {{ .JenkinsImage.Name }}-home:/var/jenkins_home"
-
-{{ else }}\
-JENKINS_MOUNT="-v {{ .JenkinsImage.Name }}-home:/var/jenkins_home"
-
+JENKINS_MOUNT="$JENKINS_MOUNT -v ${SRC}certificate.crt:/tmp/certificate.crt -v ${SRC}.certificate.key:/tmp/certificate.key"
 {{ end }}\
 
 if [ "$CONTAINER_IMG" != "" ]
