@@ -74,7 +74,7 @@ then
    echo "Github user password set."
 fi
 
-JENKINS_MOUNT="-v {{ .JenkinsImage.Name }}-home:/var/jenkins_home -e DOCKER_JENKINS_MOUNT='{{ .JenkinsImage.Name }}-home:/var/jenkins_home'"
+JENKINS_MOUNT="-v {{ .JenkinsImage.Name }}-home:/var/jenkins_home -e DOCKER_JENKINS_MOUNT={{ .JenkinsImage.Name }}-home:/var/jenkins_home"
 
 {{ if .Deploy.Ssl.Certificate }}\
 if [[ "$CERTIFICATE_KEY" = "" ]]
