@@ -252,6 +252,10 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
 	}
 	log.Printf(ret.StatusAdd("Organization maintained."))
 
+	if !gws.MaintainOrgHooks(ret) {
+
+	}
+
 	if gws.github_source.NoRepos {
 		log.Printf(ret.StatusAdd("Repositories maintained limited to your infra repository"))
 	}

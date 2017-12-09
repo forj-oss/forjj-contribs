@@ -36,7 +36,10 @@ func (g *GitHubStruct) create_yaml_data(req *CreateReq, ret *goforjj.PluginData)
 			continue
 		}
 		g.SetRepo(&repo, is_infra)
+		g.SetHooks(&repo, req.Objects.Webhooks)
 	}
+	g.SetOrgHooks(req.Objects.Webhooks)
+
 
 	log.Printf("forjj-github manages %d repository(ies).", len(g.github_source.Repos))
 

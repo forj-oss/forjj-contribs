@@ -34,7 +34,10 @@ func (g *GitHubStruct) update_yaml_data(req *UpdateReq, ret *goforjj.PluginData)
 			}
 
 			g.SetRepo(&repo, (name == g.app.ForjjInfra))
+			g.SetHooks(&repo, req.Objects.Webhooks)
 		}
+
+		g.SetOrgHooks(req.Objects.Webhooks)
 
 		// Disabling missing one
 		for name, repo := range g.github_source.Repos {
@@ -89,6 +92,7 @@ func (g *GitHubStruct) SetRepo(repo *RepoInstanceStruct, is_infra bool) {
 		map[string]string{"master": "origin/master"},
 		is_infra)
 	g.github_source.Repos[repo.Name] = r
+
 }
 
 // SaveMaintainOptions Function which adds maintain options as part of the plugin answer in create/update phase.

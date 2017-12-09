@@ -31,6 +31,8 @@ type GitHubSourceStruct struct {
 	NoTeams               bool    `yaml:",omitempty"` // True to not manage organization users
 	Users                 map[string]string           // Collection of users role at organization level
 	Groups                map[string]TeamStruct       // Collection of Team role at organization level
+	WebHooks              map[string]WebHookStruct    // k: name, v: webhook
+
 }
 
 type TeamStruct struct {

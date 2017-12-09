@@ -21,6 +21,7 @@ type RepositoryStruct struct { // Used to stored the yaml source file. Not used 
 	exist         bool                                   // True if the repo exist.
 	remotes       map[string]goforjj.PluginRepoRemoteUrl // k: remote name, v: remote urls
 	branchConnect map[string]string                      // k: local branch name, v: remote/branch
+	WebHooks      map[string]WebHookStruct               // k: name, v: webhook
 }
 
 func (r *RepositoryStruct) set(
@@ -136,4 +137,32 @@ func (r *RepoInstanceStruct) IsValid(repo_name string, ret *goforjj.PluginData) 
 	}
 	valid = true
 	return
+}
+
+func (g *GitHubStruct) SetHooks(req_repo *RepoInstanceStruct, hooks map[string]WebhooksInstanceStruct) {
+	repo := g.github_source.Repos[req_repo.Name]
+	repo.WebHooks = make(map[string]WebHookStruct)
+	for name, hook := range hooks {
+		if hook.Organization == "true" {
+			continue
+		}
+		if inStringList(repo.Name, strings.Split(hook.Repos, ",")...) == "" {
+			continue
+		}
+		data := WebHookStruct{
+			Url: hook.Url,
+			Events: strings.Split(hook.Events, ","),
+			Enabled: hook.Enabled,
+		}
+		if v, err := strconv.ParseBool(hook.SSLCheck); err == nil {
+			data.SSLCheck = v
+			log.Printf("SSL Check '%s' => %t", name, v)
+		} else {
+			log.Printf("SSLCheck has an invalid boolean string representation '%s'. Ignored. SSL Check is set to true.",
+				name)
+			data.SSLCheck = true
+		}
+
+		repo.WebHooks[name] = data
+	}
 }

@@ -10,6 +10,8 @@ import (
 	"github.com/forj-oss/goforjj"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
+	"strings"
+	"strconv"
 )
 
 func (req *CreateReq) InitOrganization(g *GitHubStruct) {
@@ -552,4 +554,28 @@ func updateBool(orig *bool, dest **bool, to bool, field string) (updated bool) {
 		updated = true
 	}
 	return
+}
+
+func (g *GitHubStruct) SetOrgHooks(hooks map[string]WebhooksInstanceStruct) {
+	for name, hook := range hooks {
+		if hook.Organization == "false" {
+			continue
+		}
+
+		data := WebHookStruct{
+			Url: hook.Url,
+			Events: strings.Split(hook.Events, ","),
+			Enabled: hook.Enabled,
+		}
+		if v, err := strconv.ParseBool(hook.SSLCheck); err == nil {
+			data.SSLCheck = v
+			log.Printf("SSL Check '%s' => %t", name, v)
+		} else {
+			log.Printf("SSLCheck has an invalid boolean string representation '%s'. Ignored. SSL Check is set to true.",
+				name)
+			data.SSLCheck = true
+		}
+
+		g.github_source.WebHooks[name] = data
+	}
 }

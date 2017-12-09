@@ -57,3 +57,12 @@ func (g *GitHubStruct) verify_req_fails(ret *goforjj.PluginData, check map[strin
 
 	return false // Everything is fine
 }
+
+func inStringList(element string, elements ...string) string {
+	for _, value := range elements {
+		if element == value {
+			return value
+		}
+	}
+	return ""
+}
