@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"log"
 	"strings"
+	"reflect"
 )
 
 type WebHookStruct struct {
@@ -18,19 +19,24 @@ type WebHookStruct struct {
 
 const hook_ignored = "ignored"
 
-func (h WebHookStruct)Update(hook *github.Hook) (dirty bool) {
-	if hook == nil {
-		return
-	}
+func (h *WebHookStruct)HookEnabled(hook *github.Hook) (dirty bool) {
 	if h.Enabled != hook_ignored {
 		if b, err := strconv.ParseBool(h.Enabled) ; err != nil {
 			log.Printf("hook `Enabled` has an invalid boolean string representation '%s'. Ignored. hook is enabled.",
 				*hook.Name)
-		} else if hook.Active && *hook.Active != b {
+		} else if hook.Active != nil && *hook.Active != b {
 			dirty = true
 			hook.Active = &b
 		}
 	}
+	return
+}
+
+func (h WebHookStruct)Update(hook *github.Hook) (dirty bool) {
+	if hook == nil {
+		return
+	}
+	dirty = h.HookEnabled(hook)
 
 	if v, found := hook.Config["url"]; found {
 		if d, ok := v.(string) ; ok && d != h.Url {
@@ -78,7 +84,7 @@ func (h WebHookStruct)Update(hook *github.Hook) (dirty bool) {
 		log.Printf("Hook '%s' content_type is set to '%s'.", *hook.Name, h.ContentType)
 	}
 
-	if hook.Events != h.Events {
+	if ! reflect.DeepEqual(hook.Events, h.Events) {
 		dirty = true
 		hook.Events = h.Events
 		log.Printf("Hook '%s' events are updated from '%s' to '%s'.",

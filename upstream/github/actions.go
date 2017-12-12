@@ -253,7 +253,7 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
 	log.Printf(ret.StatusAdd("Organization maintained."))
 
 	if !gws.MaintainOrgHooks(ret) {
-
+		return
 	}
 
 	if gws.github_source.NoRepos {
@@ -265,6 +265,9 @@ func DoMaintain(w http.ResponseWriter, r *http.Request, req *MaintainReq, ret *g
 			log.Printf(ret.StatusAdd("Repo ignored: %s", name))
 		}
 		if err := repo_data.ensure_exists(&gws, ret); err != nil {
+			return
+		}
+		if !gws.MaintainHooks(&repo_data, ret) {
 			return
 		}
 		log.Printf(ret.StatusAdd("Repo maintained: %s", name))
