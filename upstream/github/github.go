@@ -556,7 +556,23 @@ func updateBool(orig *bool, dest **bool, to bool, field string) (updated bool) {
 	return
 }
 
-func (g *GitHubStruct) SetOrgHooks(hooks map[string]WebhooksInstanceStruct) {
+func (g *GitHubStruct) SetOrgHooks(org_hook_disabled, repo_hook_disabled string, hooks map[string]WebhooksInstanceStruct) {
+
+	if b, err := strconv.ParseBool(org_hook_disabled) ; err != nil {
+		log.Printf("Organization webhook disabled: invalid boolean: %s", org_hook_disabled)
+		g.github_source.NoOrgHook = b
+		g.github_source.WebHooks = make(map[string]WebHookStruct)
+	}
+
+	if b, err := strconv.ParseBool(repo_hook_disabled); err != nil {
+		log.Printf("Organization webhook disabled: invalid boolean: %s", repo_hook_disabled)
+		g.github_source.NoRepoHook = b
+	}
+
+	if g.github_source.NoOrgHook {
+		return
+	}
+
 	for name, hook := range hooks {
 		if hook.Organization == "false" {
 			continue

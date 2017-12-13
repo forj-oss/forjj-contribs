@@ -28,6 +28,7 @@ func (g *GitHubStruct) update_yaml_data(req *UpdateReq, ret *goforjj.PluginData)
 	} else {
 		// Updating all from Forjfile repos
 		g.github_source.NoRepos = false
+		g.SetOrgHooks(g.app.OrganizationWebhooksDisabled, g.app.ReposWebhooksDisabled, req.Objects.Webhooks)
 		for name, repo := range req.Objects.Repo {
 			if !repo.IsValid(name, ret) {
 				continue
@@ -37,7 +38,6 @@ func (g *GitHubStruct) update_yaml_data(req *UpdateReq, ret *goforjj.PluginData)
 			g.SetHooks(&repo, req.Objects.Webhooks)
 		}
 
-		g.SetOrgHooks(req.Objects.Webhooks)
 
 		// Disabling missing one
 		for name, repo := range g.github_source.Repos {

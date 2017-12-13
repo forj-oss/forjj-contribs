@@ -110,7 +110,7 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
       forjj-workspace-mount:
         help: "Where the workspace dir is located in the github plugin container."
       webhooks-management:
-        help: with 'sync', the plugin will manage all repository webhooks. with 'manage', it will manage only those listed and ignored already existing one.
+        help: Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed.
         default: sync
   webhooks:
     identified_by_flag: name
@@ -132,7 +132,7 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         help: true to enable the webhook at org level. default is false.
         default: false
       enabled:
-        help: true (default) to activate the webhook, false otherwise or ignored to ignore this setup.
+        help: set 'true' (default) to activate the webhook, 'false' otherwise or 'ignore' to ignore this setup.
         default: true
       SSLCheck:
         help: true (default) to ask github to verify the SSL.

@@ -50,7 +50,7 @@ type RepoInstanceStruct struct {
 	Name string `json:"name"` // Repository name
 	Title string `json:"title"` // Github Repository title
 	Users string `json:"users"` // List of users to attach to the repository, separated by comma.
-	WebhooksManagement string `json:"webhooks-management"` // with 'sync', the plugin will manage all repository webhooks. with 'manage', it will manage only those listed and ignored already existing one.
+	WebhooksManagement string `json:"webhooks-management"` // Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed. Set 'ignore' to not manage any webhooks
 }
 
 // Object user groups structure
@@ -74,10 +74,11 @@ type UserInstanceStruct struct {
 
 type WebhooksInstanceStruct struct {
 	SSLCheck string `json:"SSLCheck"` // true (default) to ask github to verify the SSL.
-	Enabled string `json:"enabled"` // true (default) to activate the webhook, false otherwise or ignored to ignore this setup.
+	Enabled string `json:"enabled"` // set 'true' (default) to activate the webhook, 'false' otherwise or 'ignore' to ignore this setup.
 	Events string `json:"events"` // events requested separated by comma
 	Name string `json:"name"` // webhook name
 	Organization string `json:"organization"` // true to enable the webhook at org level. default is false.
+	Payload_format string `json:"payload_format"` // The media type used to serialize the payloads. Supported values include json and form. The default is form.
 	Repos string `json:"repos"` // List of repositories separated by comma subscribing to the webhook.
 	Url string `json:"url"` // Webhook url to set
 }
@@ -262,7 +263,7 @@ const YamlDesc = "---\n" +
    "      forjj-workspace-mount:\n" +
    "        help: \"Where the workspace dir is located in the github plugin container.\"\n" +
    "      webhooks-management:\n" +
-   "        help: with 'sync', the plugin will manage all repository webhooks. with 'manage', it will manage only those listed and ignored already existing one.\n" +
+   "        help: Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed. Set 'ignore' to not manage any webhooks\n" +
    "        default: sync\n" +
    "  webhooks:\n" +
    "    identified_by_flag: name\n" +
@@ -273,6 +274,9 @@ const YamlDesc = "---\n" +
    "      url:\n" +
    "        help: Webhook url to set\n" +
    "        required: true\n" +
+   "      payload_format:\n" +
+   "        help: The media type used to serialize the payloads. Supported values include json and form. The default is form.\n" +
+   "        default: form\n" +
    "      events:\n" +
    "        help: events requested separated by comma\n" +
    "      repos:\n" +
@@ -281,7 +285,7 @@ const YamlDesc = "---\n" +
    "        help: true to enable the webhook at org level. default is false.\n" +
    "        default: false\n" +
    "      enabled:\n" +
-   "        help: true (default) to activate the webhook, false otherwise or ignored to ignore this setup.\n" +
+   "        help: set 'true' (default) to activate the webhook, 'false' otherwise or 'ignore' to ignore this setup.\n" +
    "        default: true\n" +
    "      SSLCheck:\n" +
    "        help: true (default) to ask github to verify the SSL.\n" +

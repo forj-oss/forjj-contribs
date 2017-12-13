@@ -17,7 +17,7 @@ type WebHookStruct struct {
 	ContentType string // json or form. Default form
 }
 
-const hook_ignored = "ignored"
+const hook_ignored = "ignore"
 
 func (h *WebHookStruct)HookEnabled(hook *github.Hook) (dirty bool) {
 	if h.Enabled != hook_ignored {
