@@ -74,13 +74,13 @@ type UserInstanceStruct struct {
 // Object Instance structures
 
 type WebhooksInstanceStruct struct {
-	SSLCheck string `json:"SSLCheck"` // true (default) to ask github to verify the SSL.
 	Enabled string `json:"enabled"` // set 'true' (default) to activate the webhook, 'false' otherwise or 'ignore' to ignore this setup.
 	Events string `json:"events"` // events requested separated by comma
 	Name string `json:"name"` // webhook name
 	Organization string `json:"organization"` // true to enable the webhook at org level. default is false.
 	Payload_format string `json:"payload_format"` // The media type used to serialize the payloads. Supported values include json and form. The default is form.
 	Repos string `json:"repos"` // List of repositories separated by comma subscribing to the webhook.
+	SslCheck string `json:"ssl-check"` // true (default) to ask github to verify the SSL.
 	Url string `json:"url"` // Webhook url to set
 }
 
@@ -291,7 +291,8 @@ const YamlDesc = "---\n" +
    "      enabled:\n" +
    "        help: set 'true' (default) to activate the webhook, 'false' otherwise or 'ignore' to ignore this setup.\n" +
    "        default: true\n" +
-   "      SSLCheck:\n" +
+   "      ssl-check:\n" +
    "        help: true (default) to ask github to verify the SSL.\n" +
+   "        default: true\n" +
    "\n" +
    ""

@@ -594,7 +594,7 @@ func (g *GitHubStruct) SetOrgHooks(org_hook_disabled, repo_hook_disabled, wh_pol
 			Events: strings.Split(hook.Events, ","),
 			Enabled: hook.Enabled,
 		}
-		if v, err := strconv.ParseBool(hook.SSLCheck); err == nil {
+		if v, err := strconv.ParseBool(hook.SslCheck); err == nil {
 			data.SSLCheck = v
 			log.Printf("SSL Check '%s' => %t", name, v)
 		} else {

@@ -171,7 +171,7 @@ func (g *GitHubStruct) SetHooks(req_repo *RepoInstanceStruct, hooks map[string]W
 			Enabled: hook.Enabled,
 			ContentType: hook.Payload_format,
 		}
-		if v, err := strconv.ParseBool(hook.SSLCheck); err == nil {
+		if v, err := strconv.ParseBool(hook.SslCheck); err == nil {
 			data.SSLCheck = v
 			log.Printf("SSL Check '%s' => %t", name, v)
 		} else {

@@ -137,6 +137,7 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
       enabled:
         help: set 'true' (default) to activate the webhook, 'false' otherwise or 'ignore' to ignore this setup.
         default: true
-      SSLCheck:
+      ssl-check:
         help: true (default) to ask github to verify the SSL.
+        default: true
 
