@@ -181,6 +181,7 @@ func (g *GitHubStruct) SetHooks(req_repo *RepoInstanceStruct, hooks map[string]W
 		}
 
 		repo.WebHooks[name] = data
+		g.github_source.Repos[req_repo.Name] = repo
 	}
 }
 
