@@ -57,6 +57,9 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
       repos-webhooks-disabled:
         help: true if the plugin should not manage github repositories webhooks.
         default: false
+      org-hook-policy:
+        help: Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed.
+        default: sync
   # Define github group exposure to forjj
   group: # New object type in forjj
     # Default is : actions: ["add", "change", "remove", "list", "rename"]

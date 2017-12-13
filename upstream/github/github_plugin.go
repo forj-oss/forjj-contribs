@@ -35,6 +35,7 @@ type GitHubSourceStruct struct {
 	NoOrgHook             bool    `yaml:",omitempty"` // true to ignore org hooks.
 	NoRepoHook            bool    `yaml:",omitempty"` // true to ignore repo hooks.
 	WebHooks              map[string]WebHookStruct    // k: name, v: webhook
+	WebHookPolicy         string                      // sync or manage
 
 }
 

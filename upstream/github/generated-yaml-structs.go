@@ -13,6 +13,7 @@ package main
 type AppInstanceStruct struct {
 	ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use in github if requested.
 	ForjjOrganization string `json:"forjj-organization"` // Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
+	OrgHookPolicy string `json:"org-hook-policy"` // Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed.
 	Organization string `json:"organization"` // Github Organization name. By default, it uses the FORJJ organization name
 	OrganizationWebhooksDisabled string `json:"organization-webhooks-disabled"` // true if the plugin should not manage github organization webhooks.
 	ReposDisabled string `json:"repos-disabled"` // true if the plugin should not manage github repositories except the infra repository.
@@ -50,7 +51,7 @@ type RepoInstanceStruct struct {
 	Name string `json:"name"` // Repository name
 	Title string `json:"title"` // Github Repository title
 	Users string `json:"users"` // List of users to attach to the repository, separated by comma.
-	WebhooksManagement string `json:"webhooks-management"` // Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed. Set 'ignore' to not manage any webhooks
+	WebhooksManagement string `json:"webhooks-management"` // Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed.
 }
 
 // Object user groups structure
@@ -210,6 +211,9 @@ const YamlDesc = "---\n" +
    "      repos-webhooks-disabled:\n" +
    "        help: true if the plugin should not manage github repositories webhooks.\n" +
    "        default: false\n" +
+   "      org-hook-policy:\n" +
+   "        help: Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed.\n" +
+   "        default: sync\n" +
    "  # Define github group exposure to forjj\n" +
    "  group: # New object type in forjj\n" +
    "    # Default is : actions: [\"add\", \"change\", \"remove\", \"list\", \"rename\"]\n" +
@@ -263,7 +267,7 @@ const YamlDesc = "---\n" +
    "      forjj-workspace-mount:\n" +
    "        help: \"Where the workspace dir is located in the github plugin container.\"\n" +
    "      webhooks-management:\n" +
-   "        help: Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed. Set 'ignore' to not manage any webhooks\n" +
+   "        help: Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed.\n" +
    "        default: sync\n" +
    "  webhooks:\n" +
    "    identified_by_flag: name\n" +

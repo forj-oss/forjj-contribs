@@ -25,7 +25,7 @@ func (g *GitHubStruct) create_yaml_data(req *CreateReq, ret *goforjj.PluginData)
 		log.Print("Repositories_disabled is true. forjj_github won't manage repositories except the infra repository.")
 	}
 
-	g.SetOrgHooks(g.app.OrganizationWebhooksDisabled, g.app.ReposWebhooksDisabled, req.Objects.Webhooks)
+	g.SetOrgHooks(g.app.OrganizationWebhooksDisabled, g.app.ReposWebhooksDisabled, g.app.OrgHookPolicy, req.Objects.Webhooks)
 
 	// Add all repos
 	for name, repo := range req.Objects.Repo {

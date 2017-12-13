@@ -556,7 +556,7 @@ func updateBool(orig *bool, dest **bool, to bool, field string) (updated bool) {
 	return
 }
 
-func (g *GitHubStruct) SetOrgHooks(org_hook_disabled, repo_hook_disabled string, hooks map[string]WebhooksInstanceStruct) {
+func (g *GitHubStruct) SetOrgHooks(org_hook_disabled, repo_hook_disabled, wh_policy string, hooks map[string]WebhooksInstanceStruct) {
 
 	if b, err := strconv.ParseBool(org_hook_disabled) ; err != nil {
 		log.Printf("Organization webhook disabled: invalid boolean: %s", org_hook_disabled)
@@ -567,6 +567,17 @@ func (g *GitHubStruct) SetOrgHooks(org_hook_disabled, repo_hook_disabled string,
 	if b, err := strconv.ParseBool(repo_hook_disabled); err != nil {
 		log.Printf("Organization webhook disabled: invalid boolean: %s", repo_hook_disabled)
 		g.github_source.NoRepoHook = b
+	}
+
+	if v := inStringList(wh_policy, "manage", "sync"); v == "" {
+		if wh_policy != "" {
+			log.Printf("'Invalid value '%s' for 'WebhooksManagement'. Set it to 'sync'.", wh_policy)
+		} else {
+			log.Print("'WebhooksManagement' is set by default to 'sync'.")
+		}
+		g.github_source.WebHookPolicy = "sync"
+	} else {
+		g.github_source.WebHookPolicy = v
 	}
 
 	if g.github_source.NoOrgHook {

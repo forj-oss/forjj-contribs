@@ -22,6 +22,7 @@ type RepositoryStruct struct { // Used to stored the yaml source file. Not used 
 	remotes       map[string]goforjj.PluginRepoRemoteUrl // k: remote name, v: remote urls
 	branchConnect map[string]string                      // k: local branch name, v: remote/branch
 	WebHooks      map[string]WebHookStruct               // k: name, v: webhook
+	WebHookPolicy string                                 // 'sync' or 'manage'
 }
 
 func (r *RepositoryStruct) set(
@@ -49,6 +50,17 @@ func (r *RepositoryStruct) set(
 	r.AddGroups(repo.Groups)
 	r.remotes = remotes
 	r.branchConnect = branchConnect
+	if v := inStringList(repo.WebhooksManagement, "manage", "sync") ; v == "" {
+		if repo.WebhooksManagement != "" {
+			log.Printf("Repo %s: 'Invalid value '%s' for 'WebhooksManagement'. Set it to 'sync'.",
+				r.Name, repo.WebhooksManagement)
+		} else {
+			log.Printf("Repo %s: 'WebhooksManagement' is set by default to 'sync'.", r.Name)
+		}
+		r.WebHookPolicy = "sync"
+	} else {
+		r.WebHookPolicy = v
+	}
 	return r
 }
 
@@ -157,6 +169,7 @@ func (g *GitHubStruct) SetHooks(req_repo *RepoInstanceStruct, hooks map[string]W
 			Url: hook.Url,
 			Events: strings.Split(hook.Events, ","),
 			Enabled: hook.Enabled,
+			ContentType: hook.Payload_format,
 		}
 		if v, err := strconv.ParseBool(hook.SSLCheck); err == nil {
 			data.SSLCheck = v

@@ -26,13 +26,16 @@ func (g *GitHubStruct)MaintainOrgHooks(ret *goforjj.PluginData) (_ bool) {
 						return
 					}
 				}
-			} else if _, err := g.Client.Organizations.DeleteHook(g.ctxt, g.github_source.Organization, hook.GetID()); err != nil {
-				log.Print(ret.Errorf("Failed to delete '%s'. %s", hook.GetName(), err))
-				return
+			} else if  g.github_source.WebHookPolicy == "sync" {
+				if _, err := g.Client.Organizations.DeleteHook(g.ctxt, g.github_source.Organization, hook.GetID()); err != nil {
+					log.Print(ret.Errorf("Failed to delete '%s'. %s", hook.GetName(), err))
+					return
+				} else {
+					log.Print(ret.StatusAdd("Org Hook '%s' removed.", hook.GetName()))
+				}
 			} else {
-				log.Print(ret.StatusAdd("Org Hook '%s removed.", hook.GetName()))
+				log.Print(ret.StatusAdd("Org Hook '%s' not managed. (org webhook policy = 'manage')", hook.GetName()))
 			}
-
 		}
 	}
 	for name, hook := range g.github_source.WebHooks {
@@ -83,11 +86,15 @@ func (g *GitHubStruct) MaintainHooks(repo *RepositoryStruct, ret *goforjj.Plugin
 						log.Print(ret.StatusAdd("Hook '%s updated.", hook.GetName()))
 					}
 				}
-			} else if _, err := g.Client.Repositories.DeleteHook(g.ctxt, g.github_source.Organization, repo.Name, hook.GetID()); err != nil {
-				log.Print(ret.Errorf("Failed to delete '%s'. %s", hook.GetName(), err))
-				return
+			} else if repo.WebHookPolicy == "sync" {
+				if _, err := g.Client.Repositories.DeleteHook(g.ctxt, g.github_source.Organization, repo.Name, hook.GetID()); err != nil {
+					log.Print(ret.Errorf("Failed to delete '%s'. %s", hook.GetName(), err))
+					return
+				} else {
+					log.Print(ret.StatusAdd("Hook '%s' removed.", hook.GetName()))
+				}
 			} else {
-				log.Print(ret.StatusAdd("Hook '%s removed.", hook.GetName()))
+				log.Print(ret.StatusAdd("Hook '%s' not managed. Ignored. (policy = 'manage')", hook.GetName()))
 			}
 
 		}
