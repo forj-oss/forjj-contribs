@@ -9,18 +9,20 @@ import (
 )
 
 type RepositoryStruct struct { // Used to stored the yaml source file. Not used to respond to the API requester.
-	Name         string            // Name of the Repo
-	Flow         string            `yaml:",omitempty"`    // Flow applied on the repo.
-	Description  string            `yaml:",omitempty"`    // Title in github repository
-	Disabled     bool              `yaml:",omitempty"`    // disable the repository (became private with no team/collaborators)
-	IssueTracker bool              `yaml:"issue_tracker"` // Issue tracker option
-	Users        map[string]string // Collection of users role
-	Groups       map[string]string // Collection of groups role
+	Name          string                                       // Name of the Repo
+	Flow          string                   `yaml:",omitempty"` // Flow applied on the repo.
+	Description   string                   `yaml:",omitempty"` // Title in github repository
+	Disabled      bool                     `yaml:",omitempty"` // disable the repository (became private with no team/collaborators)
+	IssueTracker  bool        `yaml:"issue_tracker,omitempty"` // Issue tracker option
+	Users         map[string]string        `yaml:",omitempty"` // Collection of users role
+	Groups        map[string]string        `yaml:",omitempty"` // Collection of groups role
 	// Following data are used at runtime but not saved. Used to respond to the API.
-	Infra        bool              `yaml:",omitempty"`   // true if the repos is the infra one.
-	exist         bool                                   // True if the repo exist.
-	remotes       map[string]goforjj.PluginRepoRemoteUrl // k: remote name, v: remote urls
-	branchConnect map[string]string                      // k: local branch name, v: remote/branch
+	Infra         bool                     `yaml:",omitempty"` // true if the repos is the infra one.
+	exist         bool                     `yaml:",omitempty"` // True if the repo exist.
+	remotes       map[string]goforjj.PluginRepoRemoteUrl       // k: remote name, v: remote urls
+	branchConnect map[string]string                            // k: local branch name, v: remote/branch
+	WebHooks      map[string]WebHookStruct `yaml:",omitempty"` // k: name, v: webhook
+	WebHookPolicy string                   `yaml:",omitempty"` // 'sync' or 'manage'. An
 }
 
 func (r *RepositoryStruct) set(
@@ -48,6 +50,17 @@ func (r *RepositoryStruct) set(
 	r.AddGroups(repo.Groups)
 	r.remotes = remotes
 	r.branchConnect = branchConnect
+	if v := inStringList(repo.WebhooksManagement, "manage", "sync") ; v == "" {
+		if repo.WebhooksManagement != "" {
+			log.Printf("Repo %s: 'Invalid value '%s' for 'WebhooksManagement'. Set it to 'sync'.",
+				r.Name, repo.WebhooksManagement)
+		} else {
+			log.Printf("Repo %s: 'WebhooksManagement' is set by default to 'sync'.", r.Name)
+		}
+		r.WebHookPolicy = "sync"
+	} else {
+		r.WebHookPolicy = v
+	}
 	return r
 }
 
@@ -137,3 +150,39 @@ func (r *RepoInstanceStruct) IsValid(repo_name string, ret *goforjj.PluginData) 
 	valid = true
 	return
 }
+
+func (g *GitHubStruct) SetHooks(req_repo *RepoInstanceStruct, hooks map[string]WebhooksInstanceStruct) {
+	repo := g.github_source.Repos[req_repo.Name]
+	repo.WebHooks = make(map[string]WebHookStruct)
+
+	if g.github_source.NoRepoHook {
+		return
+	}
+	for name, hook := range hooks {
+		if hook.Organization == "true" {
+			continue
+		}
+		if inStringList(repo.Name, strings.Split(hook.Repos, ",")...) == "" {
+			continue
+		}
+		data := WebHookStruct{
+			Url: hook.Url,
+			Events: strings.Split(hook.Events, ","),
+			Enabled: hook.Enabled,
+			ContentType: hook.Payload_format,
+		}
+		if v, err := strconv.ParseBool(hook.SslCheck); err == nil {
+			data.SSLCheck = v
+			log.Printf("SSL Check '%s' => %t", name, v)
+		} else {
+			log.Printf("SSLCheck has an invalid boolean string representation '%s'. Ignored. SSL Check is set to true.",
+				name)
+			data.SSLCheck = true
+		}
+
+		repo.WebHooks[name] = data
+		g.github_source.Repos[req_repo.Name] = repo
+	}
+}
+
+

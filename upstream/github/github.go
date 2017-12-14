@@ -10,6 +10,8 @@ import (
 	"github.com/forj-oss/goforjj"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
+	"strings"
+	"strconv"
 )
 
 func (req *CreateReq) InitOrganization(g *GitHubStruct) {
@@ -552,4 +554,61 @@ func updateBool(orig *bool, dest **bool, to bool, field string) (updated bool) {
 		updated = true
 	}
 	return
+}
+
+func (g *GitHubStruct) SetOrgHooks(org_hook_disabled, repo_hook_disabled, wh_policy string, hooks map[string]WebhooksInstanceStruct) {
+
+	if b, err := strconv.ParseBool(org_hook_disabled) ; err != nil {
+		log.Printf("Organization webhook disabled: invalid boolean: %s", org_hook_disabled)
+		g.github_source.NoOrgHook = true
+		g.github_source.WebHooks = make(map[string]WebHookStruct)
+	} else {
+		g.github_source.NoOrgHook = b
+	}
+
+	if b, err := strconv.ParseBool(repo_hook_disabled); err != nil {
+		log.Printf("Organization webhook disabled: invalid boolean: %s", repo_hook_disabled)
+	} else {
+		g.github_source.NoRepoHook = b
+	}
+
+	if v := inStringList(wh_policy, "manage", "sync"); v == "" || v == "sync" {
+		if wh_policy != "" {
+			log.Printf("'Invalid value '%s' for 'WebhooksManagement'. Set it to 'sync'.", wh_policy)
+		} else {
+			log.Print("'WebhooksManagement' is set by default to 'sync'.")
+		}
+		g.github_source.WebHookPolicy = ""
+	} else {
+		g.github_source.WebHookPolicy = v
+	}
+
+	if g.github_source.NoOrgHook {
+		return
+	}
+
+	for name, hook := range hooks {
+		if hook.Organization == "false" {
+			continue
+		}
+
+		data := WebHookStruct{
+			Url: hook.Url,
+			Events: strings.Split(hook.Events, ","),
+			Enabled: hook.Enabled,
+		}
+		if v, err := strconv.ParseBool(hook.SslCheck); err == nil {
+			data.SSLCheck = v
+			log.Printf("SSL Check '%s' => %t", name, v)
+		} else {
+			log.Printf("SSLCheck has an invalid boolean string representation '%s'. Ignored. SSL Check is set to true.",
+				name)
+			data.SSLCheck = true
+		}
+
+		g.github_source.WebHooks[name] = data
+	}
+	if len(g.github_source.WebHooks) > 0 && g.github_source.WebHookPolicy == "sync" {
+		g.github_source.WebHookPolicy = "" // Do not show if no webhook orgs are defined.
+	}
 }

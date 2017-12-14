@@ -47,8 +47,19 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         envar: "TOKEN"
       teams-disabled:
         help: "true if the plugin should not manage github users and groups"
+        default: false
       repos-disabled:
         help: "true if the plugin should not manage github repositories except the infra repository."
+        default: false
+      organization-webhooks-disabled:
+        help: true if the plugin should not manage github organization webhooks.
+        default: false
+      repos-webhooks-disabled:
+        help: true if the plugin should not manage github repositories webhooks.
+        default: false
+      org-hook-policy:
+        help: Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed.
+        default: sync
   # Define github group exposure to forjj
   group: # New object type in forjj
     # Default is : actions: ["add", "change", "remove", "list", "rename"]
@@ -101,3 +112,32 @@ objects: # All objects will be delivered by forjj except workspace/infra under o
         help: "Flow activated on this repository"
       forjj-workspace-mount:
         help: "Where the workspace dir is located in the github plugin container."
+      webhooks-management:
+        help: Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed.
+        default: sync
+  webhooks:
+    identified_by_flag: name
+    flags:
+      name:
+        help: webhook name
+        required: true
+      url:
+        help: Webhook url to set
+        required: true
+      payload_format:
+        help: The media type used to serialize the payloads. Supported values include json and form. The default is form.
+        default: form
+      events:
+        help: events requested separated by comma
+      repos:
+        help: List of repositories separated by comma subscribing to the webhook.
+      organization:
+        help: true to enable the webhook at org level. default is false.
+        default: false
+      enabled:
+        help: set 'true' (default) to activate the webhook, 'false' otherwise or 'ignore' to ignore this setup.
+        default: true
+      ssl-check:
+        help: true (default) to ask github to verify the SSL.
+        default: true
+

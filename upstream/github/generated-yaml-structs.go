@@ -13,9 +13,12 @@ package main
 type AppInstanceStruct struct {
 	ForjjInfra string `json:"forjj-infra"` // Name of the Infra repository to use in github if requested.
 	ForjjOrganization string `json:"forjj-organization"` // Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization
+	OrgHookPolicy string `json:"org-hook-policy"` // Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed.
 	Organization string `json:"organization"` // Github Organization name. By default, it uses the FORJJ organization name
+	OrganizationWebhooksDisabled string `json:"organization-webhooks-disabled"` // true if the plugin should not manage github organization webhooks.
 	ReposDisabled string `json:"repos-disabled"` // true if the plugin should not manage github repositories except the infra repository.
-	Server string `json:"server"` // Github Entreprise Server name. By default, public 'github.com' API is used.
+	ReposWebhooksDisabled string `json:"repos-webhooks-disabled"` // true if the plugin should not manage github repositories webhooks.
+	Server string `json:"server"` // Github Enterprise Server name. By default, public 'github.com' API is used.
 	TeamsDisabled string `json:"teams-disabled"` // true if the plugin should not manage github users and groups
 	Token string `json:"token"` // github token to access. This token must authorize organization level access.
 }
@@ -48,6 +51,7 @@ type RepoInstanceStruct struct {
 	Name string `json:"name"` // Repository name
 	Title string `json:"title"` // Github Repository title
 	Users string `json:"users"` // List of users to attach to the repository, separated by comma.
+	WebhooksManagement string `json:"webhooks-management"` // Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed.
 }
 
 // Object user groups structure
@@ -60,6 +64,24 @@ type RepoInstanceStruct struct {
 type UserInstanceStruct struct {
 	Name string `json:"name"` // 
 	Role string `json:"role"` // 
+}
+
+// Object webhooks groups structure
+
+// Groups structure
+
+
+// Object Instance structures
+
+type WebhooksInstanceStruct struct {
+	Enabled string `json:"enabled"` // set 'true' (default) to activate the webhook, 'false' otherwise or 'ignore' to ignore this setup.
+	Events string `json:"events"` // events requested separated by comma
+	Name string `json:"name"` // webhook name
+	Organization string `json:"organization"` // true to enable the webhook at org level. default is false.
+	Payload_format string `json:"payload_format"` // The media type used to serialize the payloads. Supported values include json and form. The default is form.
+	Repos string `json:"repos"` // List of repositories separated by comma subscribing to the webhook.
+	SslCheck string `json:"ssl-check"` // true (default) to ask github to verify the SSL.
+	Url string `json:"url"` // Webhook url to set
 }
 
 
@@ -85,6 +107,7 @@ type CreateArgReq struct {
 	Group map[string]GroupInstanceStruct `json:"group"` // Object details
 	Repo map[string]RepoInstanceStruct `json:"repo"` // Object details
 	User map[string]UserInstanceStruct `json:"user"` // Object details
+	Webhooks map[string]WebhooksInstanceStruct `json:"webhooks"` // Object details
 }
 
 // ************************
@@ -103,6 +126,7 @@ type UpdateArgReq struct {
 	Group map[string]GroupInstanceStruct `json:"group"` // Object details
 	Repo map[string]RepoInstanceStruct `json:"repo"` // Object details
 	User map[string]UserInstanceStruct `json:"user"` // Object details
+	Webhooks map[string]WebhooksInstanceStruct `json:"webhooks"` // Object details
 }
 
 // **************************
@@ -158,7 +182,7 @@ const YamlDesc = "---\n" +
    "    # Default is : actions: [\"add\", \"change\", \"remove\"] No need to define it.\n" +
    "    flags:\n" +
    "      server:\n" +
-   "        help: \"Github Entreprise Server name. By default, public 'github.com' API is used.\"\n" +
+   "        help: \"Github Enterprise Server name. By default, public 'github.com' API is used.\"\n" +
    "      forjj-organization:\n" +
    "        only-for-actions: [\"add\"]\n" +
    "        help: \"Default FORJJ Organization. Used by default as github organization. If you want different one, use --github-organization\"\n" +
@@ -177,8 +201,19 @@ const YamlDesc = "---\n" +
    "        envar: \"TOKEN\"\n" +
    "      teams-disabled:\n" +
    "        help: \"true if the plugin should not manage github users and groups\"\n" +
+   "        default: false\n" +
    "      repos-disabled:\n" +
    "        help: \"true if the plugin should not manage github repositories except the infra repository.\"\n" +
+   "        default: false\n" +
+   "      organization-webhooks-disabled:\n" +
+   "        help: true if the plugin should not manage github organization webhooks.\n" +
+   "        default: false\n" +
+   "      repos-webhooks-disabled:\n" +
+   "        help: true if the plugin should not manage github repositories webhooks.\n" +
+   "        default: false\n" +
+   "      org-hook-policy:\n" +
+   "        help: Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed.\n" +
+   "        default: sync\n" +
    "  # Define github group exposure to forjj\n" +
    "  group: # New object type in forjj\n" +
    "    # Default is : actions: [\"add\", \"change\", \"remove\", \"list\", \"rename\"]\n" +
@@ -231,4 +266,33 @@ const YamlDesc = "---\n" +
    "        help: \"Flow activated on this repository\"\n" +
    "      forjj-workspace-mount:\n" +
    "        help: \"Where the workspace dir is located in the github plugin container.\"\n" +
+   "      webhooks-management:\n" +
+   "        help: Set 'sync' to manage all repository webhooks. set 'manage' to manage only listed.\n" +
+   "        default: sync\n" +
+   "  webhooks:\n" +
+   "    identified_by_flag: name\n" +
+   "    flags:\n" +
+   "      name:\n" +
+   "        help: webhook name\n" +
+   "        required: true\n" +
+   "      url:\n" +
+   "        help: Webhook url to set\n" +
+   "        required: true\n" +
+   "      payload_format:\n" +
+   "        help: The media type used to serialize the payloads. Supported values include json and form. The default is form.\n" +
+   "        default: form\n" +
+   "      events:\n" +
+   "        help: events requested separated by comma\n" +
+   "      repos:\n" +
+   "        help: List of repositories separated by comma subscribing to the webhook.\n" +
+   "      organization:\n" +
+   "        help: true to enable the webhook at org level. default is false.\n" +
+   "        default: false\n" +
+   "      enabled:\n" +
+   "        help: set 'true' (default) to activate the webhook, 'false' otherwise or 'ignore' to ignore this setup.\n" +
+   "        default: true\n" +
+   "      ssl-check:\n" +
+   "        help: true (default) to ask github to verify the SSL.\n" +
+   "        default: true\n" +
+   "\n" +
    ""
