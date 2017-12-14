@@ -572,13 +572,13 @@ func (g *GitHubStruct) SetOrgHooks(org_hook_disabled, repo_hook_disabled, wh_pol
 		g.github_source.NoRepoHook = b
 	}
 
-	if v := inStringList(wh_policy, "manage", "sync"); v == "" {
+	if v := inStringList(wh_policy, "manage", "sync"); v == "" || v == "sync" {
 		if wh_policy != "" {
 			log.Printf("'Invalid value '%s' for 'WebhooksManagement'. Set it to 'sync'.", wh_policy)
 		} else {
 			log.Print("'WebhooksManagement' is set by default to 'sync'.")
 		}
-		g.github_source.WebHookPolicy = "sync"
+		g.github_source.WebHookPolicy = ""
 	} else {
 		g.github_source.WebHookPolicy = v
 	}
@@ -607,5 +607,8 @@ func (g *GitHubStruct) SetOrgHooks(org_hook_disabled, repo_hook_disabled, wh_pol
 		}
 
 		g.github_source.WebHooks[name] = data
+	}
+	if len(g.github_source.WebHooks) > 0 && g.github_source.WebHookPolicy == "sync" {
+		g.github_source.WebHookPolicy = "" // Do not show if no webhook orgs are defined.
 	}
 }

@@ -23,18 +23,18 @@ type GitHubStruct struct {
 }
 
 type GitHubSourceStruct struct {
-	goforjj.PluginService `,inline`                   // github base Url
-	Repos                 map[string]RepositoryStruct // Collection of repositories managed in github
-	NoRepos               bool    `yaml:",omitempty"` // True to not manage repositories
-	Organization          string                      // Organization name
-	OrgDisplayName        string                      // Organization's display name.
-	NoTeams               bool    `yaml:",omitempty"` // True to not manage organization users
-	Users                 map[string]string           // Collection of users role at organization level
-	Groups                map[string]TeamStruct       // Collection of Team role at organization level
-	NoOrgHook             bool    `yaml:",omitempty"` // true to ignore org hooks.
-	NoRepoHook            bool    `yaml:",omitempty"` // true to ignore repo hooks.
-	WebHooks              map[string]WebHookStruct    // k: name, v: webhook
-	WebHookPolicy         string                      // sync or manage
+	goforjj.PluginService `,inline`                                    // github base Url
+	Repos                 map[string]RepositoryStruct                  // Collection of repositories managed in github
+	NoRepos               bool                     `yaml:",omitempty"` // True to not manage repositories
+	Organization          string                                       // Organization name
+	OrgDisplayName        string                                       // Organization's display name.
+	NoTeams               bool                     `yaml:",omitempty"` // True to not manage organization users
+	Users                 map[string]string                            // Collection of users role at organization level
+	Groups                map[string]TeamStruct                        // Collection of Team role at organization level
+	NoOrgHook             bool                     `yaml:",omitempty"` // true to ignore org hooks.
+	NoRepoHook            bool                     `yaml:",omitempty"` // true to ignore repo hooks.
+	WebHooks              map[string]WebHookStruct `yaml:",omitempty"` // k: name, v: webhook
+	WebHookPolicy         string                   `yaml:",omitempty"` // 'sync' (or empty) or 'manage'
 
 }
 

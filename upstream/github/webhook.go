@@ -15,6 +15,7 @@ type WebHookStruct struct {
 	SSLCheck bool
 	identified bool
 	ContentType string // json or form. Default form
+	name string
 }
 
 const hook_ignored = "ignore"
@@ -24,7 +25,7 @@ func (h *WebHookStruct)HookEnabled(hook *github.Hook) (dirty bool) {
 		if b, err := strconv.ParseBool(h.Enabled) ; err != nil {
 			log.Printf("hook `Enabled` has an invalid boolean string representation '%s'. Ignored. hook is enabled.",
 				*hook.Name)
-		} else if hook.Active != nil && *hook.Active != b {
+		} else if hook.Active == nil || (hook.Active != nil && *hook.Active != b) {
 			dirty = true
 			hook.Active = &b
 		}
