@@ -1,10 +1,52 @@
 # Introduction
 
-This plugin implements github/github entreprise configuration to build an SCM environment for GIT repositories upstream.
+This plugin implements github/github entreprise configuration to build
+an SCM environment for GIT repositories upstream.
 
 It has been implemented as REST API. See ...(TBD) for FORJJ REST API description.
 
-Depending on tasks, the driver will concretely do several things described below:
+Forjj call this plugin, when you declare the following in your Forjfile:
+
+```yaml
+applications:
+  <app name>:
+    type: upstream
+    driver: github
+```
+
+You can add several application options.
+
+For flag details, see https://github.com/forj-oss/forjj-contribs/blob/master/upstream/github/github.yaml#L29
+
+Complete example:
+```yaml
+applications:
+  github:
+    type: upstream
+    driver: github
+    # teams-disabled: false
+    # organization-webhooks-disabled: false
+    # repos-webhooks-disabled: false
+    # repos-disabled: false
+    # token: MygithubToken  -  Forjj template only
+    organization: myOrganization # if github && forjj organization are different
+    org-hook-policy: manage # 'manage' will maintain only listed hooks. by default, 'sync' is defined and will eliminate any extra webhooks not listed.
+    server: github.mycompany.com
+```
+
+forjj-github manage several objects: For details, see https://github.com/forj-oss/forjj-contribs/blob/master/upstream/github/github.yaml
+- app (the application ie `applications` section)
+- group # To maintain a collection of groups with members. **Warning!** not defined groups are removed by default!
+- user  # To maintain a collection of users at organization level
+- repo  # To create/update a collection of repository. **Repo are never removed**.
+- webhooks # To maintain a collection of webhook at organization or repo level.
+
+A good example is in https://github.com/forj-oss/forj-oss-infra/blob/master/Forjfile
+
+# How Forjj interacts with the plugin?
+
+`Forjj` has a simplified list of actions: `create`/`update`/`maintain`
+Following explains what `forjj-github` will do for `Forjj`.
 
 ## Create task
 
