@@ -78,7 +78,7 @@ type WebhooksInstanceStruct struct {
 	Events string `json:"events"` // events requested separated by comma
 	Name string `json:"name"` // webhook name
 	Organization string `json:"organization"` // true to enable the webhook at org level. default is false.
-	Payload_format string `json:"payload_format"` // The media type used to serialize the payloads. Supported values include json and form. The default is form.
+	PayloadFormat string `json:"payload-format"` // The media type used to serialize the payloads. Supported values include json and form. The default is form.
 	Repos string `json:"repos"` // List of repositories separated by comma subscribing to the webhook.
 	SslCheck string `json:"ssl-check"` // true (default) to ask github to verify the SSL.
 	Url string `json:"url"` // Webhook url to set
@@ -278,7 +278,7 @@ const YamlDesc = "---\n" +
    "      url:\n" +
    "        help: Webhook url to set\n" +
    "        required: true\n" +
-   "      payload_format:\n" +
+   "      payload-format:\n" +
    "        help: The media type used to serialize the payloads. Supported values include json and form. The default is form.\n" +
    "        default: form\n" +
    "      events:\n" +
