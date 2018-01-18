@@ -561,9 +561,11 @@ func (g *GitHubStruct) SetOrgHooks(org_hook_disabled, repo_hook_disabled, wh_pol
 	if b, err := strconv.ParseBool(org_hook_disabled) ; err != nil {
 		log.Printf("Organization webhook disabled: invalid boolean: %s", org_hook_disabled)
 		g.github_source.NoOrgHook = true
-		g.github_source.WebHooks = make(map[string]WebHookStruct)
 	} else {
 		g.github_source.NoOrgHook = b
+	}
+	if g.github_source.WebHooks == nil {
+		g.github_source.WebHooks = make(map[string]WebHookStruct)
 	}
 
 	if b, err := strconv.ParseBool(repo_hook_disabled); err != nil {
