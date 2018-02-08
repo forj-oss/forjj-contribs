@@ -3,7 +3,12 @@ pipeline {
     stages {
         stage('test Forjfile') {
             steps {
-                sh('forjj validate')
+                sh('''VERSION=latest
+                wget -O ./forjj https://github.com/forj-oss/forjj/releases/download/$VERSION/forjj
+                chmod +x .forjj
+                ./forjj validate
+                rm -f forjj
+                ''')
             }
         }
     }
